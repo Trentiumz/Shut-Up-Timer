@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TimerCompletedView: View {
     private var timeLocked: Int
+    @EnvironmentObject var appState: AppStateModel;
 
     // Constructor to initialize the time locked in
     init(timeLocked: Int) {
@@ -21,7 +22,7 @@ struct TimerCompletedView: View {
                 .padding()
             
             Button(action: {
-                
+                appState.changeState(state: .home)
             }) {
                 Text("Go Home").font(.title)
                     .foregroundColor(.white)
@@ -40,8 +41,6 @@ struct TimerCompletedView: View {
     }
 }
 
-struct PTimerCompletedView_Previews: PreviewProvider {
-    static var previews: some View {
-        TimerCompletedView(timeLocked: 1800) // Preview with 1800 seconds locked
-    }
+#Preview {
+    ContentView().environmentObject(AppStateModel(curState: .home))
 }

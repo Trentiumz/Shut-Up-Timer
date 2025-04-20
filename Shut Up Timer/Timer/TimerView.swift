@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TimerView: View {
-    @StateObject var timerViewModel = TimerViewModel(totTime: 5);
+    @ObservedObject var timerViewModel = TimerViewModel(totTime: 5);
     @EnvironmentObject var appState: AppStateModel;
     
     init() {
@@ -41,10 +41,16 @@ struct TimerView: View {
                 .edgesIgnoringSafeArea(.bottom)  // Ensures it's at the bottom of the screen
         }
         .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
+        .onAppear{
+            timerViewModel.onFinish = {
+                appState.changeState(state: .timerCompleted(seconds: 5));
+                print(appState)
+            }
+        }
     }
 
 }
 
 #Preview {
-    TimerView().environmentObject(AppStateModel(curState: .home))
+    ContentView().environmentObject(AppStateModel(curState: .home))
 }

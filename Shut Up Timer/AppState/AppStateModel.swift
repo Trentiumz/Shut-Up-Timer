@@ -1,13 +1,13 @@
 import SwiftUI
 
-class AppViewModel: ObservableObject {
-    @Published var state: AppState = .home
-
-    func goToTimer() {
-        state = .timer
+class AppStateModel: ObservableObject {
+    @Published var state: AppState
+    
+    init(curState: AppState) {
+        self.state = curState
     }
 
-    func goToHome() {
-        state = .home
+    func changeState(state: AppState) {
+        self.state = state;
     }
 }

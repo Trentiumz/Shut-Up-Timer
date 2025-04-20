@@ -8,17 +8,23 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var appState: AppStateModel;
+    
+    init() {
+    }
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        switch appState.state {
+        case .home:
+            HomeView()
+        case .timer:
+            TimerView()
+        case .timerCompleted(let seconds):
+            TimerCompletedView(timeLocked: seconds)
         }
-        .padding()
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView().environmentObject(AppStateModel(curState: .home))
 }

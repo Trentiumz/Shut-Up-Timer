@@ -1,36 +1,37 @@
 import SwiftUI
 
-struct Home: View {
+struct HomeView: View {
+    @EnvironmentObject var appState: AppStateModel;
+    
     var body: some View {
         VStack {
-
-            Spacer()  // Push the content down
+            Spacer()  // Center Content
 
             // Circle button in the center of the screen
             Button(action: {
                 // Action for the button (can navigate or do something)
-                print("Circle button pressed!")
+                appState.changeState(state: .timer)
             }) {
                 Circle()
                     .fill(Color.blue)  // Circle color
                     .frame(width: 150, height: 150)  // Size of the circle
                     .overlay(
-                        Text("Tap Me")
+                        Text("Start Timer")
                             .foregroundColor(.white)
                             .font(.headline)
                     )
             }
 
             Spacer()  // Push content up from the bottom
-            Navbar()  // Add the Navbar at the top
+            Navbar().edgesIgnoringSafeArea(.bottom)  // Add the Navbar at the top
         }
-        .padding()  // Padding around the screen
+        .edgesIgnoringSafeArea(.bottom)
     }
 }
 
 struct Home_Previews: PreviewProvider {
     static var previews: some View {
-        Home()
+        HomeView().environmentObject(AppStateModel(curState: .home))
     }
 }
 

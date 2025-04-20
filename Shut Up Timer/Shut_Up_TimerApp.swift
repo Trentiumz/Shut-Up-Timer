@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct Shut_Up_TimerApp: App {
+    @StateObject var appState: AppStateModel = AppStateModel(curState: .home);
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

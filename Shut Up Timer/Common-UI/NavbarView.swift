@@ -2,14 +2,17 @@ import SwiftUI
 
 struct Navbar: View {
     var body: some View {
-        HStack {
-            Text("Navbar")
-                .font(.title)
-                .foregroundColor(.white)
+        VStack {
+            HStack {
+                Text("Navbar")
+                    .font(.title)
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding()
             Spacer()
         }
-        .padding()
-        .frame(height: 60)  // Define the height of the navbar
+        .frame(height: 120)  // Define the height of the navbar
         .background(Color.black)  // Navbar background color
     }
 }

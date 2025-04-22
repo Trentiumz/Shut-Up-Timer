@@ -4,12 +4,11 @@ struct TimerView: View {
     @EnvironmentObject var router: AppRouter;
     
     init() {
-        
     }
     
     var body: some View {
-        let viewModel: TimerViewModel = router.timerViewModel!;
-        VStack {
+        let viewModel = router.timerViewModel;
+        return VStack {
             // Timer at the top-middle of the screen
             Text("\(viewModel.timeLeft) / \(viewModel.totTime) seconds")
                 .font(.system(size: 24))
@@ -27,7 +26,7 @@ struct TimerView: View {
             }) {
                 Text(viewModel.isRunning ? "Pause Timer" : "Start Timer")
                     .font(.title)
-                    .foregroundColor(.white)	
+                    .foregroundColor(.white)
                     .padding()
                     .background(viewModel.isRunning ? Color.red : Color.green)
                     .cornerRadius(10)
@@ -36,13 +35,11 @@ struct TimerView: View {
             
             Spacer()  // Pushes everything up to leave space for Navbar
             
-            // Navbar at the bottom
-            Navbar()
-                .edgesIgnoringSafeArea(.bottom)  // Ensures it's at the bottom of the screen
         }
         .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
+        
     }
-
+    
 }
 
 #Preview {

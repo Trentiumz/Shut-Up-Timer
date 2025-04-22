@@ -1,15 +1,10 @@
 import SwiftUI
 
 struct TimerCompletedView: View {
-    private var timeLocked: Int
-    @EnvironmentObject var appState: AppStateModel;
-
-    // Constructor to initialize the time locked in
-    init(timeLocked: Int) {
-        self.timeLocked = timeLocked
-    }
+    @EnvironmentObject var router: AppRouter;
     
     var body: some View {
+        let timeLocked = $router.timerViewModel
         VStack {
             Spacer()
             Text("Congratulations!")
@@ -22,7 +17,7 @@ struct TimerCompletedView: View {
                 .padding()
             
             Button(action: {
-                appState.changeState(state: .home)
+                router.toHome();
             }) {
                 Text("Go Home").font(.title)
                     .foregroundColor(.white)
@@ -42,5 +37,5 @@ struct TimerCompletedView: View {
 }
 
 #Preview {
-    ContentView().environmentObject(AppStateModel(curState: .home))
+    ContentView()
 }

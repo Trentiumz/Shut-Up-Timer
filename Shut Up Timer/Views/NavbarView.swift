@@ -1,25 +1,19 @@
 import SwiftUI
 
-struct Navbar: View {
+struct NavbarView: View {
     var body: some View {
-        VStack {
-            HStack {
-                Text("Navbar")
-                    .font(.title)
-                    .foregroundColor(.white)
-                Spacer()
-            }
-            .padding()
-            Spacer()
-        }
-        .frame(height: 120)  // Define the height of the navbar
-        .background(Color.black)  // Navbar background color
-    }
-}
-
-struct Navbar_Previews: PreviewProvider {
-    static var previews: some View {
-        Navbar()
-            .previewLayout(.sizeThatFits)  // To preview the navbar independently
+//        VStack {
+//            HStack {
+//                Text("Navbar")
+//                    .font(.title)
+//                    .foregroundColor(.white)
+//                Spacer()
+//            }
+//            .padding()
+//            Spacer()
+//        }
+//        .frame(height: 120)  // Define the height of the navbar
+//        .background(Color.black)  // Navbar background color
+        Text("test")
     }
 }

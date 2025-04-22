@@ -1,16 +1,21 @@
 import SwiftUI
 
 // Countdown timer that changes per second. Either manually stop it, or it will stop itself & call onFinish
-class TimerViewModel: ObservableObject {
+class TimerViewModel: ObservableObject, MVVM {
     // used to track timer running
-    var totTime: Int;
-    @Published var timeLeft: Int;
-    @Published var isRunning: Bool;
+    var totTime: Int = 0;
+    @Published var timeLeft: Int = 0;
+    @Published var isRunning: Bool = false;
     
     // the timer
-    private var timer: Timer?;
+    private var timer: Timer? = nil;
     
-    init(totTime: Int) {
+    init() {
+        
+    }
+    
+    func reset(totTime: Int) {
+        destroy();
         self.totTime = totTime;
         self.timeLeft = totTime;
         self.timer = nil;
@@ -18,14 +23,18 @@ class TimerViewModel: ObservableObject {
     }
     
     func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            if(self.timeLeft <= 0) {
-                self.stopTimer();
-            } else {
-                self.timeLeft -= 1;
+        if(!isRunning) {
+            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                if(self.timeLeft <= 0) {
+                    self.stopTimer();
+                } else {
+                    DispatchQueue.main.async {
+                        self.timeLeft -= 1;
+                    }
+                }
             }
+            isRunning = true;
         }
-        isRunning = true;
     }
     
     func stopTimer() {
@@ -35,7 +44,7 @@ class TimerViewModel: ObservableObject {
     }
     
     func destroy() {
-        timer?.invalidate();
-        timer = nil;
+        timer?.invalidate()
+        timer = nil
     }
 }

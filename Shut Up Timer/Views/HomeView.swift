@@ -23,7 +23,7 @@ struct HomeView: View {
             }
 
             Spacer()  // Push content up from the bottom
-            Navbar().edgesIgnoringSafeArea(.bottom)  // Add the Navbar at the top
+            NavbarView().edgesIgnoringSafeArea(.bottom)  // Add the Navbar at the top
         }
         .edgesIgnoringSafeArea(.bottom)
     }

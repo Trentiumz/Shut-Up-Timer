@@ -8,21 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var router = AppRouter();
+    @StateObject var router: AppRouter = AppRouter();
     
     init() {
     }
     
     var body: some View {
         NavigationStack(path:$router.path){
-            HomeView().environmentObject(router)
-        }.navigationDestination(for: String.self) { value in
-            switch value {
-            case "timer":
-                TimerView().environmentObject(router)
-            default:
-                Text("Invalid")
-            }
+            HomeView()
+                .environmentObject(router)
+                .navigationDestination(for: String.self) { value in
+                    switch value {
+                    case "timer":
+                        TimerView().environmentObject(router)
+                    case "completed-timer":
+                        TimerCompletedView().environmentObject(router)
+                    default:
+                        Text("Invalid")
+                    }
+                }
         }
     }
 }

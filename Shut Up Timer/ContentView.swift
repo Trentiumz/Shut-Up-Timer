@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Shut Up Timer
-//
-//  Created by user279207 on 4/20/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
@@ -15,7 +8,13 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack(path:$router.path){
-            HomeView()
+            TabView {
+                HomeView().tabItem { Label("Home", systemImage: "house")}
+                LeaderboardView().tabItem { Label("Leaderboard", systemImage: "list.number")}
+                FriendInvite().tabItem { Label("Invite", systemImage: "arrow.up")}
+                DisappointmentView().tabItem { Label("Leaderboard", systemImage: "gobackward.10.hi")}
+                AccountView().tabItem{ Label("Account", systemImage: "person")}
+            }
                 .environmentObject(router)
                 .navigationDestination(for: AppRoute.self) { value in
                     switch value {

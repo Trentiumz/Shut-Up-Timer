@@ -15,7 +15,7 @@ struct ContentView: View {
                     HomeView().tabItem { Label("Home", systemImage: "house")}
                     LeaderboardView().tabItem { Label("Leaderboard", systemImage: "list.number")}
                     FriendInvite().tabItem { Label("Invite", systemImage: "arrow.up")}
-                    DisappointmentView().tabItem { Label("Leaderboard", systemImage: "gobackward.10.hi")}
+                    DisappointmentView().tabItem { Label("Disappointment", systemImage: "gobackward.10.hi")}
                     AccountView().tabItem{ Label("Account", systemImage: "person")}
                 }
             }

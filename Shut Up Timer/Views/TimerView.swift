@@ -5,6 +5,7 @@ struct TimerView: View {
     @ObservedObject var timerViewModel: TimerViewModel;
     // access for page transitions
     @EnvironmentObject var router: AppRouter;
+    @Environment(\.scenePhase) private var scenePhase;
     
     init(timerViewModel: TimerViewModel) {
         self.timerViewModel = timerViewModel
@@ -44,10 +45,12 @@ struct TimerView: View {
                 router.toTimerCompleted(totTime: timerViewModel.totTime);
             }
         }
-        .onDisappear {
-            if(timerViewModel.isRunning) {
-                timerViewModel.stopTimer();
-                router.toTimerFailed(totTime: timerViewModel.totTime)
+        .onChange(of: scenePhase) {
+            if scenePhase == .inactive {
+                if timerViewModel.isRunning {
+                    timerViewModel.stopTimer()
+                    router.toTimerFailed(totTime: timerViewModel.totTime)
+                }
             }
         }
     }

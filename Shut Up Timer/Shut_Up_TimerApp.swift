@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import UIKit
 
 @main
 struct Shut_Up_TimerApp: App {
-    var router: AppRouter = AppRouter();
+    @StateObject var router: AppRouter = AppRouter();
     
     var body: some Scene {
         WindowGroup {

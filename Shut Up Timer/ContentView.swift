@@ -9,12 +9,15 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack(path:$router.path){
-            TabView {
-                HomeView().tabItem { Label("Home", systemImage: "house")}
-                LeaderboardView().tabItem { Label("Leaderboard", systemImage: "list.number")}
-                FriendInvite().tabItem { Label("Invite", systemImage: "arrow.up")}
-                DisappointmentView().tabItem { Label("Leaderboard", systemImage: "gobackward.10.hi")}
-                AccountView().tabItem{ Label("Account", systemImage: "person")}
+            VStack {
+                TopBarView()
+                TabView {
+                    HomeView().tabItem { Label("Home", systemImage: "house")}
+                    LeaderboardView().tabItem { Label("Leaderboard", systemImage: "list.number")}
+                    FriendInvite().tabItem { Label("Invite", systemImage: "arrow.up")}
+                    DisappointmentView().tabItem { Label("Leaderboard", systemImage: "gobackward.10.hi")}
+                    AccountView().tabItem{ Label("Account", systemImage: "person")}
+                }
             }
                 .environmentObject(router)
                 .navigationDestination(for: AppRoute.self) { value in

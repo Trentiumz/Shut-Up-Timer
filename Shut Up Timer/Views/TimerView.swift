@@ -1,17 +1,17 @@
 import SwiftUI
 
 struct TimerView: View {
-    @ObservedObject var timerViewModel = TimerViewModel(totTime: 5);
-    @EnvironmentObject var appState: AppStateModel;
+    @EnvironmentObject var router: AppRouter;
     
     init() {
         
     }
     
     var body: some View {
+        let viewModel: TimerViewModel = router.timerViewModel!;
         VStack {
             // Timer at the top-middle of the screen
-            Text("\(timerViewModel.timeLeft) / \(timerViewModel.totTime) seconds")
+            Text("\(viewModel.timeLeft) / \(viewModel.totTime) seconds")
                 .font(.system(size: 24))
                 .fontWeight(.bold)
                 .padding(.top, 50)  // Optional: adjust the top padding
@@ -19,17 +19,17 @@ struct TimerView: View {
             
             // Button to stop the timer
             Button(action: {
-                if timerViewModel.timerRunning {
-                    timerViewModel.pauseTimer()
+                if viewModel.isRunning {
+                    viewModel.stopTimer()
                 } else {
-                    timerViewModel.startTimer()
+                    viewModel.startTimer()
                 }
             }) {
-                Text(timerViewModel.timerRunning ? "Pause Timer" : "Start Timer")
+                Text(viewModel.isRunning ? "Pause Timer" : "Start Timer")
                     .font(.title)
-                    .foregroundColor(.white)
+                    .foregroundColor(.white)	
                     .padding()
-                    .background(timerViewModel.timerRunning ? Color.red : Color.green)
+                    .background(viewModel.isRunning ? Color.red : Color.green)
                     .cornerRadius(10)
             }
             .padding(.top, 20)  // Optional: padding below the timer
@@ -41,16 +41,10 @@ struct TimerView: View {
                 .edgesIgnoringSafeArea(.bottom)  // Ensures it's at the bottom of the screen
         }
         .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
-        .onAppear{
-            timerViewModel.onFinish = {
-                appState.changeState(state: .timerCompleted(seconds: 5));
-                print(appState)
-            }
-        }
     }
 
 }
 
 #Preview {
-    ContentView().environmentObject(AppStateModel(curState: .home))
+    ContentView()
 }

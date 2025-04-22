@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject var appState: AppStateModel;
+    @EnvironmentObject var router: AppRouter;
     
     var body: some View {
         VStack {
@@ -10,7 +10,7 @@ struct HomeView: View {
             // Circle button in the center of the screen
             Button(action: {
                 // Action for the button (can navigate or do something)
-                appState.changeState(state: .timer)
+                router.toTimerState(totTime: 1800);
             }) {
                 Circle()
                     .fill(Color.blue)  // Circle color
@@ -31,7 +31,7 @@ struct HomeView: View {
 
 struct Home_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView().environmentObject(AppStateModel(curState: .home))
+        ContentView()
     }
 }
 

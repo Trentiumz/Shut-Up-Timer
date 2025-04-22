@@ -17,12 +17,12 @@ struct ContentView: View {
         NavigationStack(path:$router.path){
             HomeView()
                 .environmentObject(router)
-                .navigationDestination(for: String.self) { value in
+                .navigationDestination(for: AppRoute.self) { value in
                     switch value {
-                    case "timer":
-                        TimerView().environmentObject(router)
-                    case "completed-timer":
-                        TimerCompletedView().environmentObject(router)
+                    case .timer:
+                        TimerView(timerViewModel: router.timerViewModel).environmentObject(router)
+                    case .timerCompleted(let seconds):
+                        TimerCompletedView(timeLocked: seconds).environmentObject(router)
                     default:
                         Text("Invalid")
                     }

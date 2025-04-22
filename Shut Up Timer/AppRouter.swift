@@ -3,20 +3,18 @@ import SwiftUI;
 class AppRouter: ObservableObject {
     @Published var path = NavigationPath()
     @Published var timerViewModel: TimerViewModel = TimerViewModel();
-    @Published var timerCompletedViewModel: TimerCompletedViewModel = TimerCompletedViewModel();
     
     func toTimerState(totTime: Int){
         timerViewModel.reset(totTime: totTime);
-        path.append("timer");
+        path.append(AppRoute.timer);
     }
     
     func toTimerCompleted(totTime: Int) {
-        timerCompletedViewModel.reset(totTime: totTime);
-        path.append("completed-timer")
+        path.append(AppRoute.timerCompleted(seconds: totTime))
     }
     
     func toHome() {
-        while path.count > 1 {
+        while !path.isEmpty {
             path.removeLast();
         }
     }

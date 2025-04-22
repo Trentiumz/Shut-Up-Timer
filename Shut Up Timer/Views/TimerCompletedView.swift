@@ -2,9 +2,13 @@ import SwiftUI
 
 struct TimerCompletedView: View {
     @EnvironmentObject var router: AppRouter;
+    private var timeLocked: Int;
+    
+    init(timeLocked: Int) {
+        self.timeLocked = timeLocked;
+    }
     
     var body: some View {
-        let timeLocked = $router.timerViewModel
         VStack {
             Spacer()
             Text("Congratulations!")

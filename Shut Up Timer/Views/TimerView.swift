@@ -1,16 +1,17 @@
 import SwiftUI
 
 struct TimerView: View {
+    @ObservedObject var timerViewModel: TimerViewModel;
     @EnvironmentObject var router: AppRouter;
     
-    init() {
+    init(timerViewModel: TimerViewModel) {
+        self.timerViewModel = timerViewModel
     }
     
     var body: some View {
-        let viewModel = router.timerViewModel;
         return VStack {
             // Timer at the top-middle of the screen
-            Text("\(viewModel.timeLeft) / \(viewModel.totTime) seconds")
+            Text("\(timerViewModel.timeLeft) / \(timerViewModel.totTime) seconds")
                 .font(.system(size: 24))
                 .fontWeight(.bold)
                 .padding(.top, 50)  // Optional: adjust the top padding
@@ -18,17 +19,17 @@ struct TimerView: View {
             
             // Button to stop the timer
             Button(action: {
-                if viewModel.isRunning {
-                    viewModel.stopTimer()
+                if timerViewModel.isRunning {
+                    timerViewModel.stopTimer()
                 } else {
-                    viewModel.startTimer()
+                    timerViewModel.startTimer()
                 }
             }) {
-                Text(viewModel.isRunning ? "Pause Timer" : "Start Timer")
+                Text(timerViewModel.isRunning ? "Pause Timer" : "Start Timer")
                     .font(.title)
                     .foregroundColor(.white)
                     .padding()
-                    .background(viewModel.isRunning ? Color.red : Color.green)
+                    .background(timerViewModel.isRunning ? Color.red : Color.green)
                     .cornerRadius(10)
             }
             .padding(.top, 20)  // Optional: padding below the timer
@@ -37,7 +38,11 @@ struct TimerView: View {
             
         }
         .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
-        
+        .onChange(of: timerViewModel.timeLeft) {
+            if(timerViewModel.timeLeft == 0) {
+                router.toTimerCompleted(totTime: timerViewModel.totTime);
+            }
+        }
     }
     
 }

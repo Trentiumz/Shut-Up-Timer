@@ -2,7 +2,7 @@ import SwiftUI
 
 // Control for all pages
 struct ContentView: View {
-    @StateObject var router: AppRouter = AppRouter();
+    @EnvironmentObject var router: AppRouter;
     
     init() {
     }
@@ -21,8 +21,15 @@ struct ContentView: View {
                     switch value {
                     case .timer:
                         TimerView(timerViewModel: router.timerViewModel).environmentObject(router)
+                            .navigationBarBackButtonHidden(true)
                     case .timerCompleted(let seconds):
-                        TimerCompletedView(timeLocked: seconds).environmentObject(router)
+                        TimerCompletedView(timeLocked: seconds)
+                            .environmentObject(router)
+                            .navigationBarBackButtonHidden(true)
+                    case .timerFailed(let seconds):
+                        TimerFailedView(timeLocked: seconds)
+                            .environmentObject(router)
+                            .navigationBarBackButtonHidden(true)
                     default:
                         Text("Invalid")
                     }
@@ -32,5 +39,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView().environmentObject(AppRouter());
 }

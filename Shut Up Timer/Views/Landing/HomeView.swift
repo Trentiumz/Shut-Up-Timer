@@ -10,7 +10,7 @@ struct HomeView: View {
             // Circle button in the center of the screen
             Button(action: {
                 // Action for the button (can navigate or do something)
-                router.toTimerState(totTime: 2);
+                router.toTimerState(totTime: 20);
             }) {
                 Circle()
                     .fill(Color.blue)  // Circle color

@@ -40,7 +40,14 @@ struct TimerView: View {
         .onChange(of: timerViewModel.timeLeft) {
             // check if timer expires
             if(timerViewModel.timeLeft == 0) {
+                timerViewModel.stopTimer();
                 router.toTimerCompleted(totTime: timerViewModel.totTime);
+            }
+        }
+        .onDisappear {
+            if(timerViewModel.isRunning) {
+                timerViewModel.stopTimer();
+                router.toTimerFailed(totTime: timerViewModel.totTime)
             }
         }
     }
@@ -48,5 +55,7 @@ struct TimerView: View {
 }
 
 #Preview {
-    ContentView()
+    let tvm = TimerViewModel()
+    tvm.reset(totTime: 10)
+    return TimerView(timerViewModel: tvm).environmentObject(AppRouter())
 }

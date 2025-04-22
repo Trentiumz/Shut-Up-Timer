@@ -5,6 +5,7 @@ struct ContentView: View {
     @EnvironmentObject var router: AppRouter;
     
     init() {
+        print(ToDoList.getToDo())
     }
     
     var body: some View {
@@ -18,11 +19,11 @@ struct ContentView: View {
                     DisappointmentView().tabItem { Label("Disappointment", systemImage: "gobackward.10.hi")}
                     AccountView().tabItem{ Label("Account", systemImage: "person")}
                 }
-            }
+            }	
                 .environmentObject(router)
                 .navigationDestination(for: AppRoute.self) { value in
                     switch value {
-                    case .timer:
+                    case .timer:		
                         TimerView(timerViewModel: router.timerViewModel).environmentObject(router)
                             .navigationBarBackButtonHidden(true)
                     case .timerCompleted(let seconds):

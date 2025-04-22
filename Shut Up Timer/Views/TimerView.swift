@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct TimerView: View {
+    // holds the model
     @ObservedObject var timerViewModel: TimerViewModel;
+    // access for page transitions
     @EnvironmentObject var router: AppRouter;
     
     init(timerViewModel: TimerViewModel) {
@@ -32,13 +34,11 @@ struct TimerView: View {
                     .background(timerViewModel.isRunning ? Color.red : Color.green)
                     .cornerRadius(10)
             }
-            .padding(.top, 20)  // Optional: padding below the timer
-            
-            Spacer()  // Pushes everything up to leave space for Navbar
-            
+            .padding(.top, 20)
         }
         .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
         .onChange(of: timerViewModel.timeLeft) {
+            // check if timer expires
             if(timerViewModel.timeLeft == 0) {
                 router.toTimerCompleted(totTime: timerViewModel.totTime);
             }

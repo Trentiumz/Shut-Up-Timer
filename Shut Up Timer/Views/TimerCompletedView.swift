@@ -41,5 +41,5 @@ struct TimerCompletedView: View {
 }
 
 #Preview {
-    ContentView()
+    TimerCompletedView(timeLocked: 1800)
 }

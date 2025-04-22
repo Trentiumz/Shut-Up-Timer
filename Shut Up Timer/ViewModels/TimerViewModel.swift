@@ -14,6 +14,7 @@ class TimerViewModel: ObservableObject, MVVM {
         
     }
     
+    // resets the model to its initial state
     func reset(totTime: Int) {
         destroy();
         self.totTime = totTime;
@@ -22,6 +23,7 @@ class TimerViewModel: ObservableObject, MVVM {
         self.isRunning = false;
     }
     
+    // starts a timer that counts down totTime
     func startTimer() {
         if(!isRunning) {
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
@@ -37,12 +39,14 @@ class TimerViewModel: ObservableObject, MVVM {
         }
     }
     
+    // stops and destroys the timer
     func stopTimer() {
         timer?.invalidate();
         isRunning = false;
         timer = nil;
     }
     
+    // destroys the object before dereferencing
     func destroy() {
         timer?.invalidate()
         timer = nil

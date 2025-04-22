@@ -1,5 +1,6 @@
 import SwiftUI
 
+// Control for all pages
 struct ContentView: View {
     @StateObject var router: AppRouter = AppRouter();
     

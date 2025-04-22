@@ -1,5 +1,6 @@
 import SwiftUI;
 
+// Main model for app routing - also keeps track of models for state transitions
 class AppRouter: ObservableObject {
     @Published var path = NavigationPath()
     @Published var timerViewModel: TimerViewModel = TimerViewModel();

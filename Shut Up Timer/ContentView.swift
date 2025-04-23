@@ -5,7 +5,10 @@ struct ContentView: View {
     @EnvironmentObject var router: AppRouter;
     
     init() {
-        print(ToDoList.getToDo())
+        print(Settings.loadSettings())
+        var curSettings = Settings.loadSettings();
+        curSettings.difficulty = .medium;
+        Settings.saveSettings(settings: curSettings)
     }
     
     var body: some View {

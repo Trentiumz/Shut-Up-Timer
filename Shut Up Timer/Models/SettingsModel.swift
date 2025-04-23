@@ -12,14 +12,22 @@ enum RoastLevel : Codable {
     case high;
 }
 
+enum TimerType : Codable {
+    case countdown (seconds: Int);
+}
+
 struct SettingsModel : Codable{
     var firstTime: Bool;
     var difficulty: Difficulty;
     var roastLevel : RoastLevel;
+    var timerType : TimerType;
 }
 
 class Settings {
-    private static var defaultSettings: SettingsModel = SettingsModel(firstTime: true, difficulty: .easy, roastLevel: .low);
+    private static var defaultSettings: SettingsModel = SettingsModel(firstTime: true,
+                                                                      difficulty: .easy,
+                                                                      roastLevel: .low,
+                                                                      timerType: .countdown(seconds: 60 * 30));
     
     static func loadSettings() -> SettingsModel {
         let data = UserDefaults.standard.data(forKey: "user-settings");
@@ -56,6 +64,12 @@ class Settings {
     static func setRoastLevel(val: RoastLevel) {
         var curSettings = loadSettings();
         curSettings.roastLevel = val;
+        saveSettings(settings: curSettings);
+    }
+    
+    static func setTimerType(val: TimerType) {
+        var curSettings = loadSettings();
+        curSettings.timerType = val;
         saveSettings(settings: curSettings);
     }
 }

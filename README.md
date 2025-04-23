@@ -2,11 +2,13 @@
 Shut up timer is an iOS app made for people who want a more humorous (and aggressive) approach to studying
 
 ### Project Structure
-📦 MyApp/
+```
+MyApp/
 ├── Models/
 ├── ViewModels/
 ├── Views/
 │   └── Landing/
+```
 
 * Models: Holds common & global models for data storage and commonly required items (e.g. todo list, settings, leaderboard entries)
 * ViewModels: Holds any large models used for a specific view (e.g. Timer)

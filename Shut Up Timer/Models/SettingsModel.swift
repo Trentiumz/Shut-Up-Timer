@@ -40,4 +40,22 @@ class Settings {
             UserDefaults.standard.set(encoded, forKey: "user-settings")
         }
     }
+    
+    static func setFirstTime(val: Bool) {
+        var curSettings = loadSettings();
+        curSettings.firstTime = val;
+        saveSettings(settings: curSettings);
+    }
+    
+    static func setDifficulty(val: Difficulty) {
+        var curSettings = loadSettings();
+        curSettings.difficulty = val;
+        saveSettings(settings: curSettings);
+    }
+    
+    static func setRoastLevel(val: RoastLevel) {
+        var curSettings = loadSettings();
+        curSettings.roastLevel = val;
+        saveSettings(settings: curSettings);
+    }
 }

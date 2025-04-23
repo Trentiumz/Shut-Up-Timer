@@ -3,24 +3,31 @@ import SwiftUI
 // Control for all pages
 struct ContentView: View {
     @EnvironmentObject var router: AppRouter;
+    @State private var firstTime: Bool;
     
     init() {
-        print(Settings.loadSettings())
-        var curSettings = Settings.loadSettings();
-        curSettings.difficulty = .medium;
-        Settings.saveSettings(settings: curSettings)
+        let curSettings = Settings.loadSettings();
+        print(curSettings)
+        self.firstTime = curSettings.firstTime;
     }
     
     var body: some View {
         NavigationStack(path:$router.path){
             VStack {
-                TopBarView()
-                TabView {
-                    HomeView().tabItem { Label("Home", systemImage: "house")}
-                    LeaderboardView().tabItem { Label("Leaderboard", systemImage: "list.number")}
-                    FriendInvite().tabItem { Label("Invite", systemImage: "arrow.up")}
-                    DisappointmentView().tabItem { Label("Disappointment", systemImage: "gobackward.10.hi")}
-                    AccountView().tabItem{ Label("Account", systemImage: "person")}
+                if(firstTime) {
+                    OnboardingView(onDone: {
+                        Settings.setFirstTime(val: false);
+                        self.firstTime = false;
+                    })
+                } else {
+                    TopBarView()
+                    TabView {
+                        HomeView().tabItem { Label("Home", systemImage: "house")}
+                        LeaderboardView().tabItem { Label("Leaderboard", systemImage: "list.number")}
+                        FriendInvite().tabItem { Label("Invite", systemImage: "arrow.up")}
+                        DisappointmentView().tabItem { Label("Disappointment", systemImage: "gobackward.10.hi")}
+                        AccountView().tabItem{ Label("Account", systemImage: "person")}
+                    }
                 }
             }	
                 .environmentObject(router)

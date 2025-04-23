@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
+    
     @State private var duration: TimeInterval;
     @State private var showingPicker = false;
     
@@ -19,6 +20,7 @@ struct HomeView: View {
             ZStack {
                 VStack {
                     Spacer().layoutPriority(0.5)
+                    // a rectangle allowing you to pick the amount of time
                     Button (action: {
                         showingPicker = true;
                     }) {
@@ -49,6 +51,7 @@ struct HomeView: View {
                     }
                     Spacer().layoutPriority(0.4)
                 }.overlay {
+                    // if todo is in focus, the blur this
                     if expandedTodo {
                         Color.white.opacity(0.4)
                     }

@@ -1,7 +1,10 @@
 import SwiftUI;
 
 struct TodoView : View {
+    // whether or not we're expanded
     @Binding var expanded: Bool;
+    
+    // tracking current list items & what to add
     @State private var listItems: [ToDoEntry];
     @State private var newTaskText: String;
     
@@ -11,6 +14,7 @@ struct TodoView : View {
         listItems = ToDoList.getToDo()
     }
     
+    // adds a task and saves it
     func addTask() {
         listItems = ToDoList.getToDo()
         listItems.append(ToDoEntry(todo: newTaskText, done: false))
@@ -20,6 +24,7 @@ struct TodoView : View {
         }
     }
     
+    // toggle if a list element is being used
     func toggleDone(id: UUID) {
         listItems = ToDoList.getToDo()
         for i in 0..<listItems.count {
@@ -32,20 +37,24 @@ struct TodoView : View {
     
     var body : some View {
         Button(action: {
+            // expand and disexpand todo list
             withAnimation {
                 expanded.toggle()
             }
         }) {
             ScrollView {
                 VStack {
+                    // list of items
                     ForEach(listItems) { item in
                         HStack {
+                            // task
                             Text(item.todo)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                                 .clipped()
                             Spacer()
                             
+                            // icon for whether or not it's done
                             Button(action: {
                                 toggleDone(id: item.id)
                             }) {
@@ -61,6 +70,7 @@ struct TodoView : View {
                         .foregroundStyle(.black)
                     }.padding()
                     
+                    // when expanded, allow adding tasks
                     if expanded {
                         HStack {
                             TextField("Add a new Task", text: $newTaskText, onCommit: addTask)

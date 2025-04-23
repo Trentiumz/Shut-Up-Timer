@@ -15,6 +15,7 @@ struct ContentView: View {
         NavigationStack(path:$router.path){
             VStack {
                 if(firstTime) {
+                    // onboarding
                     OnboardingView(onDone: {
                         Settings.setFirstTime(val: false);
                         self.firstTime = false;
@@ -33,14 +34,17 @@ struct ContentView: View {
                 .environmentObject(router)
                 .navigationDestination(for: AppRoute.self) { value in
                     switch value {
-                    case .timer:		
+                    case .timer:
+                        // timer started
                         TimerView(timerViewModel: router.timerViewModel).environmentObject(router)
                             .navigationBarBackButtonHidden(true)
                     case .timerCompleted(let seconds):
+                        // timer completed
                         TimerCompletedView(timeLocked: seconds)
                             .environmentObject(router)
                             .navigationBarBackButtonHidden(true)
                     case .timerFailed(let seconds):
+                        // timer failed
                         TimerFailedView(timeLocked: seconds)
                             .environmentObject(router)
                             .navigationBarBackButtonHidden(true)

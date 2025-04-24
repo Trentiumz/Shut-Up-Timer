@@ -1,5 +1,6 @@
 import SwiftUI
 
+// a generic slider
 struct Slider: View {
     @State private var dragOffset: CGFloat = 0
     @State private var sliderWidth: CGFloat = 0
@@ -41,6 +42,7 @@ struct Slider: View {
         }
         .frame(height: 80)
         .background(
+            // slider back
             RoundedRectangle(cornerRadius: 40)
                 .fill(Color.gray)
                 .overlay(
@@ -53,6 +55,7 @@ struct Slider: View {
                 )
         )
         .overlay(
+            // the message
             Text(message)
                 .foregroundColor(.white)
                 .font(.headline)

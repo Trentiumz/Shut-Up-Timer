@@ -7,15 +7,17 @@ struct TimerView: View {
     @EnvironmentObject var router: AppRouter;
     @Environment(\.scenePhase) private var scenePhase;
     
+    // whether the todo list is expanded
     @State var todoExpanded: Bool = false;
     
+    // whether the modal for quitting is open
     @State var quitExpanded: Bool = false;
     
     init(timerViewModel: TimerViewModel) {
         self.timerViewModel = timerViewModel;
-        self.timerViewModel.startTimer()
     }
     
+    // go to timer failed slide
     func failTimer() {
         timerViewModel.stopTimer()
         router.toTimerFailed(totTime: timerViewModel.totTime)
@@ -23,6 +25,7 @@ struct TimerView: View {
     
     var body: some View {
         return ZStack {
+            // main content of timer
             VStack {
                 Spacer()
                 // Timer at the top-middle of the screen
@@ -52,6 +55,7 @@ struct TimerView: View {
                 }
                 .padding(.top, 20)
                 
+                // button to give up
                 Button(action: {
                     quitExpanded = true;
                 }) {
@@ -62,11 +66,12 @@ struct TimerView: View {
                         .background(Color.gray)
                         .cornerRadius(10)
                 }.sheet(isPresented: $quitExpanded) {
+                    // when the sheet is open, they're tryna quit :(
                     VStack {
                         Slider(onActivate: {
                             failTimer();
                             quitExpanded = false;
-                        }, message: "Do you reall want to give up?")
+                        }, message: "Do you really want to give up?")
                     }.padding()
                         .background(.white)
                 }
@@ -74,6 +79,7 @@ struct TimerView: View {
             .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
             .padding()
             
+            // todo list item
             VStack {
                 HStack {
                     TodoView(expanded: $todoExpanded)
@@ -87,12 +93,16 @@ struct TimerView: View {
                 timerViewModel.stopTimer();
                 router.toTimerCompleted(totTime: timerViewModel.totTime);
             }
-        }	.onChange(of: scenePhase) {
+        }.onChange(of: scenePhase) {
+            // fail on leaving
             if scenePhase == .inactive {
                 if timerViewModel.isRunning {
                     failTimer()
                 }
             }
+        }.onAppear() {
+            // start timer when appear
+            self.timerViewModel.startTimer();
         }
     }
     

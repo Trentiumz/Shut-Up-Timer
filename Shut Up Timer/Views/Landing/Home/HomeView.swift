@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
     
+    // timer parameters
     @State private var timerParams: TimerType;
     
     @State private var expandedTodo = false;
@@ -17,6 +18,7 @@ struct HomeView: View {
                 VStack {
                     Spacer().layoutPriority(0.5)
                     
+                    // display the timer selector
                     switch timerParams {
                     case .countdown(let seconds):
                         CountdownSelectorView(initialDuation: Double(seconds), timerParams: $timerParams)
@@ -25,7 +27,7 @@ struct HomeView: View {
                     // Circle button in the center of the screen
                     Button(action: {
                         // Action for the button (can navigate or do something)
-                        router.toTimerState(totTime: 20);
+                        router.toTimerState(params: timerParams);
                     }) {
                         Text("Start Cooking")
                             .frame(maxWidth: .infinity)
@@ -43,6 +45,7 @@ struct HomeView: View {
                     }
                 }
                 
+                // todo list at the top
                 VStack {
                     HStack {
                         TodoView(expanded: $expandedTodo)

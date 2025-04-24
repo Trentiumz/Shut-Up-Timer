@@ -3,16 +3,12 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
     
-    @State private var duration: TimeInterval;
-    @State private var showingPicker = false;
+    @State private var timerParams: TimerType;
     
     @State private var expandedTodo = false;
     
     init() {
-        switch Settings.loadSettings().timerType {
-        case .countdown(let seconds):
-            duration = Double(seconds);
-        }
+        timerParams = Settings.loadSettings().timerType
     }
     
     var body: some View {
@@ -20,20 +16,10 @@ struct HomeView: View {
             ZStack {
                 VStack {
                     Spacer().layoutPriority(0.5)
-                    // a rectangle allowing you to pick the amount of time
-                    Button (action: {
-                        showingPicker = true;
-                    }) {
-                        Text("\(formatTime(duration))")
-                            .frame(width: 150, height: 150)
-                            .padding()
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.orange)
-                            .background(.gray)
-                            .cornerRadius(10)
-                    }.sheet(isPresented: $showingPicker) {
-                        DurationPickerModal(duration: $duration)
+                    
+                    switch timerParams {
+                    case .countdown(let seconds):
+                        CountdownSelectorView(initialDuation: Double(seconds), timerParams: $timerParams)
                     }
                     
                     // Circle button in the center of the screen
@@ -69,9 +55,8 @@ struct HomeView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: duration) {
-            Settings.setTimerType(val:
-                    .countdown(seconds: Int(duration.rounded())));
+        .onChange(of: timerParams) {
+            Settings.setTimerType(val: timerParams);
         }
     }
 }

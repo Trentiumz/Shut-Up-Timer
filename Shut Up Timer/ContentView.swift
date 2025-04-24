@@ -7,7 +7,6 @@ struct ContentView: View {
     
     init() {
         let curSettings = Settings.loadSettings();
-        print(curSettings)
         self.firstTime = curSettings.firstTime;
     }
     

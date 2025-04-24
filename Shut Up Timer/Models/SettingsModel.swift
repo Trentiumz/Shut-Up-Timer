@@ -12,7 +12,7 @@ enum RoastLevel : Codable {
     case high;
 }
 
-enum TimerType : Codable {
+enum TimerType : Codable, Equatable {
     case countdown (seconds: Int);
 }
 

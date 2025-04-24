@@ -7,53 +7,95 @@ struct TimerView: View {
     @EnvironmentObject var router: AppRouter;
     @Environment(\.scenePhase) private var scenePhase;
     
+    @State var todoExpanded: Bool = false;
+    
+    @State var quitExpanded: Bool = false;
+    
     init(timerViewModel: TimerViewModel) {
-        self.timerViewModel = timerViewModel
+        self.timerViewModel = timerViewModel;
+        self.timerViewModel.startTimer()
+    }
+    
+    func failTimer() {
+        timerViewModel.stopTimer()
+        router.toTimerFailed(totTime: timerViewModel.totTime)
     }
     
     var body: some View {
-        return VStack {
-            // Timer at the top-middle of the screen
-            Text("\(timerViewModel.timeLeft) / \(timerViewModel.totTime) seconds")
-                .font(.system(size: 24))
-                .fontWeight(.bold)
-                .padding(.top, 50)  // Optional: adjust the top padding
-                .frame(maxWidth: .infinity, alignment: .center)
-            
-            // Button to stop the timer
-            Button(action: {
-                if timerViewModel.isRunning {
-                    timerViewModel.stopTimer()
-                } else {
-                    timerViewModel.startTimer()
-                }
-            }) {
-                Text(timerViewModel.isRunning ? "Pause Timer" : "Start Timer")
-                    .font(.title)
-                    .foregroundColor(.white)
+        return ZStack {
+            VStack {
+                Spacer()
+                // Timer at the top-middle of the screen
+                Text("\(formatTime(Double(timerViewModel.timeLeft)))")
+                    .frame(width: 150, height: 150)
                     .padding()
-                    .background(timerViewModel.isRunning ? Color.red : Color.green)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.orange)
+                    .background(.gray)
                     .cornerRadius(10)
+                
+                // Button to stop the timer
+                Button(action: {
+                    if timerViewModel.isRunning {
+                        timerViewModel.stopTimer()
+                    } else {
+                        timerViewModel.startTimer()
+                    }
+                }) {
+                    Text(timerViewModel.isRunning ? "Pause Timer" : "Start Timer")
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(timerViewModel.isRunning ? Color.red : Color.green)
+                        .cornerRadius(10)
+                }
+                .padding(.top, 20)
+                
+                Button(action: {
+                    quitExpanded = true;
+                }) {
+                    Text("Give up")
+                        .font(.title)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.gray)
+                        .cornerRadius(10)
+                }.sheet(isPresented: $quitExpanded) {
+                    VStack {
+                        Slider(onActivate: {
+                            failTimer();
+                            quitExpanded = false;
+                        }, message: "Do you reall want to give up?")
+                    }.padding()
+                        .background(.white)
+                }
             }
-            .padding(.top, 20)
-        }
-        .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
-        .onChange(of: timerViewModel.timeLeft) {
+            .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
+            .padding()
+            
+            VStack {
+                HStack {
+                    TodoView(expanded: $todoExpanded)
+                    Spacer()
+                }
+                Spacer()
+            }
+        }.onChange(of: timerViewModel.timeLeft) {
             // check if timer expires
             if(timerViewModel.timeLeft == 0) {
                 timerViewModel.stopTimer();
                 router.toTimerCompleted(totTime: timerViewModel.totTime);
             }
-        }
-        .onChange(of: scenePhase) {
+        }	.onChange(of: scenePhase) {
             if scenePhase == .inactive {
                 if timerViewModel.isRunning {
-                    timerViewModel.stopTimer()
-                    router.toTimerFailed(totTime: timerViewModel.totTime)
+                    failTimer()
                 }
             }
         }
     }
+    
     
 }
 

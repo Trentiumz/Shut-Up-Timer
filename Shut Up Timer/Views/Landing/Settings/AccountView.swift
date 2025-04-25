@@ -1,7 +1,10 @@
 import SwiftUI;
 
 struct AccountView : View {
+    // current settings
     @State private var curSettings: SettingsModel
+    
+    // the current type of element
     @State private var curType: TimerType
     
     init() {
@@ -12,6 +15,7 @@ struct AccountView : View {
     
     var body: some View {
         VStack {
+            // difficulty selector
             HStack {
                 Text("Difficulty")
                 Spacer()
@@ -22,6 +26,7 @@ struct AccountView : View {
                 }
                 .pickerStyle(.menu)
             }
+            // roast level selector
             HStack {
                 Text("Roast Level")
                 Spacer()

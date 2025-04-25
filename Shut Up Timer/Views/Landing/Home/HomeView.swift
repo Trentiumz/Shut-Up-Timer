@@ -1,5 +1,7 @@
 import SwiftUI
 
+// TODO: Sync up settings (particularly for duration) between the different parts (central settings object??)
+
 struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
     

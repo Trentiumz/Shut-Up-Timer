@@ -1,11 +1,11 @@
 import SwiftUI;
 
 struct CountdownSelectorView : View{
-    @Binding private var timerParams: TimerType;
+    @Binding private var timerParams: TimerParam;
     @State private var duration: TimeInterval;
     @State private var showingPicker = false;
     
-    init(initialDuation: TimeInterval, timerParams: Binding<TimerType>) {
+    init(initialDuation: TimeInterval, timerParams: Binding<TimerParam>) {
         self._duration = State(initialValue: initialDuation);
         self._timerParams = timerParams;
     }

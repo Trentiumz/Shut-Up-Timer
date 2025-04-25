@@ -1,33 +1,46 @@
 import SwiftUI;
 
-enum Difficulty : Codable {
+enum Difficulty : String, Codable, CaseIterable, Identifiable {
     case easy;
     case medium;
     case asian;
+    var id: String { self.rawValue }
 }
 
-enum RoastLevel : Codable {
+enum RoastLevel : String, Codable, CaseIterable, Identifiable {
     case low;
     case med;
     case high;
+    
+    var id: String { self.rawValue }
 }
 
-enum TimerType : Codable, Equatable {
+enum TimerParam : Codable, Equatable {
     case countdown (seconds: Int);
 }
+enum TimerType: String, Codable, CaseIterable, Identifiable {
+    case countdown;
+    var id: String {self.rawValue }
+}
+func timerParamToType(param: TimerParam) -> TimerType {
+    switch param {
+    case .countdown:
+        return .countdown;
+    }
+}
 
-struct SettingsModel : Codable{
+struct SettingsModel : Codable, Equatable {
     var firstTime: Bool;
     var difficulty: Difficulty;
     var roastLevel : RoastLevel;
-    var timerType : TimerType;
+    var timerParam : TimerParam;
 }
 
 class Settings {
     private static var defaultSettings: SettingsModel = SettingsModel(firstTime: true,
                                                                       difficulty: .easy,
                                                                       roastLevel: .low,
-                                                                      timerType: .countdown(seconds: 60 * 30));
+                                                                      timerParam: .countdown(seconds: 60 * 30));
     
     static func loadSettings() -> SettingsModel {
         let data = UserDefaults.standard.data(forKey: "user-settings");
@@ -67,9 +80,9 @@ class Settings {
         saveSettings(settings: curSettings);
     }
     
-    static func setTimerType(val: TimerType) {
+    static func setTimerType(val: TimerParam) {
         var curSettings = loadSettings();
-        curSettings.timerType = val;
+        curSettings.timerParam = val;
         saveSettings(settings: curSettings);
     }
 }

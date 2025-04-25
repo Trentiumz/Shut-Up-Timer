@@ -4,12 +4,12 @@ struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
     
     // timer parameters
-    @State private var timerParams: TimerType;
+    @State private var timerParams: TimerParam;
     
     @State private var expandedTodo = false;
     
     init() {
-        timerParams = Settings.loadSettings().timerType
+        timerParams = Settings.loadSettings().timerParam
     }
     
     var body: some View {

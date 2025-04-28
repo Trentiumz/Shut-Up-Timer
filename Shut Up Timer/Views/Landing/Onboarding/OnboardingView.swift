@@ -7,6 +7,7 @@ struct OnboardingView : View {
     
     private var onDone: () -> Void;
     @State private var curStage: OnboardingStage;
+    @EnvironmentObject var settings: Settings;
     @Namespace private var transitionNS;
     
     init(onDone: @escaping () -> Void) {
@@ -19,13 +20,13 @@ struct OnboardingView : View {
             switch curStage {
             case .difficulty:
                 DifficultyScreen(onNext: { difficulty in
-                    Settings.setDifficulty(val: difficulty)
+                    settings.difficulty = difficulty;
                     if(difficulty == .easy) {
-                        Settings.setRoastLevel(val: .low);
+                        settings.roastLevel = .low;
                     } else if(difficulty == .medium) {
-                        Settings.setRoastLevel(val: .med);
+                        settings.roastLevel = .med;
                     } else if(difficulty == .asian) {
-                        Settings.setRoastLevel(val: .high);
+                        settings.roastLevel = .high;
                     }
                     withAnimation {
                         curStage = .loginQuery;

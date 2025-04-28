@@ -4,14 +4,12 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
+    @EnvironmentObject var settings: Settings;
     
-    // timer parameters
-    @State private var timerParams: TimerParam;
     
     @State private var expandedTodo = false;
     
     init() {
-        timerParams = Settings.loadSettings().timerParam
     }
     
     var body: some View {
@@ -21,15 +19,12 @@ struct HomeView: View {
                     Spacer().layoutPriority(0.5)
                     
                     // display the timer selector
-                    switch timerParams {
-                    case .countdown(let seconds):
-                        CountdownSelectorView(initialDuation: Double(seconds), timerParams: $timerParams)
-                    }
+                    CountdownSelectorView(timerParams: $settings.timerParam)
                     
                     // Circle button in the center of the screen
                     Button(action: {
                         // Action for the button (can navigate or do something)
-                        router.toTimerState(params: timerParams);
+                        router.toTimerState(params: settings.timerParam);
                     }) {
                         Text("Start Cooking")
                             .frame(maxWidth: .infinity)
@@ -60,9 +55,6 @@ struct HomeView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onChange(of: timerParams) {
-            Settings.setTimerType(val: timerParams);
-        }
     }
 }
 

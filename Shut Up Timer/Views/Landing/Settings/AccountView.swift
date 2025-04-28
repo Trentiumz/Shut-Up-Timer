@@ -2,15 +2,9 @@ import SwiftUI;
 
 struct AccountView : View {
     // current settings
-    @State private var curSettings: SettingsModel
-    
-    // the current type of element
-    @State private var curType: TimerType
+    @EnvironmentObject var settings: Settings;
     
     init() {
-        let curSettings = Settings.loadSettings()
-        self.curSettings = curSettings;
-        curType = timerParamToType(param: curSettings.timerParam);
     }
     
     var body: some View {
@@ -19,7 +13,7 @@ struct AccountView : View {
             HStack {
                 Text("Difficulty")
                 Spacer()
-                Picker("Difficulty", selection: $curSettings.difficulty) {
+                Picker("Difficulty", selection: $settings.difficulty) {
                     ForEach(Difficulty.allCases) { difficulty in
                         Text(difficulty.rawValue.capitalized).tag(difficulty)
                     }
@@ -30,7 +24,7 @@ struct AccountView : View {
             HStack {
                 Text("Roast Level")
                 Spacer()
-                Picker("Difficulty", selection: $curSettings.roastLevel) {
+                Picker("Difficulty", selection: $settings.roastLevel) {
                     ForEach(RoastLevel.allCases) { level in
                         Text(level.rawValue.capitalized).tag(level)
                     }
@@ -38,12 +32,9 @@ struct AccountView : View {
                 .pickerStyle(.menu)
             }
             
-            TimerSelector(param: $curSettings.timerParam)
+            TimerSelector(param: $settings.timerParam)
         }
         .padding()
-        .onChange(of: curSettings) {
-            Settings.saveSettings(settings: curSettings)
-        }
     }
 }
 

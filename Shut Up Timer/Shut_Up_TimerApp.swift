@@ -11,10 +11,16 @@ import UIKit
 @main
 struct Shut_Up_TimerApp: App {
     @StateObject var router: AppRouter = AppRouter();
+    @StateObject var settings: Settings = SettingsLoader.loadSettings();
     
     var body: some Scene {
         WindowGroup {
-            ContentView().environmentObject(router);
+            ContentView()
+                .environmentObject(router)
+                .environmentObject(settings)
+                .onReceive(settings.objectWillChange) { _ in
+                    SettingsLoader.saveSettings(settings);
+                };
         }
     }
 }

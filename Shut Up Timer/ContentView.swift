@@ -3,21 +3,18 @@ import SwiftUI
 // Control for all pages
 struct ContentView: View {
     @EnvironmentObject var router: AppRouter;
-    @State private var firstTime: Bool;
+    @EnvironmentObject var settings: Settings;
     
     init() {
-        let curSettings = Settings.loadSettings();
-        self.firstTime = curSettings.firstTime;
     }
     
     var body: some View {
         NavigationStack(path:$router.path){
             VStack {
-                if(firstTime) {
+                if(settings.firstTime) {
                     // onboarding
                     OnboardingView(onDone: {
-                        Settings.setFirstTime(val: false);
-                        self.firstTime = false;
+                        settings.firstTime = false;
                     })
                 } else {
                     TopBarView()

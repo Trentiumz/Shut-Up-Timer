@@ -110,7 +110,7 @@ struct TimerView: View {
                 if timerViewModel.isRunning {
                     failTimer()
                 }
-            }
+            }
         }.onAppear() {
             // start timer when appear
             self.timerViewModel.startTimer();
@@ -122,6 +122,6 @@ struct TimerView: View {
 
 #Preview {
     let tvm = TimerViewModel()
-    tvm.reset(totTime: 10)
-    return TimerView(timerViewModel: tvm).environmentObject(AppRouter())
+    tvm.reset(totTime: 10, startTime: Date(), todoID: UUID())
+    TimerView(timerViewModel: tvm).environmentObject(AppRouter())
 }

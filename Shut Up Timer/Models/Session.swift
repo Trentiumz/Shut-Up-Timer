@@ -27,7 +27,7 @@ class Sessions : Codable, Equatable, ObservableObject {
     
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self);
-        firstTime = try container.decode([SessionEntry].self, forKey: .sessions);
+        sessions = try container.decode([SessionEntry].self, forKey: .sessions);
     }
     
     func encode(to encoder: Encoder) throws {
@@ -39,7 +39,7 @@ class Sessions : Codable, Equatable, ObservableObject {
 class SessionsLoader {
     static var defaultSessions: Sessions = Sessions(sessions: []);
 
-    static func loadSettings() -> Settings {
+    static func loadSettings() -> Sessions {
         let data = UserDefaults.standard.data(forKey: "user-sessions");
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Sessions.self, from: liveData) {

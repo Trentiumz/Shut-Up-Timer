@@ -1,11 +1,7 @@
-# Ignore Xcode user-specific files
-**/*.xcuserstate
-**/*.xcuserdata
+**/xcuserstate/*
+**/xcuserdata/*
 
-# Ignore build output
 build/
 DerivedData/
 
-# Optional: Ignore the workspace if not needed
-*.xcworkspace
-
+**/*.xcworkspace/*

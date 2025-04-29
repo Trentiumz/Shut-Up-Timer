@@ -123,5 +123,5 @@ struct TimerView: View {
 #Preview {
     let tvm = TimerViewModel()
     tvm.reset(totTime: 10, startTime: Date(), todoID: UUID())
-    TimerView(timerViewModel: tvm).environmentObject(AppRouter())
+    return TimerView(timerViewModel: tvm).environmentObject(AppRouter())
 }

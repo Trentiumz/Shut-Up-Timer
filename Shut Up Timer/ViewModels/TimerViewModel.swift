@@ -4,6 +4,8 @@ import SwiftUI
 class TimerViewModel: ObservableObject, MVVM {
     // used to track timer running
     var totTime: Int = 0;
+    var startTime: Date = Date();
+    var todoID: UUID = UUID();
     @Published var timeLeft: Int = 0;
     @Published var isRunning: Bool = false;
     
@@ -15,9 +17,11 @@ class TimerViewModel: ObservableObject, MVVM {
     }
     
     // resets the model to its initial state
-    func reset(totTime: Int) {
+    func reset(totTime: Int, startTime: Date, todoID: UUID) {
         destroy();
         self.totTime = totTime;
+        self.startTime = startTime;
+        self.todoID = todoID;
         self.timeLeft = totTime;
         self.timer = nil;
         self.isRunning = false;

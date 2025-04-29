@@ -8,3 +8,54 @@ struct SessionEntry: Identifiable, Codable, Equatable {
     var timeLocked: TimeInterval
     var success: Bool
 }
+
+class Sessions : Codable, Equatable, ObservableObject {
+    @Published var sessions: [SessionEntry];
+
+    init(sessions: [SessionEntry]) {
+        self.sessions = sessions;
+    }
+    
+    static func == (l: Sessions, r: Sessions) -> Bool {
+        return l.sessions == r.sessions;
+    }
+    
+    // MARK: - Codable
+    enum CodingKeys: String, CodingKey {
+        case sessions;
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self);
+        firstTime = try container.decode([SessionEntry].self, forKey: .sessions);
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self);
+        try container.encode(sessions, forKey: .sessions);
+    }
+}
+
+class SessionsLoader {
+    static var defaultSessions: Sessions = Sessions(sessions: []);
+
+    static func loadSettings() -> Settings {
+        let data = UserDefaults.standard.data(forKey: "user-sessions");
+        if let liveData = data {
+            if let decoded = try? JSONDecoder().decode(Sessions.self, from: liveData) {
+                return decoded;
+            }
+            print("Incorrect Data Type");
+            return defaultSessions;
+        } else {
+            saveSettings(defaultSessions);
+            return defaultSessions;
+        }
+    }
+    
+    static func saveSettings(_ sessions: Sessions) {
+        if let encoded = try? JSONEncoder().encode(sessions) {
+            UserDefaults.standard.set(encoded, forKey: "user-sessions");
+        }
+    }
+}

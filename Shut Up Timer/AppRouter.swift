@@ -5,10 +5,10 @@ class AppRouter: ObservableObject {
     @Published var path = NavigationPath();
     @Published var timerViewModel: TimerViewModel = TimerViewModel();
     
-    func toTimerState(params: TimerParam){
+    func toTimerState(params: TimerParam, todoID: UUID, startTime: Date = Date()) {
         switch params {
         case .countdown(let seconds):
-            timerViewModel.reset(totTime: seconds);
+            timerViewModel.reset(totTime: seconds, startTime: startTime, todoID: todoID);
         }
         path.append(AppRoute.timer);
     }

@@ -12,14 +12,19 @@ import UIKit
 struct Shut_Up_TimerApp: App {
     @StateObject var router: AppRouter = AppRouter();
     @StateObject var settings: Settings = SettingsLoader.loadSettings();
+    @StateObject var sessions: Sessions = SessionsLoader.loadSettings();
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(router)
                 .environmentObject(settings)
+                .environmentObject(sessions)
                 .onReceive(settings.objectWillChange) { _ in
                     SettingsLoader.saveSettings(settings);
+                }
+                .onReceive(sessions.objectWillChange) { _ in
+                    SessionsLoader.saveSettings(sessions);
                 };
         }
     }

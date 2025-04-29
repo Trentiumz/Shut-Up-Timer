@@ -24,7 +24,7 @@ struct HomeView: View {
                     // Circle button in the center of the screen
                     Button(action: {
                         // Action for the button (can navigate or do something)
-                        router.toTimerState(params: settings.timerParam);
+                        router.toTimerState(params: settings.timerParam, todoID: UUID());
                     }) {
                         Text("Start Cooking")
                             .frame(maxWidth: .infinity)

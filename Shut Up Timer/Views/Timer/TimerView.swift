@@ -12,6 +12,8 @@ struct TimerView: View {
     
     // whether the modal for quitting is open
     @State var quitExpanded: Bool = false;
+
+    @EnvironmentObject var sessions: Sessions;
     
     init(timerViewModel: TimerViewModel) {
         self.timerViewModel = timerViewModel;
@@ -21,6 +23,16 @@ struct TimerView: View {
     func failTimer() {
         timerViewModel.stopTimer()
         router.toTimerFailed(totTime: timerViewModel.totTime)
+        sessions.sessions.append(SessionEntry(todoID: timerViewModel.todoID, 
+                                            started: timerViewModel.startTime, 
+                                            ended: Date(), 
+                                            timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft), 
+                                            success: false));
+    }
+
+    func succeedTimer() {
+        timerViewModel.stopTimer();
+        router.toTimerCompleted(totTime: timerViewModel.totTime);
     }
     
     var body: some View {
@@ -90,8 +102,7 @@ struct TimerView: View {
         }.onChange(of: timerViewModel.timeLeft) {
             // check if timer expires
             if(timerViewModel.timeLeft == 0) {
-                timerViewModel.stopTimer();
-                router.toTimerCompleted(totTime: timerViewModel.totTime);
+                succeedTimer();
             }
         }.onChange(of: scenePhase) {
             // fail on leaving

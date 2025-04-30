@@ -5,7 +5,7 @@ struct TodoView : View {
     @Binding var expanded: Bool;
     
     // tracking current list items & what to add
-    @State private var listItems: [ToDoEntry];
+    @EnvironmentObject var todoList: ToDoList;
     @State private var newTaskText: String;
     
     @Binding private var selectedTodo: UUID;
@@ -14,14 +14,11 @@ struct TodoView : View {
         _expanded = expanded;
         _selectedTodo = selectedTodo;
         newTaskText = "";
-        listItems = ToDoList.getToDo()
     }
     
     // adds a task and saves it
     func addTask() {
-        listItems = ToDoList.getToDo()
-        listItems.append(ToDoEntry(todo: newTaskText))
-        ToDoList.saveToDo(lst: listItems)
+        todoList.lst.append(ToDoEntry(todo: newTaskText))
         DispatchQueue.main.async {
             newTaskText = ""
         }
@@ -42,7 +39,7 @@ struct TodoView : View {
             ScrollView {
                 VStack {
                     // list of items
-                    ForEach(listItems) { item in
+                    ForEach(todoList.lst) { item in
                         Button (action: {
                             withAnimation {
                                 select(id: item.id)

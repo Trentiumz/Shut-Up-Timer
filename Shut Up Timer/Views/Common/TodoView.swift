@@ -17,7 +17,7 @@ struct TodoView : View {
     // adds a task and saves it
     func addTask() {
         listItems = ToDoList.getToDo()
-        listItems.append(ToDoEntry(todo: newTaskText, done: false))
+        listItems.append(ToDoEntry(todo: newTaskText))
         ToDoList.saveToDo(lst: listItems)
         DispatchQueue.main.async {
             newTaskText = ""
@@ -29,7 +29,7 @@ struct TodoView : View {
         listItems = ToDoList.getToDo()
         for i in 0..<listItems.count {
             if listItems[i].id == id {
-                listItems[i] = ToDoEntry(todo: listItems[i].todo, done: !listItems[i].done)
+                listItems[i] = ToDoEntry(todo: listItems[i].todo)
                 ToDoList.saveToDo(lst: listItems)
             }
         }
@@ -53,17 +53,6 @@ struct TodoView : View {
                                 .truncationMode(.tail)
                                 .clipped()
                             Spacer()
-                            
-                            // icon for whether or not it's done
-                            Button(action: {
-                                toggleDone(id: item.id)
-                            }) {
-                                if item.done {
-                                    Image(systemName: "checkmark")
-                                } else {
-                                    Image(systemName: "rectangle")
-                                }
-                            }
                         }
                         .frame(maxWidth: .infinity)
                         .font(.title2)

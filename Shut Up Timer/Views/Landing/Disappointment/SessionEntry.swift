@@ -8,13 +8,13 @@ struct SessionEntryView : View {
     }
     
     var body: some View {
-        Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed")");
+        Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed")")
             .padding()
             .background(.gray)
-            .cornerRadius(10)
+            .cornerRadius(10);
     }
 }
 
 #Preview {
-    LBRowView(sessionEntry: SessionEntry(todoID: UUID(), started: Date(), ended: Date(), timeLocked: 10, success: true));
+    SessionEntryView(sessionEntry: SessionEntry(todoID: UUID(), started: Date(), ended: Date(), timeLocked: 10, success: true));
 }

@@ -23,16 +23,23 @@ struct TimerView: View {
     func failTimer() {
         timerViewModel.stopTimer()
         router.toTimerFailed(totTime: timerViewModel.totTime)
-        sessions.sessions.append(SessionEntry(todoID: timerViewModel.todoID, 
-                                            started: timerViewModel.startTime, 
-                                            ended: Date(), 
-                                            timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft), 
-                                            success: false));
+        sessions.sessions.append(
+            SessionEntry(todoID: timerViewModel.todoID,
+                         started: timerViewModel.startTime,
+                         ended: Date(),
+                         timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
+                         success: false));
     }
 
     func succeedTimer() {
         timerViewModel.stopTimer();
         router.toTimerCompleted(totTime: timerViewModel.totTime);
+        sessions.sessions.append(
+            SessionEntry(todoID: timerViewModel.todoID,
+                         started: timerViewModel.startTime,
+                         ended: Date(),
+                         timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
+                         success: true));
     }
     
     var body: some View {

@@ -39,28 +39,36 @@ struct TodoView : View {
             ScrollView {
                 VStack {
                     // list of items
-                    ForEach(todoList.lst) { item in
-                        Button (action: {
-                            withAnimation {
-                                select(id: item.id)
-                            }
-                        }) {
-                            HStack {
-                                // task
-                                Text(item.todo)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                    .clipped()
-                                Spacer()
-                                
-                                if selectedTodo == item.id {
-                                    Image(systemName: "star")
+                    ForEach(todoList.lst.filter { $0.active }) { item in
+                        HStack {
+                            Image(systemName: "trash")
+                                .onTapGesture {
+                                    withAnimation {
+                                        if let index = todoList.lst.firstIndex(where: { $0.id == item.id }) {
+                                            todoList.lst[index].active = false
+                                        }
+                                    }
                                 }
+                            // task
+                            Text(item.todo)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .clipped()
+                                .onTapGesture {
+                                    withAnimation {
+                                        select(id: item.id)
+                                    }
+                                }
+                            
+                            Spacer()
+                            
+                            if selectedTodo == item.id {
+                                Image(systemName: "star")
                             }
-                            .frame(maxWidth: .infinity)
-                            .font(.title2)
-                            .foregroundStyle(.black)
                         }
+                        .frame(maxWidth: .infinity)
+                        .font(.title2)
+                        .foregroundStyle(.black)
                     }.padding()
                     
                     // when expanded, allow adding tasks

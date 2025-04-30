@@ -9,6 +9,7 @@ struct TimerView: View {
     
     // whether the todo list is expanded
     @State var todoExpanded: Bool = false;
+    @State var selectedTodo = UUID();
     
     // whether the modal for quitting is open
     @State var quitExpanded: Bool = false;
@@ -101,7 +102,7 @@ struct TimerView: View {
             // todo list item
             VStack {
                 HStack {
-                    TodoView(expanded: $todoExpanded)
+                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
                     Spacer()
                 }
                 Spacer()

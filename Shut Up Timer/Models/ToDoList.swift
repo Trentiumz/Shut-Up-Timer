@@ -3,6 +3,7 @@ import SwiftUI;
 struct ToDoEntry : Codable, Identifiable{
     var id: UUID = UUID();
     var todo: String;
+    var active: Bool = true;
 }
 
 class ToDoList {

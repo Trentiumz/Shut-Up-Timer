@@ -6,8 +6,8 @@ struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var settings: Settings;
     
-    
     @State private var expandedTodo = false;
+    @State private var selectedTodo = UUID();
     
     init() {
     }
@@ -24,7 +24,7 @@ struct HomeView: View {
                     // Circle button in the center of the screen
                     Button(action: {
                         // Action for the button (can navigate or do something)
-                        router.toTimerState(params: settings.timerParam, todoID: UUID());
+                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo);
                     }) {
                         Text("Start Cooking")
                             .frame(maxWidth: .infinity)
@@ -45,7 +45,7 @@ struct HomeView: View {
                 // todo list at the top
                 VStack {
                     HStack {
-                        TodoView(expanded: $expandedTodo)
+                        TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
                             
                         Spacer()
                     }

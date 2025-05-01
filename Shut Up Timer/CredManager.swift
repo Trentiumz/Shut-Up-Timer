@@ -11,11 +11,11 @@ class CredManager: ObservableObject {
     init() {
         // Initialize Supabase client with temporary keys
         supabaseClient = SupabaseClient(
-            supabaseURL: URL(string: "https://your-project.supabase.co")!,
-            supabaseKey: "your-anon-key"
-        )
-        
-        // Try to get the current session
+                supabaseURL: URL(string: "https://oullomxexthybhywbgpr.supabase.co")!,
+                supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91bGxvbXhleHRoeWJoeXdiZ3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3NTYwMDYsImV4cCI6MjA2MTMzMjAwNn0.ox6uLdxPQ57WsBACWC2iVhn0akPUWBcQxTTAQ39kwdE"
+            )
+            
+            // Try to get the current session
         Task {
             do {
                 if let session = try await supabaseClient?.auth.session {

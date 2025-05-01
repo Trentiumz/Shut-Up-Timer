@@ -28,8 +28,8 @@ struct ContentView: View {
                 }
             }	
                 .environmentObject(router)
-                .navigationDestination(for: AppRoute.self) { value in
-                    switch value {
+                .navigationDestination(for: PathElement.self) { elem in
+                    switch elem.route {
                     case .timer:
                         // timer started
                         TimerView(timerViewModel: router.timerViewModel).environmentObject(router)

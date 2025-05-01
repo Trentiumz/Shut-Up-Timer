@@ -10,21 +10,21 @@ class AppRouter: ObservableObject {
         case .countdown(let seconds):
             timerViewModel.reset(totTime: seconds, startTime: startTime, todoID: todoID);
         }
-        path.append(AppRoute.timer);
+        path.append(PathElement(route: AppRoute.timer));
     }
 
     func toLogin(onSuccess: @escaping () -> Void) {
-        path.append(AppRoute.login(onSuccess: onSuccess))
+        path.append(PathElement(route: AppRoute.login(onSuccess: onSuccess)))
     }
     
     func toTimerCompleted(totTime: Int) {
         assert(!timerViewModel.isRunning);
-        path.append(AppRoute.timerCompleted(seconds: totTime))
+        path.append(PathElement(route: AppRoute.timerCompleted(seconds: totTime)))
     }
     
     func toTimerFailed(totTime: Int) {
         assert(!timerViewModel.isRunning);
-        path.append(AppRoute.timerFailed(seconds: totTime))
+        path.append(PathElement(route: AppRoute.timerFailed(seconds: totTime)))
     }
     
     func toHome() {

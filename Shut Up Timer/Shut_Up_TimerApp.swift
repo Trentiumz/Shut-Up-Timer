@@ -7,12 +7,14 @@
 
 import SwiftUI
 import UIKit
+import Supabase
 
 @main
 struct Shut_Up_TimerApp: App {
     @StateObject var router: AppRouter = AppRouter();
     @StateObject var settings: Settings = SettingsLoader.loadSettings();
     @StateObject var sessions: Sessions = SessionsLoader.loadSettings();
+    @State private var session: Session? = try? SupabaseClient.shared.auth.session
     
     var body: some Scene {
         WindowGroup {

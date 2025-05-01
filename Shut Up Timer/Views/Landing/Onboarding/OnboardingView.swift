@@ -2,6 +2,7 @@ import SwiftUI
 struct OnboardingView : View {
     enum OnboardingStage {
         case difficulty;
+        case network;
         case loginQuery;
     }
     
@@ -28,6 +29,13 @@ struct OnboardingView : View {
                     } else if(difficulty == .asian) {
                         settings.roastLevel = .high;
                     }
+                    withAnimation {
+                        curStage = .network;
+                    }
+                })
+                .transition(.move(edge: .trailing))
+            case .network:
+                NetworkScreen(onNext: { _ in
                     withAnimation {
                         curStage = .loginQuery;
                     }

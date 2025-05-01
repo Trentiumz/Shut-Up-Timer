@@ -84,6 +84,56 @@ struct LoginQueryView : View {
     }
 }
 
+enum NetworkSource {
+    case friends
+    case youtube
+    case appStore
+    case instagram
+    case other
+    case hurryLah
+}
+
+struct NetworkScreen : View {
+    var onNext: (NetworkSource) -> Void;
+    
+    func selectSource(source: NetworkSource) {
+        onNext(source);
+    }
+    
+    var body : some View {
+        VStack(spacing: 20) {
+            Rectangle()
+                .fill(Color.red)
+                .frame(width: 200, height: 200)
+                .cornerRadius(10)
+            
+            Text("How did you hear about us?")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            OnboardingSelector(text: "Friends", onPress: {
+                selectSource(source: .friends)
+            })
+            OnboardingSelector(text: "YouTube", onPress: {
+                selectSource(source: .youtube)
+            })
+            OnboardingSelector(text: "App Store", onPress: {
+                selectSource(source: .appStore)
+            })
+            OnboardingSelector(text: "Instagram", onPress: {
+                selectSource(source: .instagram)
+            })
+            OnboardingSelector(text: "Other", onPress: {
+                selectSource(source: .other)
+            })
+            OnboardingSelector(text: "Hurry, lah", onPress: {
+                selectSource(source: .hurryLah)
+            })
+        }
+        .padding()
+    }
+}
+
 #Preview {
     OnboardingView(onDone: {})
 }

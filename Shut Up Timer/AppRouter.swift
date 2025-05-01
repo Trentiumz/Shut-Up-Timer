@@ -12,6 +12,10 @@ class AppRouter: ObservableObject {
         }
         path.append(AppRoute.timer);
     }
+
+    func toLogin(onSuccess: @escaping () -> Void) {
+        path.append(AppRoute.login(onSuccess: onSuccess))
+    }
     
     func toTimerCompleted(totTime: Int) {
         assert(!timerViewModel.isRunning);

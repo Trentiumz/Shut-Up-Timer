@@ -4,11 +4,14 @@ struct OnboardingView : View {
         case difficulty;
         case network;
         case loginQuery;
+        case login;
+        case register;
     }
     
     private var onDone: () -> Void;
     @State private var curStage: OnboardingStage;
     @EnvironmentObject var settings: Settings;
+    @EnvironmentObject var credManager: CredentialManager;
     @Namespace private var transitionNS;
     
     init(onDone: @escaping () -> Void) {
@@ -44,9 +47,42 @@ struct OnboardingView : View {
             case .loginQuery:
                 LoginQueryView(onNext: { selection in
                     withAnimation {
-                        onDone()
+                        switch selection {
+                        case .study:
+                            onDone()
+                        case .login:
+                            curStage = .login
+                        }
                     }
                 })
+                .transition(.move(edge: .trailing))
+            case .login:
+                LoginView(
+                    onLoggedIn: {
+                        withAnimation {
+                            onDone()
+                        }
+                    },
+                    onRegister: {
+                        withAnimation {
+                            curStage = .register
+                        }
+                    }
+                )
+                .transition(.move(edge: .trailing))
+            case .register:
+                RegisterView(
+                    onRegistered: {
+                        withAnimation {
+                            onDone()
+                        }
+                    },
+                    onLogin: {
+                        withAnimation {
+                            curStage = .login
+                        }
+                    }
+                )
                 .transition(.move(edge: .trailing))
             }
         }

@@ -6,7 +6,7 @@ class CredManager: ObservableObject {
     @Published var connected: Bool = false
     @Published var loggedIn: Bool = false
     
-    private var supabaseClient: SupabaseClient?
+    @Published var supabaseClient: SupabaseClient?
     
     init() {
         // Initialize Supabase client with temporary keys

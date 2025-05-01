@@ -5,34 +5,28 @@ struct TodoView : View {
     @Binding var expanded: Bool;
     
     // tracking current list items & what to add
-    @State private var listItems: [ToDoEntry];
+    @EnvironmentObject var todoList: ToDoList;
     @State private var newTaskText: String;
     
-    init(expanded: Binding<Bool>) {
+    @Binding private var selectedTodo: UUID;
+    
+    init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>) {
         _expanded = expanded;
+        _selectedTodo = selectedTodo;
         newTaskText = "";
-        listItems = ToDoList.getToDo()
     }
     
     // adds a task and saves it
     func addTask() {
-        listItems = ToDoList.getToDo()
-        listItems.append(ToDoEntry(todo: newTaskText, done: false))
-        ToDoList.saveToDo(lst: listItems)
+        todoList.lst.append(ToDoEntry(todo: newTaskText))
         DispatchQueue.main.async {
             newTaskText = ""
         }
     }
     
-    // toggle if a list element is being used
-    func toggleDone(id: UUID) {
-        listItems = ToDoList.getToDo()
-        for i in 0..<listItems.count {
-            if listItems[i].id == id {
-                listItems[i] = ToDoEntry(todo: listItems[i].todo, done: !listItems[i].done)
-                ToDoList.saveToDo(lst: listItems)
-            }
-        }
+    // select a task
+    func select(id: UUID) {
+        selectedTodo = id;
     }
     
     var body : some View {
@@ -45,24 +39,31 @@ struct TodoView : View {
             ScrollView {
                 VStack {
                     // list of items
-                    ForEach(listItems) { item in
+                    ForEach(todoList.lst.filter { $0.active }) { item in
                         HStack {
+                            Image(systemName: "trash")
+                                .onTapGesture {
+                                    withAnimation {
+                                        if let index = todoList.lst.firstIndex(where: { $0.id == item.id }) {
+                                            todoList.lst[index].active = false
+                                        }
+                                    }
+                                }
                             // task
                             Text(item.todo)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                                 .clipped()
+                                .onTapGesture {
+                                    withAnimation {
+                                        select(id: item.id)
+                                    }
+                                }
+                            
                             Spacer()
                             
-                            // icon for whether or not it's done
-                            Button(action: {
-                                toggleDone(id: item.id)
-                            }) {
-                                if item.done {
-                                    Image(systemName: "checkmark")
-                                } else {
-                                    Image(systemName: "rectangle")
-                                }
+                            if selectedTodo == item.id {
+                                Image(systemName: "star")
                             }
                         }
                         .frame(maxWidth: .infinity)
@@ -92,5 +93,5 @@ struct TodoView : View {
 }
 
 #Preview {
-    TodoView(expanded: .constant(true))
+    TodoView(expanded: .constant(true), selectedTodo: .constant(UUID()))
 }

@@ -7,6 +7,7 @@ struct LoginView: View {
         case register
     }
     
+    @EnvironmentObject var appRouter: AppRouter
     @State private var currentState: LoginState = .login
     var onLoggedIn: () -> Void
     
@@ -14,7 +15,10 @@ struct LoginView: View {
         switch currentState {
         case .login:
             LoginScreen(
-                onLoggedIn: onLoggedIn,
+                onLoggedIn: {
+                    appRouter.path.removeLast()
+                    onLoggedIn()
+                },
                 onRegister: {
                     withAnimation {
                         currentState = .register
@@ -23,7 +27,10 @@ struct LoginView: View {
             )
         case .register:
             RegisterScreen(
-                onRegistered: onLoggedIn,
+                onRegistered: {
+                    appRouter.path.removeLast()
+                    onLoggedIn()
+                },
                 onLogin: {
                     withAnimation {
                         currentState = .login

@@ -44,6 +44,9 @@ struct ContentView: View {
                         TimerFailedView(timeLocked: seconds)
                             .environmentObject(router)
                             .navigationBarBackButtonHidden(true)
+                    case .login(let onSuccess):
+                        // login screen
+                        LoginView(onLoggedIn: onSuccess)
                     default:
                         Text("Invalid")
                     }

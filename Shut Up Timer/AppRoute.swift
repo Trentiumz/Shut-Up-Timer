@@ -3,4 +3,5 @@ enum AppRoute : Hashable{
     case timer
     case timerCompleted(seconds: Int)
     case timerFailed(seconds: Int)
+    case login(onSuccess: () -> Void)
 }

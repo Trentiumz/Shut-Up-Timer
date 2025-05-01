@@ -15,21 +15,14 @@ class CredManager: ObservableObject {
                 supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91bGxvbXhleHRoeWJoeXdiZ3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3NTYwMDYsImV4cCI6MjA2MTMzMjAwNn0.ox6uLdxPQ57WsBACWC2iVhn0akPUWBcQxTTAQ39kwdE"
             )
             
-            // Try to get the current session
+        // Try to get the current session
         Task {
             do {
-                session = try await supabaseClient.auth.session;
-                if session != nil {
-                    await MainActor.run {
-                        self.session = session
-                        self.connected = true
-                        self.loggedIn = true
-                    }
-                } else {
-                    await MainActor.run {
-                        self.connected = true
-                        self.loggedIn = false
-                    }
+                let curSession = try await supabaseClient.auth.session;
+                await MainActor.run {
+                    self.session = curSession
+                    self.connected = true
+                    self.loggedIn = true
                 }
             } catch {
                 print("Error initializing session: \(error)")
@@ -40,4 +33,4 @@ class CredManager: ObservableObject {
             }
         }
     }
-} 
+}

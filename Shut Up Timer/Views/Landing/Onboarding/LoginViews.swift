@@ -2,7 +2,7 @@ import SwiftUI
 import Supabase
 
 struct LoginView: View {
-    @EnvironmentObject var credManager: CredentialManager
+    @EnvironmentObject var credManager: CredManager
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var errorMessage: String? = nil
@@ -70,7 +70,7 @@ struct LoginView: View {
 }
 
 struct RegisterView: View {
-    @EnvironmentObject var credManager: CredentialManager
+    @EnvironmentObject var credManager: CredManager
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var errorMessage: String? = nil

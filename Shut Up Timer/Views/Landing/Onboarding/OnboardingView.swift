@@ -11,7 +11,7 @@ struct OnboardingView : View {
     private var onDone: () -> Void;
     @State private var curStage: OnboardingStage;
     @EnvironmentObject var settings: Settings;
-    @EnvironmentObject var credManager: CredentialManager;
+    @EnvironmentObject var credManager: CredManager;
     @Namespace private var transitionNS;
     
     init(onDone: @escaping () -> Void) {

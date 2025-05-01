@@ -6,7 +6,7 @@ class CredManager: ObservableObject {
     @Published var connected: Bool = false
     @Published var loggedIn: Bool = false
     
-    @Published var supabaseClient: SupabaseClient?
+    @Published var supabaseClient: SupabaseClient
     
     init() {
         // Initialize Supabase client with temporary keys
@@ -18,7 +18,8 @@ class CredManager: ObservableObject {
             // Try to get the current session
         Task {
             do {
-                if let session = try await supabaseClient?.auth.session {
+                session = try await supabaseClient.auth.session;
+                if session != nil {
                     await MainActor.run {
                         self.session = session
                         self.connected = true
@@ -33,7 +34,7 @@ class CredManager: ObservableObject {
             } catch {
                 print("Error initializing session: \(error)")
                 await MainActor.run {
-                    self.connected = false
+                    self.connected = true
                     self.loggedIn = false
                 }
             }

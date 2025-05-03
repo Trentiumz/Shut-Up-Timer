@@ -6,11 +6,16 @@ struct LeaderboardView : View {
     
     var body: some View {
         VStack() {
-            ForEach(friendLB) { user in
-                LBRowView(name: user.name, pts: user.pts);
+            if credManager.loggedIn {
+                ForEach(friendLB) { user in
+                    LBRowView(name: user.name, pts: user.pts);
+                }
+            } else {
+                Text("Log in to see your friends' leaderboard")
             }
         }
         .onAppear {
+            if credManager.loggedIn {
             Task {
                 do {
                     let data: [FriendLeaderboardResponse] = try await credManager.supabaseClient.rpc("get_friend_leaderboard").execute().value

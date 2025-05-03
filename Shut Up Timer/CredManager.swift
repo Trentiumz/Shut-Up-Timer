@@ -47,7 +47,7 @@ class CredManager: ObservableObject {
 
     /// Handles Google OAuth login
     func loginGoogle() async throws {
-        try await credManager.supabaseClient.auth.signInWithOAuth(
+        try await supabaseClient.auth.signInWithOAuth(
             provider: .google,
             redirectTo: URL(string: "shut-up-timer://login-callback")
         )
@@ -70,7 +70,7 @@ class CredManager: ObservableObject {
 
     // Handles registration
     func register(email: String, password: String) async throws {
-        try await credManager.supabaseClient.auth.signUp(
+        try await supabaseClient.auth.signUp(
             email: email,
             password: password
         )

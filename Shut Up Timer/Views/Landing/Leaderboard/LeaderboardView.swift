@@ -15,8 +15,10 @@ struct LeaderboardView : View {
                 do {
                     let data: [FriendLeaderboardResponse] = try await credManager.supabaseClient.rpc("get_friend_leaderboard").execute().value
                     print(data);
-                    friendLB = data.map{row in
-                        return LBEntry(name: row.friend_username, pts: row.friend_iq)};
+                    await MainActor.run {
+                        friendLB = data.map{row in
+                            return LBEntry(name: row.friend_username, pts: row.friend_iq)};
+                    }
                 } catch {
                     print("Error fetching leaderboard: \(error)")
                 }

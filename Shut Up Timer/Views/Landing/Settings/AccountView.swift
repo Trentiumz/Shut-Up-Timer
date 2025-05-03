@@ -9,6 +9,21 @@ struct AccountView : View {
     
     init() {
     }
+
+    func updateUserProfile() {
+        Task {
+            do {
+                if let userId = credManager.session?.user.id {
+                    let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
+                    await MainActor.run {
+                        userProfile = profile[0]
+                    }
+                }
+            } catch {
+                print("Error fetching user profile: \(error)")
+            }
+        }
+    }
     
     var body: some View {
         VStack {
@@ -75,36 +90,34 @@ struct AccountView : View {
             }
             
             // User Profile Section
-            if credManager.loggedIn {
+            if credManager.loggedIn, let profile = userProfile {
                 VStack(spacing: 20) {
-                    if let profile = userProfile {
-                        // Profile Picture
-                        if !profile.profile_picture.isEmpty {
-                            AsyncImage(url: URL(string: profile.profile_picture)) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 100, height: 100)
-                                    .clipShape(Circle())
-                            } placeholder: {
-                                Circle()
-                                    .fill(Color.gray)
-                                    .frame(width: 100, height: 100)
-                            }
+                    // Profile Picture
+                    if !profile.profile_picture.isEmpty {
+                        AsyncImage(url: URL(string: profile.profile_picture)) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                        } placeholder: {
+                            Circle()
+                                .fill(Color.gray)
+                                .frame(width: 100, height: 100)
                         }
+                    }
+                    
+                    // Username and IQ
+                    VStack(spacing: 10) {
+                        Text(profile.username)
+                            .font(.title)
+                            .fontWeight(.bold)
                         
-                        // Username and IQ
-                        VStack(spacing: 10) {
-                            Text(profile.username)
-                                .font(.title)
-                                .fontWeight(.bold)
-                            
-                            HStack {
-                                Image(systemName: "star.fill")
-                                    .foregroundColor(.yellow)
-                                Text("IQ: \(profile.iq)")
-                                    .font(.title2)
-                            }
+                        HStack {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.yellow)
+                            Text("IQ: \(profile.iq)")
+                                .font(.title2)
                         }
                     }
                 }
@@ -115,20 +128,9 @@ struct AccountView : View {
         }
         .padding()
         .onAppear {
-            if userProfile == nil {
-                Task {
-                    do {
-                        if let userId = credManager.session?.user.id {
-                            let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
-                            await MainActor.run {
-                                userProfile = profile[0]
-                            }
-                        }
-                    } catch {
-                        print("Error fetching user profile: \(error)")
-                    }
-                }
-            }
+            updateUserProfile()
+        }.onChange(of: credManager.session) {
+            updateUserProfile()
         }
     }
 }

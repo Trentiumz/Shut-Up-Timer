@@ -1,17 +1,37 @@
 import SwiftUI;
 
 struct LeaderboardView : View {
-    private var data = [LBEntry(name: "Bob", pts: 50), LBEntry(name: "Fred", pts: 10)];
+    @EnvironmentObject var credManager: CredManager
+    @State private var friendLB: [LBEntry] = []
     
     var body: some View {
         VStack() {
-            ForEach(data) { user in
+            ForEach(friendLB) { user in
                 LBRowView(name: user.name, pts: user.pts);
+            }
+        }
+        .onAppear {
+            Task {
+                do {
+                    let result = try await credManager.supabaseClient.functions.invoke("get_friend_leaderboard")
+                    if let data = result.data as? [[String: Any]] {
+                        friendLB = data.compactMap { entry in
+                            guard let name = entry["name"] as? String,
+                                  let pts = entry["pts"] as? Int else {
+                                return nil
+                            }
+                            return LBEntry(name: name, pts: pts)
+                        }
+                    }
+                } catch {
+                    print("Error fetching leaderboard: \(error)")
+                }
             }
         }
     }
 }
 
 #Preview {
-    LeaderboardView();
+    LeaderboardView()
+        .environmentObject(CredManager())
 }

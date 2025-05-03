@@ -11,6 +11,7 @@ struct AccountView : View {
     }
 
     func updateUserProfile() {
+        userProfile = nil;
         Task {
             do {
                 if let userId = credManager.session?.user.id {

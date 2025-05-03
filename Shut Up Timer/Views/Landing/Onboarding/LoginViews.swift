@@ -64,10 +64,7 @@ struct LoginScreen: View {
     private func handleGoogleLogin() {
         Task {
             do {
-                try await credManager.supabaseClient.auth.signInWithOAuth(
-                    provider: .google,
-                    redirectTo: URL(string: "shut-up-timer://login-callback")
-                )
+                try await credManager.loginGoogle()
                 onLoggedIn()
             } catch {
                 errorMessage = error.localizedDescription
@@ -79,10 +76,7 @@ struct LoginScreen: View {
     private func handleEmailLogin() {
         Task {
             do {
-                try await credManager.supabaseClient.auth.signIn(
-                    email: email,
-                    password: password
-                )
+                try await credManager.loginEmail(email: email, password: password)
                 onLoggedIn()
             } catch {
                 if error.localizedDescription.contains("Invalid login credentials") {
@@ -161,10 +155,7 @@ struct RegisterScreen: View {
     private func handleRegister() {
         Task {
             do {
-                try await credManager.supabaseClient.auth.signUp(
-                    email: email,
-                    password: password
-                )
+                try await credManager.register(email: email, password: password)
                 onRegistered()
             } catch {
                 showInvalidEmail = false

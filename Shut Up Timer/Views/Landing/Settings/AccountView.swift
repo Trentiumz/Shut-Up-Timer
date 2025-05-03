@@ -60,12 +60,8 @@ struct AccountView : View {
                     Button(action: {
                         Task {
                             do {
-                                try await credManager.supabaseClient.auth.signOut()
-                                await MainActor.run {
-                                    credManager.loggedIn = false
-                                    credManager.session = nil
-                                    userProfile = nil
-                                }
+                                try await credManager.logOut();
+                                userProfile = nil;
                             } catch {
                                 print("Error signing out: \(error)")
                             }

@@ -119,9 +119,9 @@ struct AccountView : View {
                 Task {
                     do {
                         if let userId = credManager.session?.user.id {
-                            let profile: UserPublicProfileResponse = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
+                            let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
                             await MainActor.run {
-                                userProfile = profile
+                                userProfile = profile[0]
                             }
                         }
                     } catch {

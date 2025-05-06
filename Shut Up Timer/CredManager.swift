@@ -33,4 +33,52 @@ class CredManager: ObservableObject {
             }
         }
     }
+
+    // Handles email login 
+    func loginEmail(email: String, password: String) async throws {
+        try await supabaseClient.auth.signIn(email: email, password: password)
+        let curSession = try await supabaseClient.auth.session;
+
+        await MainActor.run {
+            self.session = curSession;
+            self.loggedIn = true;
+        }
+    }
+
+    /// Handles Google OAuth login
+    func loginGoogle() async throws {
+        try await supabaseClient.auth.signInWithOAuth(
+            provider: .google,
+            redirectTo: URL(string: "shut-up-timer://login-callback")
+        )
+
+        let curSession = try await supabaseClient.auth.session;
+        await MainActor.run {
+            self.session = curSession;
+            self.loggedIn = true;
+        }
+    }
+
+    // Handles logging out
+    func logOut() async throws {
+        try await supabaseClient.auth.signOut()
+        await MainActor.run {
+            self.session = nil
+            self.loggedIn = false
+        }
+    }
+
+    // Handles registration
+    func register(email: String, password: String) async throws {
+        try await supabaseClient.auth.signUp(
+            email: email,
+            password: password
+        )
+
+        let curSession = try await supabaseClient.auth.session;
+        await MainActor.run {
+            self.session = curSession;
+            self.loggedIn = true;
+        }
+    }
 }

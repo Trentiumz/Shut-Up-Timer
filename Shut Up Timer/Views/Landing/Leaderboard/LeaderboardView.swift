@@ -16,23 +16,19 @@ struct LeaderboardView : View {
         }
         .onAppear {
             if credManager.loggedIn {
-            Task {
-                do {
-                    let data: [FriendLeaderboardResponse] = try await credManager.supabaseClient.rpc("get_friend_leaderboard").execute().value
-                    print(data);
-                    await MainActor.run {
-                        friendLB = data.map{row in
-                            return LBEntry(name: row.friend_username, pts: row.friend_iq)};
+                Task {
+                    do {
+                        let data: [FriendLeaderboardResponse] = try await credManager.supabaseClient.rpc("get_friend_leaderboard").execute().value
+                        print(data);
+                        await MainActor.run {
+                            friendLB = data.map{row in
+                                return LBEntry(name: row.friend_username, pts: row.friend_iq)};
+                        }
+                    } catch {
+                        print("Error fetching leaderboard: \(error)")
                     }
-                } catch {
-                    print("Error fetching leaderboard: \(error)")
                 }
             }
         }
     }
-}
-
-#Preview {
-    LeaderboardView()
-        .environmentObject(CredManager())
 }

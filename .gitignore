@@ -1,7 +1,2 @@
-**/xcuserstate/*
-**/xcuserdata/*
-
 build/
 DerivedData/
-
-**/*.xcworkspace/*

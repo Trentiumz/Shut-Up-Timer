@@ -5,23 +5,69 @@ struct AccountView : View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
-    @State private var userProfile: UserPublicProfileResponse? = nil;
+    @State private var userPublicProfile: UserPublicProfileResponse? = nil;
+    @State private var userProfile: UserProfileResponse? = nil;
     
     init() {
     }
-
+    
     func updateUserProfile() {
+        userPublicProfile = nil;
         userProfile = nil;
         Task {
             do {
                 if let userId = credManager.session?.user.id {
-                    let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
+                    // Get public profile
+                    let publicProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
+                    // Get private profile
+                    let privateProfile: [UserProfileResponse] = try await credManager.supabaseClient.rpc("get_profile").execute().value
+                    
                     await MainActor.run {
-                        userProfile = profile[0]
+                        userPublicProfile = publicProfile[0]
+                        userProfile = privateProfile[0]
                     }
                 }
             } catch {
-                print("Error fetching user profile: \(error)")
+                print("Error fetching user profiles: \(error)")
+            }
+        }
+    }
+    
+    func updateVisibility(field: String, newValue: Bool) {
+        // Update local state immediately
+        if var profile = userProfile {
+            switch field {
+            case "public_profile":
+                profile.is_public_profile_visible = newValue
+            case "username":
+                profile.is_username_visible = newValue
+            case "iq":
+                profile.is_iq_visible = newValue
+            case "profile_picture":
+                profile.is_profile_picture_visible = newValue
+            case "roasts":
+                profile.is_roasts_visible = newValue
+            case "disappointment":
+                profile.is_disappointment_visible = newValue
+            default:
+                break
+            }
+            userProfile = profile
+        }
+        
+        // Update server state
+        Task {
+            do {
+                try await credManager.supabaseClient.rpc("update_\(field)_visibility", params: ["is_visible": newValue]).execute()
+                await MainActor.run {
+                    updateUserProfile()
+                }
+            } catch {
+                print("Error updating \(field) visibility: \(error)")
+                // Revert local state if server update fails
+                await MainActor.run {
+                    updateUserProfile()
+                }
             }
         }
     }
@@ -61,6 +107,7 @@ struct AccountView : View {
                         Task {
                             do {
                                 try await credManager.logOut();
+                                userPublicProfile = nil;
                                 userProfile = nil;
                             } catch {
                                 print("Error signing out: \(error)")
@@ -87,11 +134,11 @@ struct AccountView : View {
             }
             
             // User Profile Section
-            if credManager.loggedIn, let profile = userProfile {
+            if credManager.loggedIn, let publicProfile = userPublicProfile, let privateProfile = userProfile {
                 VStack(spacing: 20) {
                     // Profile Picture
-                    if !profile.profile_picture.isEmpty {
-                        AsyncImage(url: URL(string: profile.profile_picture)) { image in
+                    if !publicProfile.profile_picture.isEmpty {
+                        AsyncImage(url: URL(string: publicProfile.profile_picture)) { image in
                             image
                                 .resizable()
                                 .scaledToFit()
@@ -106,15 +153,55 @@ struct AccountView : View {
                     
                     // Username and IQ
                     VStack(spacing: 10) {
-                        Text(profile.username)
+                        Text(publicProfile.username)
                             .font(.title)
                             .fontWeight(.bold)
                         
                         HStack {
                             Image(systemName: "star.fill")
                                 .foregroundColor(.yellow)
-                            Text("IQ: \(profile.iq)")
+                            Text("IQ: \(publicProfile.iq)")
                                 .font(.title2)
+                        }
+                        
+                        // Friend Code
+                        HStack {
+                            Image(systemName: "person.2.fill")
+                                .foregroundColor(.blue)
+                            Text("Friend Code: \(privateProfile.friend_code)")
+                                .font(.title3)
+                        }
+                        
+                        // Privacy Settings
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Privacy Settings")
+                                .font(.headline)
+                                .padding(.top)
+                            
+                            Toggle("Public Profile", isOn: Binding(
+                                get: { privateProfile.is_public_profile_visible },
+                                set: { updateVisibility(field: "public_profile", newValue: $0) }
+                            ))
+                            Toggle("Show Username", isOn: Binding(
+                                get: { privateProfile.is_username_visible },
+                                set: { updateVisibility(field: "username", newValue: $0) }
+                            ))
+                            Toggle("Show IQ", isOn: Binding(
+                                get: { privateProfile.is_iq_visible },
+                                set: { updateVisibility(field: "iq", newValue: $0) }
+                            ))
+                            Toggle("Show Profile Picture", isOn: Binding(
+                                get: { privateProfile.is_profile_picture_visible },
+                                set: { updateVisibility(field: "profile_picture", newValue: $0) }
+                            ))
+                            Toggle("Show Roasts", isOn: Binding(
+                                get: { privateProfile.is_roasts_visible },
+                                set: { updateVisibility(field: "roasts", newValue: $0) }
+                            ))
+                            Toggle("Show Disappointment", isOn: Binding(
+                                get: { privateProfile.is_disappointment_visible },
+                                set: { updateVisibility(field: "disappointment", newValue: $0) }
+                            ))
                         }
                     }
                 }

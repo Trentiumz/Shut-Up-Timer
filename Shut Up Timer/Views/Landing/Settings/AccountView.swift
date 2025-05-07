@@ -153,7 +153,7 @@ struct AccountView : View {
                     
                     // Username and IQ
                     VStack(spacing: 10) {
-                        Text(publicProfile.username)
+                        Text("Username: \(publicProfile.username)")
                             .font(.title)
                             .fontWeight(.bold)
                         

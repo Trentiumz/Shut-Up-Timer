@@ -20,3 +20,10 @@ struct UserProfileResponse : Decodable {
     var is_roasts_visible: Bool
     var is_disappointment_visible: Bool
 }
+
+struct FriendRequestResponse : Decodable {
+    let id: Int
+    let sender_id: UUID
+    let receiver_id: UUID
+    let created_at: Date
+}

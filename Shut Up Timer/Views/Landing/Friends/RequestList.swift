@@ -29,7 +29,7 @@ struct RequestList : View {
     func fetchUserProfile(for userId: UUID) {
         Task {
             do {
-                let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_public_profile", params: ["user_id": userId]).execute().value
+                let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
                 if let userProfile = profile.first {
                     await MainActor.run {
                         userProfiles[userId] = userProfile

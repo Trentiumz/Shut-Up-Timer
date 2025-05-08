@@ -36,7 +36,7 @@ struct AccountView : View {
     }
     
     func updateUsername() {
-        guard let userId = credManager.session?.user.id else { return }
+        guard (credManager.session?.user.id) != nil else { return }
         
         Task {
             do {

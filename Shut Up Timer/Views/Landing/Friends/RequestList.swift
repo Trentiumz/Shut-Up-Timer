@@ -14,9 +14,9 @@ struct RequestList : View {
                 await MainActor.run {
                     requests = data
                     // Fetch profiles for all unique users in the requests
-                    let uniqueUserIds = Set(data.map { $0.sender_id })
-                    for userId in uniqueUserIds {
-                        fetchUserProfile(for: userId)
+                    for user in data {
+                        fetchUserProfile(for: user.sender_id)
+                        fetchUserProfile(for: user.receiver_id)
                     }
                 }
             } catch {
@@ -34,6 +34,8 @@ struct RequestList : View {
                     await MainActor.run {
                         userProfiles[userId] = userProfile
                     }
+                } else {
+                    print("No profile found for user \(userId)")
                 }
             } catch {
                 print("Error fetching profile for user \(userId): \(error)")

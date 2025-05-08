@@ -58,7 +58,7 @@ struct AccountView : View {
         // Update server state
         Task {
             do {
-                try await credManager.supabaseClient.rpc("update_\(field)_visibility", params: ["is_visible": newValue]).execute()
+                try await credManager.supabaseClient.rpc("update_\(field)_visibility", params: ["new_\(field)_visibile": newValue]).execute()
                 await MainActor.run {
                     updateUserProfile()
                 }

@@ -6,9 +6,9 @@ struct FriendLeaderboardResponse : Decodable {
 }
 
 struct UserPublicProfileResponse : Decodable {
-    let username: String
-    let iq: Int
-    let profile_picture: String
+    var username: String
+    var iq: Int
+    var profile_picture: String
 }
 
 struct UserProfileResponse : Decodable {

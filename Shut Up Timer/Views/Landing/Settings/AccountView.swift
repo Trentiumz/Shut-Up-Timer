@@ -7,6 +7,7 @@ struct AccountView : View {
     @EnvironmentObject var router: AppRouter;
     @State private var userPublicProfile: UserPublicProfileResponse? = nil;
     @State private var userProfile: UserProfileResponse? = nil;
+    @State private var usernameDisplay: String = "";
     
     init() {
     }
@@ -25,10 +26,35 @@ struct AccountView : View {
                     await MainActor.run {
                         userPublicProfile = publicProfile[0]
                         userProfile = privateProfile[0]
+                        usernameDisplay = publicProfile[0].username
                     }
                 }
             } catch {
                 print("Error fetching user profiles: \(error)")
+            }
+        }
+    }
+    
+    func updateUsername() {
+        guard (credManager.session?.user.id) != nil else { return }
+        
+        Task {
+            do {
+                // Call the change_username function
+                try await credManager.supabaseClient.rpc("change_username", params: ["new_username": usernameDisplay]).execute()
+                
+                // Update local profile
+                if var profile = userPublicProfile {
+                    profile.username = usernameDisplay
+                    await MainActor.run {
+                        userPublicProfile = profile
+                    }
+                }
+                
+                // Fetch fresh profile data
+                updateUserProfile()
+            } catch {
+                print("Error updating username: \(error)")
             }
         }
     }
@@ -136,6 +162,14 @@ struct AccountView : View {
             // User Profile Section
             if credManager.loggedIn, let publicProfile = userPublicProfile, let privateProfile = userProfile {
                 VStack(spacing: 20) {
+                    // Username editing section
+                    HStack {
+                        Text("Username:")
+                        TextField("Username", text: $usernameDisplay, onCommit: updateUsername)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                    .padding(.horizontal)
+                    
                     // Profile Picture
                     if !publicProfile.profile_picture.isEmpty {
                         AsyncImage(url: URL(string: publicProfile.profile_picture)) { image in

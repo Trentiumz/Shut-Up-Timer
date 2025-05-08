@@ -4,6 +4,7 @@ import SwiftUI;
 struct RequestList : View {
     @EnvironmentObject var credManager: CredManager;
     @State private var requests: [FriendRequestResponse] = [];
+    @State private var userProfiles: [UUID: UserPublicProfileResponse] = [:];
     
     /// Fetches the latest friend requests from the server
     func updateRequests() {
@@ -12,9 +13,30 @@ struct RequestList : View {
                 let data: [FriendRequestResponse] = try await credManager.supabaseClient.rpc("get_friend_requests").execute().value
                 await MainActor.run {
                     requests = data
+                    // Fetch profiles for all unique users in the requests
+                    let uniqueUserIds = Set(data.map { $0.sender_id })
+                    for userId in uniqueUserIds {
+                        fetchUserProfile(for: userId)
+                    }
                 }
             } catch {
                 print("Error fetching friend requests: \(error)")
+            }
+        }
+    }
+    
+    /// Fetches the public profile for a given user ID
+    func fetchUserProfile(for userId: UUID) {
+        Task {
+            do {
+                let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_public_profile", params: ["user_id": userId]).execute().value
+                if let userProfile = profile.first {
+                    await MainActor.run {
+                        userProfiles[userId] = userProfile
+                    }
+                }
+            } catch {
+                print("Error fetching profile for user \(userId): \(error)")
             }
         }
     }
@@ -28,7 +50,7 @@ struct RequestList : View {
                 } else {
                     // Display each friend request in a simple format
                     List(requests, id: \.id) { request in
-                        Text("From \(request.sender_id) to \(request.receiver_id)")
+                        Text("From \(userProfiles[request.sender_id]?.username ?? request.sender_id.uuidString) to \(userProfiles[request.receiver_id]?.username ?? request.receiver_id.uuidString)")
                     }
                 }
             } else {

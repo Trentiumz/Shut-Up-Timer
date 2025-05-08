@@ -12,11 +12,11 @@ struct UserPublicProfileResponse : Decodable {
 }
 
 struct UserProfileResponse : Decodable {
-    let friend_code: String
-    let is_public_profile_visible: Bool
-    let is_username_visible: Bool
-    let is_iq_visible: Bool
-    let is_profile_picture_visible: Bool
-    let is_roasts_visible: Bool
-    let is_disappointment_visible: Bool
+    var friend_code: String
+    var is_public_profile_visible: Bool
+    var is_username_visible: Bool
+    var is_iq_visible: Bool
+    var is_profile_picture_visible: Bool
+    var is_roasts_visible: Bool
+    var is_disappointment_visible: Bool
 }

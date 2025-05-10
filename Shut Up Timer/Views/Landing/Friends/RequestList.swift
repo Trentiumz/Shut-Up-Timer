@@ -58,13 +58,13 @@ struct RequestList : View {
     }
     
     /// Handles responding to a friend request (accept/reject)
-    func respondToRequest(requestId: Int, action: String) {
+    func respondToRequest(requestId: Int, action: String) -> Void {
         Task {
             do {
                 try await credManager.supabaseClient.rpc("respond_to_friend_request", params: [
                     "request_id": requestId,
                     "action": action
-                ], responseType: Void.self).execute()
+                ]).execute()
                 // Refresh the requests list after responding
                 await MainActor.run {
                     updateRequests()

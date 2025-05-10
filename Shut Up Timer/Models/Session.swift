@@ -36,7 +36,28 @@ class Sessions : Codable, Equatable, ObservableObject {
     }
 
     func getIQ() -> Int {
-        return 0;
+        if let liveSession = sessions {
+            var cIq: Int = 0;
+            for session in liveSession {
+                if session.success {
+                    cIq += session.timeLocked;
+                } else {
+                    cIq -= 1;
+                }
+            }
+            return cIq;
+        } else {
+            return 0;
+        }
+    }
+
+    func getTimeLocked() -> Int {
+        if let liveSession = sessions {
+            let totTime: Int = liveSession.reduce(0) { $0 + Int($1.timeLocked) };
+            return totTime;
+        } else {
+            return 0;
+        }
     }
 }
 

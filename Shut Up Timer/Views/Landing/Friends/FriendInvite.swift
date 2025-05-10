@@ -30,8 +30,8 @@ struct FriendInvite : View {
     
     /// Sends a friend request to another user using their friend code
     func sendFriendRequest() {
-        guard credManager.loggedIn else { return }
-        guard !friendCode.isEmpty else { return }
+        guard credManager.loggedIn else { return };
+        guard !friendCode.isEmpty else { return };
         
         Task {
             do {

@@ -95,13 +95,13 @@ struct RequestList : View {
                                     }) {
                                         Image(systemName: "checkmark.circle.fill")
                                             .foregroundColor(.green)
-                                    }
+                                    }.contentShape(Rectangle())
                                     Button(action: {
                                         respondToRequest(requestId: request.id, action: "reject")
                                     }) {
                                         Image(systemName: "xmark.circle.fill")
                                             .foregroundColor(.red)
-                                    }
+                                    }.contentShape(Rectangle())
                                 }
                             }
                         }

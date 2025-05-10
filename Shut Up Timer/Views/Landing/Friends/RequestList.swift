@@ -12,7 +12,21 @@ struct RequestList : View {
             do {
                 let data: [FriendRequestResponse] = try await credManager.supabaseClient.rpc("get_friend_requests").execute().value
                 await MainActor.run {
-                    requests = data
+                    // Sort requests: current user as receiver first, then others
+                    if let currentUserId = credManager.session?.user.id {
+                        requests = data.sorted { request1, request2 in
+                            let isReceiver1 = request1.receiver_id == currentUserId
+                            let isReceiver2 = request2.receiver_id == currentUserId
+                            if isReceiver1 && !isReceiver2 {
+                                return true
+                            } else if !isReceiver1 && isReceiver2 {
+                                return false
+                            }
+                            return request1.created_at < request2.created_at // Secondary sort by creation date
+                        }
+                    } else {
+                        requests = data
+                    }
                     // Fetch profiles for all unique users in the requests
                     for user in data {
                         fetchUserProfile(for: user.sender_id)
@@ -43,6 +57,24 @@ struct RequestList : View {
         }
     }
     
+    /// Handles responding to a friend request (accept/reject)
+    func respondToRequest(requestId: Int, action: String) {
+        Task {
+            do {
+                try await credManager.supabaseClient.rpc("respond_to_friend_request", params: [
+                    "request_id": requestId,
+                    "action": action
+                ]).execute()
+                // Refresh the requests list after responding
+                await MainActor.run {
+                    updateRequests()
+                }
+            } catch {
+                print("Error responding to friend request: \(error)")
+            }
+        }
+    }
+    
     var body: some View {
         VStack {
             if credManager.loggedIn {
@@ -52,7 +84,25 @@ struct RequestList : View {
                 } else {
                     // Display each friend request in a simple format
                     List(requests, id: \.id) { request in
-                        Text("From \(userProfiles[request.sender_id]?.username ?? request.sender_id.uuidString) to \(userProfiles[request.receiver_id]?.username ?? request.receiver_id.uuidString)")
+                        HStack {
+                            Text("From \(userProfiles[request.sender_id]?.username ?? request.sender_id.uuidString) to \(userProfiles[request.receiver_id]?.username ?? request.receiver_id.uuidString)")
+                            Spacer()
+                            // Only show buttons if current user is the receiver
+                            if credManager.session?.user.id == request.receiver_id {
+                                Button(action: {
+                                    respondToRequest(requestId: request.id, action: "accept")
+                                }) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                }
+                                Button(action: {
+                                    respondToRequest(requestId: request.id, action: "reject")
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        }
                     }
                 }
             } else {

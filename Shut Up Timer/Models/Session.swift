@@ -34,6 +34,10 @@ class Sessions : Codable, Equatable, ObservableObject {
         var container = encoder.container(keyedBy: CodingKeys.self);
         try container.encode(sessions, forKey: .sessions);
     }
+
+    func getIQ() -> Int {
+        return 0;
+    }
 }
 
 class SessionsLoader {

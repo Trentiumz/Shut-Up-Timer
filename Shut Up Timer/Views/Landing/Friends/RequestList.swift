@@ -64,7 +64,7 @@ struct RequestList : View {
                 try await credManager.supabaseClient.rpc("respond_to_friend_request", params: [
                     "request_id": requestId,
                     "action": action
-                ]).execute()
+                ], responseType: Void.self).execute()
                 // Refresh the requests list after responding
                 await MainActor.run {
                     updateRequests()

@@ -62,7 +62,7 @@ struct RequestList : View {
         Task<Void, Never> {
             do {
                 try await credManager.supabaseClient.rpc("respond_to_friend_request", params: [
-                    "request_id": requestId,
+                    "request_id": String(requestId),
                     "action": action
                 ]).execute()
                 // Refresh the requests list after responding

@@ -89,17 +89,19 @@ struct RequestList : View {
                             Spacer()
                             // Only show buttons if current user is the receiver
                             if credManager.session?.user.id == request.receiver_id {
-                                Button(action: {
-                                    respondToRequest(requestId: request.id, action: "accept")
-                                }) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
-                                }
-                                Button(action: {
-                                    respondToRequest(requestId: request.id, action: "reject")
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.red)
+                                HStack {
+                                    Button(action: {
+                                        respondToRequest(requestId: request.id, action: "accept")
+                                    }) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                    }
+                                    Button(action: {
+                                        respondToRequest(requestId: request.id, action: "reject")
+                                    }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.red)
+                                    }
                                 }
                             }
                         }

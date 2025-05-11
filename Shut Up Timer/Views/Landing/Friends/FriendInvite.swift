@@ -11,9 +11,11 @@ struct FriendInvite : View {
     @State private var errorMessage: String? = nil;
     @State private var requestListRefreshTrigger = UUID();
     
-    /// Fetches the user's profile information including their friend code
+    /// Fetches the user's profile information including their friend code (only works if we are logged in)
     func updateUserProfile() {
         userProfile = nil;
+
+        guard credManager.loggedIn else { return }
         Task {
             do {
                 let privateProfile: [UserProfileResponse] = try await credManager.supabaseClient.rpc("get_profile").execute().value
@@ -28,11 +30,12 @@ struct FriendInvite : View {
     
     /// Sends a friend request to another user using their friend code
     func sendFriendRequest() {
-        guard !friendCode.isEmpty else { return }
+        guard credManager.loggedIn else { return };
+        guard !friendCode.isEmpty else { return };
         
         Task {
             do {
-                try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": friendCode]).execute()
+                try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": friendCode]).execute() 
                 await MainActor.run {
                     friendCode = ""
                     errorMessage = nil

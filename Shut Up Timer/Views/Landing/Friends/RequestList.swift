@@ -8,6 +8,7 @@ struct RequestList : View {
     
     /// Fetches the latest friend requests from the server
     func updateRequests() {
+        guard credManager.loggedIn else { return }
         Task {
             do {
                 let data: [FriendRequestResponse] = try await credManager.supabaseClient.rpc("get_friend_requests").execute().value
@@ -41,6 +42,7 @@ struct RequestList : View {
     
     /// Fetches the public profile for a given user ID
     func fetchUserProfile(for userId: UUID) {
+        guard credManager.loggedIn else { return }
         Task {
             do {
                 let profile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
@@ -59,6 +61,7 @@ struct RequestList : View {
     
     /// Handles responding to a friend request (accept/reject)
     func respondToRequest(requestId: Int, action: String) {
+        guard credManager.loggedIn else { return }
         Task<Void, Never> {
             do {
                 try await credManager.supabaseClient.rpc("respond_to_friend_request", params: [
@@ -89,17 +92,19 @@ struct RequestList : View {
                             Spacer()
                             // Only show buttons if current user is the receiver
                             if credManager.session?.user.id == request.receiver_id {
-                                Button(action: {
-                                    respondToRequest(requestId: request.id, action: "accept")
-                                }) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
-                                }
-                                Button(action: {
-                                    respondToRequest(requestId: request.id, action: "reject")
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.red)
+                                HStack {
+                                    Button(action: {
+                                        respondToRequest(requestId: request.id, action: "accept")
+                                    }) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(.green)
+                                    }.contentShape(Rectangle())
+                                    Button(action: {
+                                        respondToRequest(requestId: request.id, action: "reject")
+                                    }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.red)
+                                    }.contentShape(Rectangle())
                                 }
                             }
                         }

@@ -34,6 +34,31 @@ class Sessions : Codable, Equatable, ObservableObject {
         var container = encoder.container(keyedBy: CodingKeys.self);
         try container.encode(sessions, forKey: .sessions);
     }
+
+    func getIQ() -> Int {
+        if let liveSession = sessions {
+            var cIq: Int = 0;
+            for session in liveSession {
+                if session.success {
+                    cIq += session.timeLocked;
+                } else {
+                    cIq -= 1;
+                }
+            }
+            return cIq;
+        } else {
+            return 0;
+        }
+    }
+
+    func getTimeLocked() -> Int {
+        if let liveSession = sessions {
+            let totTime: Int = liveSession.reduce(0) { $0 + Int($1.timeLocked) };
+            return totTime;
+        } else {
+            return 0;
+        }
+    }
 }
 
 class SessionsLoader {

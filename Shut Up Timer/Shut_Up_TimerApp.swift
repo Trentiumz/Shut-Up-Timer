@@ -29,6 +29,12 @@ struct Shut_Up_TimerApp: App {
                 }
                 .onReceive(sessions.objectWillChange) { _ in
                     SessionsLoader.saveSettings(sessions);
+                    // TODO: Update when user logs in - right now it won't update so...
+                    if credManager.loggedIn {
+                        Task {
+                            await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": sessions.getIQ()]).execute();
+                        }
+                    }
                 }
                 .onReceive(todoList.objectWillChange) { _ in
                     ToDoLoader.saveToDo(todo: todoList)

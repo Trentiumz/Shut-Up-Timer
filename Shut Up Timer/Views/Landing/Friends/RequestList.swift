@@ -92,20 +92,20 @@ struct RequestList : View {
                             Spacer()
                             // Only show buttons if current user is the receiver
                             if credManager.session?.user.id == request.receiver_id {
-                                HStack {
-                                    Button(action: {
-                                        respondToRequest(requestId: request.id, action: "accept")
-                                    }) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                    }.contentShape(Rectangle())
-                                    Button(action: {
-                                        respondToRequest(requestId: request.id, action: "reject")
-                                    }) {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.red)
-                                    }.contentShape(Rectangle())
-                                }
+                                Button(action: {
+                                    respondToRequest(requestId: request.id, action: "accept")
+                                }) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .frame(width: 40, height: 40);
+                                }.buttonStyle(PlainButtonStyle())
+                                Button(action: {
+                                    respondToRequest(requestId: request.id, action: "reject")
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                        .frame(width: 40, height: 40);
+                                }.buttonStyle(PlainButtonStyle())
                             }
                         }
                     }

@@ -32,7 +32,7 @@ struct Shut_Up_TimerApp: App {
                     // TODO: Update when user logs in - right now it won't update so...
                     if credManager.loggedIn {
                         Task {
-                            await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": sessions.getIQ()]).execute();
+                            try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": sessions.getIQ()]).execute();
                         }
                     }
                 }

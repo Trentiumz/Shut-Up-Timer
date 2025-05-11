@@ -5,6 +5,13 @@ struct FriendLeaderboardResponse : Decodable {
     let friend_iq: Int
 }
 
+struct FriendProfileResponse : Decodable {
+    let friend_user_id: UUID
+    let friend_username: String
+    let friend_iq: Int
+    let friend_profile_picture: String
+}
+
 struct UserPublicProfileResponse : Decodable {
     var username: String
     var iq: Int

@@ -51,6 +51,23 @@ class Sessions : Codable, Equatable, ObservableObject {
         let totTime: Int = sessions.reduce(0) { $0 + Int($1.timeLocked) };
         return totTime;
     }
+
+    func getTopCategories() -> [(todoID: UUID, seconds: Int)] {
+        // Create a dictionary to store total seconds per todoID
+        var categorySeconds: [UUID: Int] = [:]
+        
+        // Calculate total seconds for each todoID
+        for session in sessions {
+            let seconds = Int(session.timeLocked) 
+            categorySeconds[session.todoID, default: 0] += seconds
+        }
+        
+        // Convert dictionary to array of tuples and sort by seconds
+        let sortedCategories = categorySeconds.map { (todoID: $0.key, seconds: $0.value) }
+            .sorted { $0.seconds > $1.seconds }
+        
+        return sortedCategories
+    }
 }
 
 class SessionsLoader {

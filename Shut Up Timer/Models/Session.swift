@@ -10,7 +10,7 @@ struct SessionEntry: Identifiable, Codable, Equatable {
 }
 
 class Sessions : Codable, Equatable, ObservableObject {
-    @Published var sessions: [SessionEntry];
+    @Published var sessions: [SessionEntry] = [];
 
     init(sessions: [SessionEntry]) {
         self.sessions = sessions;
@@ -36,28 +36,20 @@ class Sessions : Codable, Equatable, ObservableObject {
     }
 
     func getIQ() -> Int {
-        if let liveSession = sessions {
-            var cIq: Int = 0;
-            for session in liveSession {
-                if session.success {
-                    cIq += session.timeLocked;
-                } else {
-                    cIq -= 1;
-                }
+        var cIq: Int = 0;
+        for session in sessions {
+            if session.success {
+                cIq += Int(session.timeLocked);
+            } else {
+                cIq -= 1;
             }
-            return cIq;
-        } else {
-            return 0;
         }
+        return cIq;
     }
 
     func getTimeLocked() -> Int {
-        if let liveSession = sessions {
-            let totTime: Int = liveSession.reduce(0) { $0 + Int($1.timeLocked) };
-            return totTime;
-        } else {
-            return 0;
-        }
+        let totTime: Int = sessions.reduce(0) { $0 + Int($1.timeLocked) };
+        return totTime;
     }
 }
 

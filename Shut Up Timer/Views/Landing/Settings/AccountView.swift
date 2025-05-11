@@ -6,6 +6,7 @@ struct AccountView : View {
     @EnvironmentObject var router: AppRouter;
     @State private var userPublicProfile: UserPublicProfileResponse? = nil;
     @State private var userProfile: UserProfileResponse? = nil;
+    @State private var friends: [FriendProfileResponse] = [];
     
     func updateUserProfile() {
         userPublicProfile = nil;
@@ -29,10 +30,75 @@ struct AccountView : View {
         }
     }
     
+    func updateFriends() {
+        Task {
+            do {
+                let friendProfiles: [FriendProfileResponse] = try await credManager.supabaseClient.rpc("get_friend_profiles").execute().value
+                await MainActor.run {
+                    friends = friendProfiles
+                }
+            } catch {
+                print("Error fetching friends: \(error)")
+            }
+        }
+    }
+    
     var body: some View {
         ScrollView {
             VStack {
-                UserInfoView(userPublicProfile: $userPublicProfile)
+                UserInfoView(userPublicProfile: userPublicProfile)
+                
+                if credManager.loggedIn {
+                    VStack(alignment: .leading) {
+                        Text("Friends")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .padding(.top)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(friends, id: \.friend_user_id) { friend in
+                                    VStack {
+                                        if !friend.friend_profile_picture.isEmpty {
+                                            AsyncImage(url: URL(string: friend.friend_profile_picture)) { image in
+                                                image
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: 60, height: 60)
+                                                    .clipShape(Circle())
+                                            } placeholder: {
+                                                Circle()
+                                                    .fill(Color.gray)
+                                                    .frame(width: 60, height: 60)
+                                            }
+                                        } else {
+                                            Circle()
+                                                .fill(Color.gray)
+                                                .frame(width: 60, height: 60)
+                                        }
+                                        
+                                        Text(friend.friend_username)
+                                            .font(.headline)
+                                        
+                                        Text("IQ: \(friend.friend_iq)")
+                                            .font(.subheadline)
+                                        
+                                        Button(action: {
+                                            // TODO: Implement friend deletion
+                                        }) {
+                                            Image(systemName: "person.fill.xmark")
+                                                .foregroundColor(.red)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(Color.gray.opacity(0.1))
+                                    .cornerRadius(10)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                }
                 
                 Text("Settings")
                     .font(.title)
@@ -48,9 +114,11 @@ struct AccountView : View {
         }
         .onAppear {
             updateUserProfile()
+            updateFriends()
         }
         .onChange(of: credManager.session) {
             updateUserProfile()
+            updateFriends()
         }
     }
 }

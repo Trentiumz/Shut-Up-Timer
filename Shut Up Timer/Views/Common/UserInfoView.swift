@@ -3,7 +3,7 @@ import SwiftUI;
 struct UserInfoView : View {
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var todoList: ToDoList;
-    @Binding var userPublicProfile: UserPublicProfileResponse?;
+    let userPublicProfile: UserPublicProfileResponse?;
     
     var body: some View {
         VStack(spacing: 20) {
@@ -70,5 +70,6 @@ struct UserInfoView : View {
         .padding()
         .background(Color.gray.opacity(0.1))
         .cornerRadius(15)
+        .frame(maxWidth: .infinity)
     }
 } 

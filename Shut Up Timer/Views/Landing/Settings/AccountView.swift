@@ -43,6 +43,19 @@ struct AccountView : View {
         }
     }
     
+    func removeFriend(_ friendId: UUID) {
+        Task {
+            do {
+                try await credManager.supabaseClient.rpc("remove_from", params: ["other_id": friendId]).execute()
+                await MainActor.run {
+                    updateFriends()
+                }
+            } catch {
+                print("Error removing friend: \(error)")
+            }
+        }
+    }
+    
     var body: some View {
         ScrollView {
             VStack {
@@ -84,7 +97,7 @@ struct AccountView : View {
                                             .font(.subheadline)
                                         
                                         Button(action: {
-                                            // TODO: Implement friend deletion
+                                            removeFriend(friend.friend_user_id)
                                         }) {
                                             Image(systemName: "person.fill.xmark")
                                                 .foregroundColor(.red)

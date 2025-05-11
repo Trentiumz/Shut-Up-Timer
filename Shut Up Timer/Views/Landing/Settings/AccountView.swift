@@ -46,7 +46,7 @@ struct AccountView : View {
     func removeFriend(_ friendId: UUID) {
         Task {
             do {
-                try await credManager.supabaseClient.rpc("remove_from", params: ["other_id": friendId]).execute()
+                try await credManager.supabaseClient.rpc("remove_friend", params: ["other_id": friendId]).execute()
                 await MainActor.run {
                     updateFriends()
                 }

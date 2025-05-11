@@ -30,19 +30,21 @@ struct AccountView : View {
     }
     
     var body: some View {
-        VStack {
-            UserInfoView(userPublicProfile: $userPublicProfile)
-            
-            Text("Settings")
-                .font(.title)
-                .fontWeight(.bold)
-                .padding(.top)
-            
-            SettingsView(
-                userPublicProfile: $userPublicProfile,
-                userProfile: $userProfile,
-                updateUserProfile: updateUserProfile
-            )
+        ScrollView {
+            VStack {
+                UserInfoView(userPublicProfile: $userPublicProfile)
+                
+                Text("Settings")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .padding(.top)
+                
+                SettingsView(
+                    userPublicProfile: $userPublicProfile,
+                    userProfile: $userProfile,
+                    updateUserProfile: updateUserProfile
+                )
+            }
         }
         .onAppear {
             updateUserProfile()

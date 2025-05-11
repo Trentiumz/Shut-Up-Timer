@@ -31,6 +31,10 @@ class ToDoList : Codable, Equatable, ObservableObject {
         var container = encoder.container(keyedBy: CodingKeys.self);
         try container.encode(lst, forKey: .lst);
     }
+    
+    func uuidToEntry(_ uuid: UUID) -> ToDoEntry? {
+        return lst.first { $0.id == uuid }
+    }
 }
 
 class ToDoLoader {

@@ -16,8 +16,6 @@ struct SessionEntryView : View {
         }
     }
     
-    
-    
     var body: some View {
         VStack {
             Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed")")

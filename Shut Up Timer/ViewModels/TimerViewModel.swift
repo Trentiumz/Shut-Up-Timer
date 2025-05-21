@@ -27,6 +27,7 @@ class TimerViewModel: ObservableObject, MVVM {
         self.timer = nil;
         self.isRunning = false;
         self.tasks = []
+        self.curTodo = todoID;
     }
     
     // starts a timer that counts down totTime

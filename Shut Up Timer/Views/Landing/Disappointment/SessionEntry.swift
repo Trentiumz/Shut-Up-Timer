@@ -2,35 +2,42 @@ import SwiftUI;
 
 struct SessionEntryView : View {
     @State private var sessionEntry: SessionEntry;
-    @State private var todoEntry: ToDoEntry?;
     @EnvironmentObject var todoList: ToDoList;
     
     init(sessionEntry: SessionEntry) {
         self.sessionEntry = sessionEntry;
+    }
+
+    func getTaskName(todoID: UUID) {
+        if let todo = todoList.lst.first(where: { $0.id == todoID}) {
+            return todo.todo;
+        } else {
+            return "unknown";
+        }
     }
     
     
     
     var body: some View {
         VStack {
-            if let todo = todoEntry {
-                Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) to do \(todo.todo) and \(sessionEntry.success ? "succeeded" : "failed")")
-                    .padding()
-                    .background(.gray)
-                    .cornerRadius(10);
-            } else {
-                Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed")")
-                    .padding()
-                    .background(.gray)
-                    .cornerRadius(10);
-            }
-        }.task {
-            if let todo = todoList.lst.first(where: { $0.id == sessionEntry.todoID }) {
-                todoEntry = todo;
-            } else {
-                todoEntry = nil;
+            Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed")")
+                .padding()
+            BulletListView(sessionEntry.tasks.map{ "Did \(getTaskName($0.todoID)) for \($0.timeIn) seconds"})
+        }.background(.gray)
+        .cornerRadius(10);
+    }
+}
+
+struct BulletListView: View {
+    let items: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(items, id: \.self) { item in
+                Text("• \(item)")
             }
         }
+        .padding()
     }
 }
 

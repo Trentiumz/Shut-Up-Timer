@@ -18,8 +18,8 @@ struct TodoView : View {
     
     // adds a task and saves it
     func addTask() {
-        todoList.lst.append(ToDoEntry(todo: newTaskText))
         DispatchQueue.main.async {
+            todoList.lst.append(ToDoEntry(todo: newTaskText))
             newTaskText = ""
         }
     }

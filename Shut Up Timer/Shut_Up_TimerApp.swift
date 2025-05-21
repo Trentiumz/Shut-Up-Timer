@@ -36,8 +36,7 @@ struct Shut_Up_TimerApp: App {
                         }
                     }
                 }
-                .onReceive(todoList.objectWillChange) { _ in
-                    print("Saving...")
+                .onChange(of: todoList.lst) {
                     ToDoLoader.saveToDo(todo: todoList)
                 }
         }

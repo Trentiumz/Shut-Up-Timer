@@ -1,8 +1,13 @@
 import Foundation
 
+struct TaskLog: Identifiable, Codable, Equatable{
+    var todoID: UUID
+    var timeIn: Int
+}
+
 struct SessionEntry: Identifiable, Codable, Equatable {
     var id = UUID()
-    var todoID: UUID
+    var tasks: [TaskLog]
     var started: Date
     var ended: Date
     var timeLocked: TimeInterval
@@ -58,8 +63,10 @@ class Sessions : Codable, Equatable, ObservableObject {
         
         // Calculate total seconds for each todoID
         for session in sessions {
-            let seconds = Int(session.timeLocked) 
-            categorySeconds[session.todoID, default: 0] += seconds
+            for taskLog in session.tasks {
+                let seconds = Int(taskLog.timeIn) 
+                categorySeconds[taskLog.todoID, default: 0] += seconds
+            }
         }
         
         // Convert dictionary to array of tuples and sort by seconds

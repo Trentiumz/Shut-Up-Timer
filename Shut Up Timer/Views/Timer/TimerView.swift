@@ -9,7 +9,7 @@ struct TimerView: View {
     
     // whether the todo list is expanded
     @State var todoExpanded: Bool = false;
-    @State var selectedTodo = UUID();
+    @Binding var selectedTodo;
     
     // whether the modal for quitting is open
     @State var quitExpanded: Bool = false;
@@ -18,6 +18,7 @@ struct TimerView: View {
     
     init(timerViewModel: TimerViewModel) {
         self.timerViewModel = timerViewModel;
+        self.$selectedTodo = $timerViewModel.curTodo;
     }
     
     // go to timer failed slide
@@ -25,7 +26,7 @@ struct TimerView: View {
         timerViewModel.stopTimer()
         router.toTimerFailed(totTime: timerViewModel.totTime)
         sessions.sessions.append(
-            SessionEntry(todoID: timerViewModel.todoID,
+            SessionEntry(tasks: timerViewModel.tasks,
                          started: timerViewModel.startTime,
                          ended: Date(),
                          timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
@@ -36,7 +37,7 @@ struct TimerView: View {
         timerViewModel.stopTimer();
         router.toTimerCompleted(totTime: timerViewModel.totTime);
         sessions.sessions.append(
-            SessionEntry(todoID: timerViewModel.todoID,
+            SessionEntry(tasks: timerViewModel.tasks,
                          started: timerViewModel.startTime,
                          ended: Date(),
                          timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
@@ -118,7 +119,7 @@ struct TimerView: View {
                 if timerViewModel.isRunning {
                     failTimer()
                 }
-            }
+            }
         }.onAppear() {
             // start timer when appear
             self.timerViewModel.startTimer();

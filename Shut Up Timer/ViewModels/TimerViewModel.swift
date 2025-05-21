@@ -5,7 +5,9 @@ class TimerViewModel: ObservableObject, MVVM {
     // used to track timer running
     var totTime: Int = 0;
     var startTime: Date = Date();
-    var todoID: UUID = UUID();
+    var curTodo: UUID = UUID();
+    var tasks: [TaskLog]
+
     @Published var timeLeft: Int = 0;
     @Published var isRunning: Bool = false;
     
@@ -25,6 +27,7 @@ class TimerViewModel: ObservableObject, MVVM {
         self.timeLeft = totTime;
         self.timer = nil;
         self.isRunning = false;
+        self.tasks = []
     }
     
     // starts a timer that counts down totTime
@@ -36,6 +39,11 @@ class TimerViewModel: ObservableObject, MVVM {
                 } else {
                     DispatchQueue.main.async {
                         self.timeLeft -= 1;
+                        if !self.tasks.isEmpty && self.tasks.last.todoID == curTodo {
+                            self.tasks[self.tasks.count - 1].timeIn += 1;
+                        } else {
+                            self.tasks.append(TaskLog(curTodo, 1));
+                        }
                     }
                 }
             }

@@ -1,14 +1,14 @@
 import SwiftUI;
 
 struct TopBarView : View {
-    @AppStorage("iq-points") var iqPts: Int = 0;
+    @EnvironmentObject var sessions: Sessions;
     
     var body: some View {
         HStack{
             Image(systemName: "star.fill")
                 .font(.system(size: 32))
             Spacer()
-            Text("IQ: \(iqPts)")
+            Text("IQ: \(sessions.getIQ())")
                 .font(.system(size: 32))
         }
         .padding()

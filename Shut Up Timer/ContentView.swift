@@ -32,7 +32,7 @@ struct ContentView: View {
                     switch elem.route {
                     case .timer:
                         // timer started
-                        TimerView(timerViewModel: router.timerViewModel).environmentObject(router)
+                        TimerView(timerViewModel: router.timerViewModel, selectedTodo: $router.timerViewModel.curTodo).environmentObject(router)
                             .navigationBarBackButtonHidden(true)
                     case .timerCompleted(let seconds):
                         // timer completed
@@ -51,6 +51,15 @@ struct ContentView: View {
                         Text("Invalid")
                     }
                 }
+        }.onAppear {
+            requestNotificationPermission()
+        }
+    }
+
+    // Request permission to send notifications (call once)
+    func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            // handle permission response if needed
         }
     }
 }

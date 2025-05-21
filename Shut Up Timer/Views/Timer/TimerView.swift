@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct TimerView: View {
     // holds the model
@@ -16,12 +17,15 @@ struct TimerView: View {
 
     @EnvironmentObject var sessions: Sessions;
     
+    // New state for background countdown
+    @State private var lastOnScreen: Double = Date()
+    @State private var checkerTimer: Timer? = nil
+    
     init(timerViewModel: TimerViewModel, selectedTodo: Binding<UUID>) {
         self.timerViewModel = timerViewModel;
         self._selectedTodo = selectedTodo;
     }
     
-    // go to timer failed slide
     func failTimer() {
         timerViewModel.stopTimer()
         router.toTimerFailed(totTime: timerViewModel.totTime)
@@ -44,12 +48,28 @@ struct TimerView: View {
                          success: true));
     }
     
+    // Schedule local notification after 2 seconds of leaving
+    func scheduleComeBackNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "Come back!"
+        content.body = "Your timer is running. Please return soon or it will fail."
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let request = UNNotificationRequest(identifier: "comeBackNotification", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request)
+    }
+    
+    // Cancel scheduled notifications
+    func cancelNotifications() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["comeBackNotification"])
+    }
+    
     var body: some View {
-        return ZStack {
-            // main content of timer
+        ZStack {
             VStack {
                 Spacer()
-                // Timer at the top-middle of the screen
                 Text("\(formatTime(Double(timerViewModel.timeLeft)))")
                     .frame(width: 150, height: 150)
                     .padding()
@@ -59,7 +79,6 @@ struct TimerView: View {
                     .background(.gray)
                     .cornerRadius(10)
                 
-                // Button to stop the timer
                 Button(action: {
                     if timerViewModel.isRunning {
                         timerViewModel.stopTimer()
@@ -76,7 +95,6 @@ struct TimerView: View {
                 }
                 .padding(.top, 20)
                 
-                // button to give up
                 Button(action: {
                     quitExpanded = true;
                 }) {
@@ -86,21 +104,21 @@ struct TimerView: View {
                         .padding()
                         .background(Color.gray)
                         .cornerRadius(10)
-                }.sheet(isPresented: $quitExpanded) {
-                    // when the sheet is open, they're tryna quit :(
+                }
+                .sheet(isPresented: $quitExpanded) {
                     VStack {
                         Slider(onActivate: {
                             failTimer();
                             quitExpanded = false;
                         }, message: "Do you really want to give up?")
-                    }.padding()
-                        .background(.white)
+                    }
+                    .padding()
+                    .background(.white)
                 }
             }
-            .edgesIgnoringSafeArea(.bottom)  // Optional: makes the content fill the screen
+            .edgesIgnoringSafeArea(.bottom)
             .padding()
             
-            // todo list item
             VStack {
                 HStack {
                     TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
@@ -108,21 +126,58 @@ struct TimerView: View {
                 }
                 Spacer()
             }
-        }.onChange(of: timerViewModel.timeLeft) {
-            // check if timer expires
-            if(timerViewModel.timeLeft == 0) {
-                succeedTimer();
-            }
-        }.onChange(of: scenePhase) {
-            // fail on leaving
-            if scenePhase == .inactive {
+        }
+        .onAppear {
+            // Keep screen awake
+            UIApplication.shared.isIdleTimerDisabled = true
+            self.timerViewModel.startTimer()
+            checkerTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                 if timerViewModel.isRunning {
-                    failTimer()
+                    if scenePhase == .active {
+                        lastOnScreen = Date().timeIntervalSince1970
+                    } else {
+                        let currentTime = Date().timeIntervalSince1970
+                        if currentTime - lastOnScreen > 20 {
+                            failTimer()
+                        }
+                    }
+                } else {
+                    checkerTimer?.invalidate()
+                    checkerTimer = nil
                 }
             }
-        }.onAppear() {
-            // start timer when appear
-            self.timerViewModel.startTimer();
+        }
+        .onDisappear {
+            // Allow screen to sleep when leaving view
+            UIApplication.shared.isIdleTimerDisabled = false
+            cancelNotifications()
+            backgroundTimer?.invalidate()
+            backgroundTimer = nil
+        }
+        .onChange(of: timerViewModel.timeLeft) { newValue in
+            if newValue == 0 {
+                succeedTimer()
+            }
+        }
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .active:
+                // User came back, cancel fail timer & notifications
+                cancelNotifications()
+                
+            case .inactive:
+                // User left app, start 20 second fail timer and schedule notification after 2 seconds
+                if timerViewModel.isRunning {
+                    scheduleComeBackNotification()
+                }
+                
+            case .background:
+                // Similar to inactive, can also handle if needed
+                break
+                
+            @unknown default:
+                break
+            }
         }
     }
 }

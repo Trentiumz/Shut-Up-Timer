@@ -51,6 +51,15 @@ struct ContentView: View {
                         Text("Invalid")
                     }
                 }
+        }.onAppear {
+            requestNotificationPermission()
+        }
+    }
+
+    // Request permission to send notifications (call once)
+    func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
+            // handle permission response if needed
         }
     }
 }

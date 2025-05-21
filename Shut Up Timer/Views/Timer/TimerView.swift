@@ -18,7 +18,7 @@ struct TimerView: View {
     @EnvironmentObject var sessions: Sessions;
     
     // New state for background countdown
-    @State private var lastOnScreen: Double = Date()
+    @State private var lastOnScreen: Double = Date().timeIntervalSince1970
     @State private var checkerTimer: Timer? = nil
     
     init(timerViewModel: TimerViewModel, selectedTodo: Binding<UUID>) {
@@ -151,16 +151,16 @@ struct TimerView: View {
             // Allow screen to sleep when leaving view
             UIApplication.shared.isIdleTimerDisabled = false
             cancelNotifications()
-            backgroundTimer?.invalidate()
-            backgroundTimer = nil
+            checkerTimer?.invalidate()
+            checkerTimer = nil
         }
-        .onChange(of: timerViewModel.timeLeft) { newValue in
-            if newValue == 0 {
+        .onChange(of: timerViewModel.timeLeft) {
+            if timerViewModel.timeLeft == 0 {
                 succeedTimer()
             }
         }
-        .onChange(of: scenePhase) { newPhase in
-            switch newPhase {
+        .onChange(of: scenePhase) {
+            switch scenePhase {
             case .active:
                 // User came back, cancel fail timer & notifications
                 cancelNotifications()

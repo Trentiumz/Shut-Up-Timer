@@ -8,7 +8,7 @@ struct SessionEntryView : View {
         self.sessionEntry = sessionEntry;
     }
 
-    func getTaskName(todoID: UUID) {
+    func getTaskName(todoID: UUID) -> String {
         if let todo = todoList.lst.first(where: { $0.id == todoID}) {
             return todo.todo;
         } else {
@@ -22,7 +22,7 @@ struct SessionEntryView : View {
         VStack {
             Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed")")
                 .padding()
-            BulletListView(sessionEntry.tasks.map{ "Did \(getTaskName($0.todoID)) for \($0.timeIn) seconds"})
+            BulletListView(items: sessionEntry.tasks.map{ "Did \(getTaskName(todoID: $0.todoID)) for \($0.timeIn) seconds"})
         }.background(.gray)
         .cornerRadius(10);
     }
@@ -42,5 +42,5 @@ struct BulletListView: View {
 }
 
 #Preview {
-    SessionEntryView(sessionEntry: SessionEntry(todoID: UUID(), started: Date(), ended: Date(), timeLocked: 10, success: true));
+    SessionEntryView(sessionEntry: SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 10, success: true));
 }

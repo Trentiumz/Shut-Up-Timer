@@ -16,9 +16,9 @@ struct TimerView: View {
 
     @EnvironmentObject var sessions: Sessions;
     
-    init(timerViewModel: TimerViewModel) {
+    init(timerViewModel: TimerViewModel, selectedTodo: Binding<UUID>) {
         self.timerViewModel = timerViewModel;
-        self._selectedTodo = $timerViewModel.curTodo;
+        self._selectedTodo = selectedTodo;
     }
     
     // go to timer failed slide
@@ -125,12 +125,4 @@ struct TimerView: View {
             self.timerViewModel.startTimer();
         }
     }
-    
-    
-}
-
-#Preview {
-    let tvm = TimerViewModel()
-    tvm.reset(totTime: 10, startTime: Date(), todoID: UUID())
-    return TimerView(timerViewModel: tvm).environmentObject(AppRouter())
 }

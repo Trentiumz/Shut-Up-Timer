@@ -32,7 +32,7 @@ struct ContentView: View {
                     switch elem.route {
                     case .timer:
                         // timer started
-                        TimerView(timerViewModel: router.timerViewModel).environmentObject(router)
+                        TimerView(timerViewModel: router.timerViewModel, selectedTodo: $router.timerViewModel.curTodo).environmentObject(router)
                             .navigationBarBackButtonHidden(true)
                     case .timerCompleted(let seconds):
                         // timer completed

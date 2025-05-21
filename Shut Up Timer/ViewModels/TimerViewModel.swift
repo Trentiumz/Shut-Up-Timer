@@ -5,7 +5,7 @@ class TimerViewModel: ObservableObject, MVVM {
     // used to track timer running
     var totTime: Int = 0;
     var startTime: Date = Date();
-    var curTodo: UUID = UUID();
+    @Published var curTodo: UUID = UUID();
     var tasks: [TaskLog] = []
 
     @Published var timeLeft: Int = 0;

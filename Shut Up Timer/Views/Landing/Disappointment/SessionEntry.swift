@@ -9,6 +9,8 @@ struct SessionEntryView : View {
         self.sessionEntry = sessionEntry;
     }
     
+    
+    
     var body: some View {
         VStack {
             if let todo = todoEntry {

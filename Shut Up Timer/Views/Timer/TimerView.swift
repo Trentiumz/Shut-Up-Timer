@@ -9,7 +9,7 @@ struct TimerView: View {
     
     // whether the todo list is expanded
     @State var todoExpanded: Bool = false;
-    @Binding var selectedTodo;
+    @Binding var selectedTodo: UUID;
     
     // whether the modal for quitting is open
     @State var quitExpanded: Bool = false;
@@ -18,7 +18,7 @@ struct TimerView: View {
     
     init(timerViewModel: TimerViewModel) {
         self.timerViewModel = timerViewModel;
-        self.$selectedTodo = $timerViewModel.curTodo;
+        self._selectedTodo = $timerViewModel.curTodo;
     }
     
     // go to timer failed slide

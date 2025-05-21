@@ -1,6 +1,7 @@
 import Foundation
 
 struct TaskLog: Identifiable, Codable, Equatable{
+    var id = UUID()
     var todoID: UUID
     var timeIn: Int
 }

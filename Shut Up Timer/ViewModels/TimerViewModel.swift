@@ -6,7 +6,7 @@ class TimerViewModel: ObservableObject, MVVM {
     var totTime: Int = 0;
     var startTime: Date = Date();
     var curTodo: UUID = UUID();
-    var tasks: [TaskLog]
+    var tasks: [TaskLog] = []
 
     @Published var timeLeft: Int = 0;
     @Published var isRunning: Bool = false;
@@ -23,7 +23,6 @@ class TimerViewModel: ObservableObject, MVVM {
         destroy();
         self.totTime = totTime;
         self.startTime = startTime;
-        self.todoID = todoID;
         self.timeLeft = totTime;
         self.timer = nil;
         self.isRunning = false;
@@ -39,10 +38,10 @@ class TimerViewModel: ObservableObject, MVVM {
                 } else {
                     DispatchQueue.main.async {
                         self.timeLeft -= 1;
-                        if !self.tasks.isEmpty && self.tasks.last.todoID == curTodo {
+                        if !self.tasks.isEmpty && self.tasks.last?.todoID == self.curTodo {
                             self.tasks[self.tasks.count - 1].timeIn += 1;
                         } else {
-                            self.tasks.append(TaskLog(curTodo, 1));
+                            self.tasks.append(TaskLog(todoID: self.curTodo, timeIn: 1));
                         }
                     }
                 }

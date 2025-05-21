@@ -134,7 +134,6 @@ struct TimerView: View {
             checkerTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                 if timerViewModel.isRunning {
                     let currentTime = Date().timeIntervalSince1970
-                    print("Timer at \(currentTime - lastOnScreen)")
                     if currentTime - lastOnScreen > 20 {
                         failTimer()
                     }

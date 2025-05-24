@@ -34,7 +34,7 @@ struct FriendsUserIdResponse : Codable{
 struct UserProfileResponse : Codable{
     var friend_code: String
     var is_public_profile_visible: Bool
-    var sessions: String
+    var sessions: [String]
 }
 
 struct UserPublicProfileResponse : Codable{
@@ -42,8 +42,8 @@ struct UserPublicProfileResponse : Codable{
     var username: String
     var profile_picture: String
     var roasts: [String]
-    var hours: TimeInterval
-    var last_login: Date
+    var hours: String
+    var last_login: Date?
     var top_categories: [String]
 }
 

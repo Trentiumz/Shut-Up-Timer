@@ -7,22 +7,15 @@ struct FriendLeaderboardResponse {
     var iq: Int
 }
 
-struct FriendProfilesResponse {
+struct FriendProfileResponse {
     var friendUserId: String
     var friendUsername: String
     var friendIq: Int
     var friendProfilePicture: String
 }
 
-struct FriendRequestsResponse {
+struct FriendRequestResponse {
     var id: Int64
-    var senderId: String
-    var receiverId: String
-    var createdAt: Date
-}
-
-struct FriendRequestsUserIdResponse {
-    var id: String
     var senderId: String
     var receiverId: String
     var createdAt: Date
@@ -38,7 +31,7 @@ struct FriendsUserIdResponse {
     var createdAt: Date
 }
 
-struct ProfileResponse {
+struct UserProfileResponse {
     var friendCode: String
     var isPublicProfileVisible: Bool
     var sessions: [String: Any] // jsonb, customize decoding as needed

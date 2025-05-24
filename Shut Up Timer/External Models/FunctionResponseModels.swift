@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct FriendLeaderboardResponse : Codable{
-    var user_id: String
+    var user_id: UUID
     var username: String
     var profile_picture: String
     var iq: Int
@@ -16,18 +16,18 @@ struct FriendProfileResponse : Codable{
 
 struct FriendRequestResponse : Codable{
     var id: Int
-    var sender_id: String
-    var receiver_id: String
+    var sender_id: UUID
+    var receiver_id: UUID
     var created_at: Date
 }
 
 struct FriendsResponse : Codable{
-    var friend_user_id: String
+    var friend_user_id: UUID
     var created_at: Date
 }
 
 struct FriendsUserIdResponse : Codable{
-    var friend_user_id: String
+    var friend_user_id: UUID
     var created_at: Date
 }
 
@@ -48,7 +48,7 @@ struct UserPublicProfileResponse : Codable{
 }
 
 struct WorldLeaderboardResponse : Codable{
-    var user_id: String
+    var user_id: UUID
     var username: String
     var profile_picture: String
     var iq: Int

@@ -18,7 +18,7 @@ struct LeaderboardView : View {
             if credManager.loggedIn {
                 Task {
                     do {
-                        let data: [FriendLeaderboardResponse] = try await credManager.supabaseClient.rpc("get_friend_leaderboard").execute().value
+                        let data: [FriendProfileResponse] = try await credManager.supabaseClient.rpc("get_friend_leaderboard").execute().value
                         print(data);
                         await MainActor.run {
                             friendLB = data.map{row in

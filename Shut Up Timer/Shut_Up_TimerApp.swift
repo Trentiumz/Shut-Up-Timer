@@ -15,6 +15,7 @@ struct Shut_Up_TimerApp: App {
     @StateObject var sessions: Sessions = SessionsLoader.loadSettings();
     @StateObject var todoList: ToDoList = ToDoLoader.getToDo();
     @StateObject var credManager: CredManager = CredManager();
+    // TODO: onReceive is called BEFORE the object is changed, so the updates aren't actually saved !
     
     var body: some Scene {
         WindowGroup {

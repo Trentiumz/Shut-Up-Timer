@@ -44,16 +44,6 @@ struct SettingsView : View {
             switch field {
             case "public_profile":
                 profile.is_public_profile_visible = newValue
-            case "username":
-                profile.is_username_visible = newValue
-            case "iq":
-                profile.is_iq_visible = newValue
-            case "profile_picture":
-                profile.is_profile_picture_visible = newValue
-            case "roasts":
-                profile.is_roasts_visible = newValue
-            case "disappointment":
-                profile.is_disappointment_visible = newValue
             default:
                 break
             }
@@ -194,26 +184,6 @@ struct SettingsView : View {
                             Toggle("Public Profile", isOn: Binding(
                                 get: { privateProfile.is_public_profile_visible },
                                 set: { updateVisibility(field: "public_profile", newValue: $0) }
-                            ))
-                            Toggle("Show Username", isOn: Binding(
-                                get: { privateProfile.is_username_visible },
-                                set: { updateVisibility(field: "username", newValue: $0) }
-                            ))
-                            Toggle("Show IQ", isOn: Binding(
-                                get: { privateProfile.is_iq_visible },
-                                set: { updateVisibility(field: "iq", newValue: $0) }
-                            ))
-                            Toggle("Show Profile Picture", isOn: Binding(
-                                get: { privateProfile.is_profile_picture_visible },
-                                set: { updateVisibility(field: "profile_picture", newValue: $0) }
-                            ))
-                            Toggle("Show Roasts", isOn: Binding(
-                                get: { privateProfile.is_roasts_visible },
-                                set: { updateVisibility(field: "roasts", newValue: $0) }
-                            ))
-                            Toggle("Show Disappointment", isOn: Binding(
-                                get: { privateProfile.is_disappointment_visible },
-                                set: { updateVisibility(field: "disappointment", newValue: $0) }
                             ))
                         }
                     }

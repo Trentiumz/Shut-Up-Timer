@@ -21,11 +21,6 @@ struct UserPublicProfileResponse : Decodable {
 struct UserProfileResponse : Decodable {
     var friend_code: String
     var is_public_profile_visible: Bool
-    var is_username_visible: Bool
-    var is_iq_visible: Bool
-    var is_profile_picture_visible: Bool
-    var is_roasts_visible: Bool
-    var is_disappointment_visible: Bool
 }
 
 struct FriendRequestResponse : Decodable {

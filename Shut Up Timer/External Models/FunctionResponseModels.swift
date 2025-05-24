@@ -15,7 +15,7 @@ struct FriendProfileResponse : Codable{
 }
 
 struct FriendRequestResponse : Codable{
-    var id: Int64
+    var id: Int
     var sender_id: String
     var receiver_id: String
     var created_at: Date

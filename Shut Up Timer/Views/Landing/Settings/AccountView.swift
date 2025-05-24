@@ -62,7 +62,7 @@ struct AccountView : View {
                 UserInfoView(userPublicProfile: userPublicProfile)
                 
                 if credManager.loggedIn {
-                    FriendView(
+                    FriendsList(
                         friends: friends,
                         removeFriend: removeFriend
                     )
@@ -144,19 +144,6 @@ struct FriendsList : View {
                     }
                 }
                 .padding(.horizontal)
-            }
-        }
-    }
-    
-    func updateFriends() {
-        Task {
-            do {
-                let friendProfiles: [FriendProfileResponse] = try await credManager.supabaseClient.rpc("get_friend_profiles").execute().value
-                await MainActor.run {
-                    friends = friendProfiles
-                }
-            } catch {
-                print("Error fetching friends: \(error)")
             }
         }
     }

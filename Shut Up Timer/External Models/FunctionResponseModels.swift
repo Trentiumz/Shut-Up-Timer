@@ -8,7 +8,7 @@ struct FriendLeaderboardResponse : Codable{
 }
 
 struct FriendProfileResponse : Codable{
-    var friend_user_id: String
+    var friend_user_id: UUID
     var friend_username: String
     var friend_iq: Int
     var friend_profile_picture: String

@@ -1,55 +1,55 @@
 import SwiftUI
 
 struct FriendLeaderboardResponse {
-    var userId: String
+    var user_id: String
     var username: String
-    var profilePicture: String
+    var profile_picture: String
     var iq: Int
 }
 
 struct FriendProfileResponse {
-    var friendUserId: String
-    var friendUsername: String
-    var friendIq: Int
-    var friendProfilePicture: String
+    var friend_user_id: String
+    var friend_username: String
+    var friend_iq: Int
+    var friend_profile_picture: String
 }
 
 struct FriendRequestResponse {
     var id: Int64
-    var senderId: String
-    var receiverId: String
-    var createdAt: Date
+    var sender_id: String
+    var receiver_id: String
+    var created_at: Date
 }
 
 struct FriendsResponse {
-    var friendUserId: String
-    var createdAt: Date
+    var friend_user_id: String
+    var created_at: Date
 }
 
 struct FriendsUserIdResponse {
-    var friendUserId: String
-    var createdAt: Date
+    var friend_user_id: String
+    var created_at: Date
 }
 
 struct UserProfileResponse {
-    var friendCode: String
-    var isPublicProfileVisible: Bool
+    var friend_code: String
+    var is_public_profile_visible: Bool
     var sessions: [String: Any] // jsonb, customize decoding as needed
 }
 
 struct UserPublicProfileResponse {
     var iq: Int
     var username: String
-    var profilePicture: String
+    var profile_picture: String
     var roasts: [String: Any]
     var hours: TimeInterval
-    var lastLogin: Date
-    var topCategories: [String: Any]
+    var last_login: Date
+    var top_categories: [String: Any]
 }
 
 struct WorldLeaderboardResponse {
-    var userId: String
+    var user_id: String
     var username: String
-    var profilePicture: String
+    var profile_picture: String
     var iq: Int
 }

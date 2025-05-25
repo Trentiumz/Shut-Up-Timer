@@ -9,6 +9,6 @@ class LBEntry : ObservableObject, Identifiable{
     init(name: String, pfp: String, pts: Int) {
         self.name = name
         self.pts = pts
-        self.pfp = pfp
+        self.profilePicture = pfp
     }
 }

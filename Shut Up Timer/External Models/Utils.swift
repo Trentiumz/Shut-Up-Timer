@@ -1,3 +1,6 @@
+import SwiftUI
+import Foundation
+
 func parseISO(_ durationString: String) -> TimeInterval? {
     let formatter = ISO8601DateComponentsFormatter()
     formatter.formatOptions = [.withTime]

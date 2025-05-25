@@ -92,7 +92,7 @@ class Sessions : Codable, Equatable, ObservableObject {
     }
 
     func getRoasts() -> [String] {
-        let roasts = sessions.map{ $0.roast}.filter{$0 != nil};
+        let roasts = sessions.compactMap{ $0.roast }
         return roasts;
     }
 }

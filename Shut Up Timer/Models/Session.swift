@@ -13,6 +13,7 @@ struct SessionEntry: Identifiable, Codable, Equatable {
     var ended: Date
     var timeLocked: TimeInterval
     var success: Bool
+    var roast: String?
 }
 
 class Sessions : Codable, Equatable, ObservableObject {
@@ -53,7 +54,7 @@ class Sessions : Codable, Equatable, ObservableObject {
         return cIq;
     }
 
-    func getTimeLocked() -> Int {
+    func getTotalTimeLocked() -> Int {
         let totTime: Int = sessions.reduce(0) { $0 + Int($1.timeLocked) };
         return totTime;
     }
@@ -75,6 +76,24 @@ class Sessions : Codable, Equatable, ObservableObject {
             .sorted { $0.seconds > $1.seconds }
         
         return sortedCategories
+    }
+
+    func getTopCategoryStrings(toDoList: ToDoList) -> [String] {
+        let topCategories = getTopCategories()
+        var categoryStrings: [String] = []
+        
+        for category in topCategories {
+            if let todoEntry = toDoList.uuidToEntry(category.todoID) {
+                categoryStrings.append(todoEntry.todo)
+            }
+        }
+        
+        return categoryStrings
+    }
+
+    func getRoasts() -> [String] {
+        let roasts = sessions.map{ $0.roast}.filter{$0 != nil};
+        return roasts;
     }
 }
 

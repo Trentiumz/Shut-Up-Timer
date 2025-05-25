@@ -42,7 +42,7 @@ struct UserInfoView : View {
                 VStack {
                     Text("Seconds")
                         .font(.headline)
-                    Text("\(sessions.getTimeLocked())")
+                    Text("\(sessions.getTotalTimeLocked())")
                         .font(.title2)
                 }
                 

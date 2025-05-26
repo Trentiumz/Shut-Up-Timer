@@ -12,6 +12,7 @@ struct SessionEntry: Identifiable, Codable, Equatable {
     var started: Date
     var ended: Date
     var timeLocked: TimeInterval
+    var plannedTime: TimeInterval
     var success: Bool
     var roast: String?
 }

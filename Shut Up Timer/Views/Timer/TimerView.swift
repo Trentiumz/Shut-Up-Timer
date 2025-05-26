@@ -27,6 +27,8 @@ struct TimerView: View {
     }
     
     func failTimer() {
+        TempSessionLoader.clearSessionInProgress();
+
         timerViewModel.stopTimer()
         let chosenRoast = getRandomRoast();
         router.toTimerFailed(totTime: timerViewModel.totTime, roast: chosenRoast);
@@ -36,10 +38,13 @@ struct TimerView: View {
                          ended: Date(),
                          timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
                          success: false,
+                         plannedTime: TimeInterval(timerViewModel.totTime),
                          roast: chosenRoast));
     }
 
     func succeedTimer() {
+        TempSessionLoader.clearSessionInProgress();
+
         timerViewModel.stopTimer();
         router.toTimerCompleted(totTime: timerViewModel.totTime);
         sessions.sessions.append(
@@ -47,6 +52,7 @@ struct TimerView: View {
                          started: timerViewModel.startTime,
                          ended: Date(),
                          timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
+                         plannedTime: TimeInterval(timerViewModel.totTime),
                          success: true));
     }
     
@@ -84,8 +90,10 @@ struct TimerView: View {
                 Button(action: {
                     if timerViewModel.isRunning {
                         timerViewModel.stopTimer()
+                        self.timerViewModel.saveTempSession();
                     } else {
                         timerViewModel.startTimer()
+                        self.timerViewModel.saveTempSession();
                     }
                 }) {
                     Text(timerViewModel.isRunning ? "Pause Timer" : "Start Timer")
@@ -147,6 +155,8 @@ struct TimerView: View {
                     checkerTimer = nil
                 }
             }
+            
+            self.timerViewModel.saveTempSession();
         }
         .onDisappear {
             // Allow screen to sleep when leaving view
@@ -165,16 +175,18 @@ struct TimerView: View {
             case .active:
                 // User came back, cancel fail timer & notifications
                 cancelNotifications()
+                self.timerViewModel.saveTempSession();
                 
             case .inactive:
                 // User left app, start 20 second fail timer and schedule notification after 2 seconds
                 if timerViewModel.isRunning {
                     scheduleComeBackNotification()
                 }
+                self.timerViewModel.saveTempSession();
                 
             case .background:
                 // Similar to inactive, can also handle if needed
-                break
+                self.timerViewModel.saveTempSession();
                 
             @unknown default:
                 break

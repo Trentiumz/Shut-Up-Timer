@@ -15,5 +15,23 @@
 			</array>
 		</dict>
 	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict/>
+	</array>
+	<key>GIDClientID</key>
+	<string>379065476005-bjgaifp729ikrutpj2olhf3i7kb7p13f.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+	  <dict>
+	    <key>CFBundleURLSchemes</key>
+	    <array>
+	      <string>com.googleusercontent.apps.379065476005-bjgaifp729ikrutpj2olhf3i7kb7p13f</string>
+	    </array>
+	  </dict>
+	</array>
+	
+	<key>GIDServerClientID</key>
+	<string>379065476005-6tfmpnc3sscqmnl3m0l5cr0ip6ge83n6.apps.googleusercontent.com</string>
 </dict>
 </plist>

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import Supabase
 
 @main
 struct Shut_Up_TimerApp: App {

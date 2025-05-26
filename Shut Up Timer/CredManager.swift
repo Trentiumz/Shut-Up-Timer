@@ -1,5 +1,6 @@
 import SwiftUI
 import Supabase
+import GoogleSignIn
 
 class CredManager: ObservableObject {
     @Published var session: Session?

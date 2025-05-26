@@ -98,7 +98,7 @@ class SettingsLoader {
                                                     difficulty: .easy,
                                                     roastLevel: .low,
                                                     timerParam: .countdown(seconds: 60 * 30));
-    static func loadSettings(onUpdate: @escaping (_: Settings) -> Void = {_ in}) -> Settings {
+    static func loadSettings(onUpdate: (@escaping (_: Settings) -> Void) = {_ in}) -> Settings {
         let data = UserDefaults.standard.data(forKey: "user-settings");
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Settings.self, from: liveData) {

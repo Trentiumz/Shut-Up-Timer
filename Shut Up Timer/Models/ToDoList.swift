@@ -7,10 +7,16 @@ struct ToDoEntry : Codable, Equatable, Identifiable{
 }
 
 class ToDoList : Codable, Equatable, ObservableObject {
-    @Published var lst: [ToDoEntry];
+    @Published var lst: [ToDoEntry] {
+        didSet {
+            self.onUpdate(self);
+        }
+    }
+    var onUpdate: (_: ToDoList) -> Void = {val in };
     
-    init(lst: [ToDoEntry]) {
+    init(lst: [ToDoEntry], onUpdate: (@escaping (_: ToDoList) -> Void) = {val in }) {
         self.lst = lst;
+        self.onUpdate = onUpdate;
     }
     
     static func == (l: ToDoList, r: ToDoList) -> Bool {
@@ -25,6 +31,7 @@ class ToDoList : Codable, Equatable, ObservableObject {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self);
         lst = try container.decode([ToDoEntry].self, forKey: .lst);
+        onUpdate = {val in }
     }
     
     func encode(to encoder: Encoder) throws {
@@ -45,10 +52,11 @@ class ToDoLoader {
             UserDefaults.standard.set(encoded, forKey: "todo-list")
         }
     }
-    static func getToDo() -> ToDoList {
+    static func getToDo(onUpdate: @escaping (_: ToDoList) -> Void = {val in }) -> ToDoList {
         let data = UserDefaults.standard.data(forKey: "todo-list")
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(ToDoList.self, from: liveData) {
+                decoded.onUpdate = onUpdate;
                 return decoded;
             }
             print("Incorrect Data Type")

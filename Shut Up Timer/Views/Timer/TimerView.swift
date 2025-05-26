@@ -28,13 +28,15 @@ struct TimerView: View {
     
     func failTimer() {
         timerViewModel.stopTimer()
-        router.toTimerFailed(totTime: timerViewModel.totTime)
+        let chosenRoast = getRandomRoast();
+        router.toTimerFailed(totTime: timerViewModel.totTime, roast: chosenRoast);
         sessions.sessions.append(
             SessionEntry(tasks: timerViewModel.tasks,
                          started: timerViewModel.startTime,
                          ended: Date(),
                          timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
-                         success: false));
+                         success: false,
+                         roast: chosenRoast));
     }
 
     func succeedTimer() {

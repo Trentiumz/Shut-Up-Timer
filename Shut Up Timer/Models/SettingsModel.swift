@@ -30,17 +30,34 @@ func timerParamToType(param: TimerParam) -> TimerType {
 }
 
 class Settings : Codable, Equatable, ObservableObject {
-    @Published var firstTime: Bool;
-    @Published var difficulty: Difficulty;
-    @Published var roastLevel : RoastLevel;
-    @Published var timerParam : TimerParam;
+    @Published var firstTime: Bool{
+        didSet {
+            self.onUpdate(self);
+        }
+    }
+    @Published var difficulty: Difficulty{
+        didSet {
+            self.onUpdate(self);
+        }
+    }
+    @Published var roastLevel : RoastLevel{
+        didSet {
+            self.onUpdate(self);
+        }
+    }
+    @Published var timerParam : TimerParam{
+        didSet {
+            self.onUpdate(self);
+        }
+    }
+    var onUpdate: (_: Settings) -> Void = { _ in };
     
-    
-    init(firstTime: Bool, difficulty: Difficulty, roastLevel: RoastLevel, timerParam: TimerParam) {
+    init(firstTime: Bool, difficulty: Difficulty, roastLevel: RoastLevel, timerParam: TimerParam, onUpdate: @escaping (_: Settings) -> Void = { _ in }) {
         self.firstTime = firstTime;
         self.difficulty = difficulty
         self.roastLevel = roastLevel
         self.timerParam = timerParam
+        self.onUpdate = onUpdate;
     }
     
     static func == (l: Settings, r: Settings) -> Bool {
@@ -64,6 +81,7 @@ class Settings : Codable, Equatable, ObservableObject {
         difficulty = try container.decode(Difficulty.self, forKey: .difficulty)
         roastLevel = try container.decode(RoastLevel.self, forKey: .roastLevel)
         timerParam = try container.decode(TimerParam.self, forKey: .timerParam)
+        onUpdate = { _ in }
     }
     
     func encode(to encoder: Encoder) throws {
@@ -77,13 +95,14 @@ class Settings : Codable, Equatable, ObservableObject {
 
 class SettingsLoader {
     static var defaultSettings: Settings = Settings(firstTime: true,
-                                                                      difficulty: .easy,
-                                                                      roastLevel: .low,
-                                                                      timerParam: .countdown(seconds: 60 * 30));
-    static func loadSettings() -> Settings {
+                                                    difficulty: .easy,
+                                                    roastLevel: .low,
+                                                    timerParam: .countdown(seconds: 60 * 30));
+    static func loadSettings(onUpdate: (@escaping (_: Settings) -> Void) = {_ in}) -> Settings {
         let data = UserDefaults.standard.data(forKey: "user-settings");
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Settings.self, from: liveData) {
+                decoded.onUpdate = onUpdate;
                 return decoded;
             }
             print("Incorrect Data Type");

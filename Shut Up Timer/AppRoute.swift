@@ -4,7 +4,7 @@ enum AppRoute {
     case home
     case timer
     case timerCompleted(seconds: Int)
-    case timerFailed(seconds: Int)
+    case timerFailed(seconds: Int, roast: String? = nil)
     case login(onSuccess: () -> Void)
 }
 

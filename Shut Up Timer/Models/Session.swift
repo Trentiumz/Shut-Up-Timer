@@ -17,10 +17,16 @@ struct SessionEntry: Identifiable, Codable, Equatable {
 }
 
 class Sessions : Codable, Equatable, ObservableObject {
-    @Published var sessions: [SessionEntry] = [];
+    @Published var sessions: [SessionEntry] = [] {
+        didSet {
+            onUpdate(self);
+        }
+    }
+    var onUpdate: (_: Sessions) -> Void = { _ in };
 
-    init(sessions: [SessionEntry]) {
+    init(sessions: [SessionEntry], onUpdate: @escaping (_: Sessions) -> Void = { _ in }) {
         self.sessions = sessions;
+        self.onUpdate = onUpdate;
     }
     
     static func == (l: Sessions, r: Sessions) -> Bool {
@@ -35,6 +41,7 @@ class Sessions : Codable, Equatable, ObservableObject {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self);
         sessions = try container.decode([SessionEntry].self, forKey: .sessions);
+        onUpdate = {_ in }
     }
     
     func encode(to encoder: Encoder) throws {
@@ -100,10 +107,11 @@ class Sessions : Codable, Equatable, ObservableObject {
 class SessionsLoader {
     static var defaultSessions: Sessions = Sessions(sessions: []);
 
-    static func loadSettings() -> Sessions {
+    static func loadSettings(onUpdate: @escaping (_: Sessions) -> Void) -> Sessions {
         let data = UserDefaults.standard.data(forKey: "user-sessions");
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Sessions.self, from: liveData) {
+                decoded.onUpdate = onUpdate;
                 return decoded;
             }
             print("Incorrect Data Type");

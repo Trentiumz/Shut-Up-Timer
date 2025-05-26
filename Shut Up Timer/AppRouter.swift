@@ -22,9 +22,9 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.timerCompleted(seconds: totTime)))
     }
     
-    func toTimerFailed(totTime: Int) {
+    func toTimerFailed(totTime: Int, roast: String? = nil) {
         assert(!timerViewModel.isRunning);
-        path.append(PathElement(route: AppRoute.timerFailed(seconds: totTime)))
+        path.append(PathElement(route: AppRoute.timerFailed(seconds: totTime, roast: roast)))
     }
     
     func toHome() {

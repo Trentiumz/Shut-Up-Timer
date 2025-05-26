@@ -3,9 +3,11 @@ import SwiftUI
 struct TimerFailedView: View {
     @EnvironmentObject var router: AppRouter;
     private var timeLocked: Int;
+    private var roast: String?;
     
-    init(timeLocked: Int) {
+    init(timeLocked: Int, roast: String? = nil) {
         self.timeLocked = timeLocked;
+        self.roast = roast;
     }
     
     var body: some View {
@@ -20,6 +22,12 @@ struct TimerFailedView: View {
                 .font(.title)
                 .padding()
             
+            if let roast = roast {
+                Text("Roast: \(roast)")
+                    .font(.headline)
+                    .padding()
+            }             
+
             Button(action: {
                 router.toHome();
             }) {

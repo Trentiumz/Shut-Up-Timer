@@ -39,9 +39,9 @@ struct ContentView: View {
                         TimerCompletedView(timeLocked: seconds)
                             .environmentObject(router)
                             .navigationBarBackButtonHidden(true)
-                    case .timerFailed(let seconds):
+                    case .timerFailed(let seconds, let roast):
                         // timer failed
-                        TimerFailedView(timeLocked: seconds)
+                        TimerFailedView(timeLocked: seconds, roast: roast)
                             .environmentObject(router)
                             .navigationBarBackButtonHidden(true)
                     case .login(let onSuccess):

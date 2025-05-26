@@ -16,9 +16,17 @@ struct SessionEntryView : View {
         }
     }
     
+    func roastMessage(_ roast: String?) -> String {
+        if let roast = roast {
+            return "Your roast is \"\(roast)\""
+        } else {
+            return ""
+        }
+    }
+    
     var body: some View {
         VStack {
-            Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed"). \(roast = sessionEntry.roast ? "Your roast is \(roast)" : "")")
+            Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed"). \(roastMessage(sessionEntry.roast))")
                 .padding()
             BulletListView(items: sessionEntry.tasks.map{ "Did \(getTaskName(todoID: $0.todoID)) for \($0.timeIn) seconds"})
         }.background(.gray)

@@ -107,7 +107,7 @@ class Sessions : Codable, Equatable, ObservableObject {
 class SessionsLoader {
     static var defaultSessions: Sessions = Sessions(sessions: []);
 
-    static func loadSettings(onUpdate: @escaping (_: Sessions) -> Void) -> Sessions {
+    static func loadSessions(onUpdate: @escaping (_: Sessions) -> Void) -> Sessions {
         let data = UserDefaults.standard.data(forKey: "user-sessions");
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Sessions.self, from: liveData) {
@@ -117,12 +117,12 @@ class SessionsLoader {
             print("Incorrect Data Type");
             return defaultSessions;
         } else {
-            saveSettings(defaultSessions);
+            saveSessions(defaultSessions);
             return defaultSessions;
         }
     }
     
-    static func saveSettings(_ sessions: Sessions) {
+    static func saveSessions(_ sessions: Sessions) {
         if let encoded = try? JSONEncoder().encode(sessions) {
             UserDefaults.standard.set(encoded, forKey: "user-sessions");
         }

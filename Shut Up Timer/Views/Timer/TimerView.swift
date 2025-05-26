@@ -27,7 +27,7 @@ struct TimerView: View {
     }
     
     func failTimer() {
-        TempSessionLoader.clearSessionInProgress();
+        TempSessionLoader.clearSession();
 
         timerViewModel.stopTimer()
         let chosenRoast = getRandomRoast();
@@ -37,13 +37,13 @@ struct TimerView: View {
                          started: timerViewModel.startTime,
                          ended: Date(),
                          timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
-                         success: false,
                          plannedTime: TimeInterval(timerViewModel.totTime),
+                         success: false,
                          roast: chosenRoast));
     }
 
     func succeedTimer() {
-        TempSessionLoader.clearSessionInProgress();
+        TempSessionLoader.clearSession();
 
         timerViewModel.stopTimer();
         router.toTimerCompleted(totTime: timerViewModel.totTime);

@@ -1,3 +1,5 @@
+import SwiftUI
+
 struct TempSession: Codable, Equatable {
     var tasks: [TaskLog]
     var startTime: Date

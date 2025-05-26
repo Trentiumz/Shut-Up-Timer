@@ -38,10 +38,11 @@ struct ContentView: View {
                                          started: sessionInProgress.startTime,
                                          ended: sessionInProgress.lasUpdate,
                                          timeLocked: TimeInterval(sessionInProgress.timeLocked),
-                                         plannedTime: TimeInterval(sessionInProgress.totTime),
+                                         plannedTime: TimeInterval(sessionInProgress.plannedTime),
                                          success: false,
                                          roast: curRoast));
-                        router.toTimerFailed(totTime: sessionInProgress.plannedTime, roast: curRoast);
+                        TempSessionLoader.clearSession();
+                        router.toTimerFailed(totTime: Int(sessionInProgress.plannedTime), roast: curRoast);
                     }
                 }
                 .navigationDestination(for: PathElement.self) { elem in

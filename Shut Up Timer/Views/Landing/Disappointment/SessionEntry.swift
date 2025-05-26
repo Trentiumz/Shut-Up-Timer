@@ -48,5 +48,5 @@ struct BulletListView: View {
 }
 
 #Preview {
-    SessionEntryView(sessionEntry: SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 10, success: true));
+    SessionEntryView(sessionEntry: SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 10, plannedTime: 20, success: true));
 }

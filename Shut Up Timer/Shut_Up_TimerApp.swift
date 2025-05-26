@@ -25,24 +25,20 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(sessions)
                 .environmentObject(todoList)
                 .environmentObject(credManager)
-                .onReceive(settings.objectWillChange) { newSettings in
-                    SettingsLoader.saveSettings(newSettings);
+                .onReceive(settings.objectWillChange) { _ in
+                    SettingsLoader.saveSettings(settings);
                 }
-                .onReceive(sessions.objectWillChange) { newSessions in
-                    SessionsLoader.saveSettings(newSessions);
+                .onReceive(sessions.objectWillChange) { _ in
+                    SessionsLoader.saveSettings(sessions);
                     // TODO: Update when user logs in - right now it won't update so...
                     if credManager.loggedIn {
                         Task {
-                            try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": newSessions.getIQ()]).execute();
-                            try await credManager.supabaseClient.rpc("change_hours", params: ["new_hours": toISO(TimeInterval(newSessions.getTotalTimeLocked()))]).execute();
-                            try await credManager.supabaseClient.rpc("change_roasts", params: ["new_roasts": newSessions.getRoasts()]).execute();
-                            try await credManager.supabaseClient.rpc("change_top_categories", params: ["new_top_categories": newSessions.getTopCategoryStrings(toDoList: todoList)]).execute();
+                            try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": sessions.getIQ()]).execute();
                         }
                     }
                 }
-                .onReceive(todoList.objectWillChange) { newToDoList in
-                    // Save the todo list whenever it changes
-                    ToDoLoader.saveToDo(todo: newToDoList);
+                .onChange(of: todoList.lst) {
+                    ToDoLoader.saveToDo(todo: todoList)
                 }
         }
     }

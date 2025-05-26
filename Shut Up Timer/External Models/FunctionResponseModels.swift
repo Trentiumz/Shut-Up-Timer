@@ -1,36 +1,55 @@
-import SwiftUI;
-struct FriendLeaderboardResponse : Decodable {
-    let friend_user_id: UUID
-    let friend_username: String
-    let friend_iq: Int
-}
+import SwiftUI
 
-struct FriendProfileResponse : Decodable {
-    let friend_user_id: UUID
-    let friend_username: String
-    let friend_iq: Int
-    let friend_profile_picture: String
-}
-
-struct UserPublicProfileResponse : Decodable {
+struct FriendLeaderboardResponse : Codable{
+    var user_id: UUID
     var username: String
-    var iq: Int
     var profile_picture: String
+    var iq: Int
 }
 
-struct UserProfileResponse : Decodable {
+struct FriendProfileResponse : Codable{
+    var friend_user_id: UUID
+    var friend_username: String
+    var friend_iq: Int
+    var friend_profile_picture: String
+}
+
+struct FriendRequestResponse : Codable{
+    var id: Int
+    var sender_id: UUID
+    var receiver_id: UUID
+    var created_at: Date
+}
+
+struct FriendsResponse : Codable{
+    var friend_user_id: UUID
+    var created_at: Date
+}
+
+struct FriendsUserIdResponse : Codable{
+    var friend_user_id: UUID
+    var created_at: Date
+}
+
+struct UserProfileResponse : Codable{
     var friend_code: String
     var is_public_profile_visible: Bool
-    var is_username_visible: Bool
-    var is_iq_visible: Bool
-    var is_profile_picture_visible: Bool
-    var is_roasts_visible: Bool
-    var is_disappointment_visible: Bool
+    var sessions: [String]
 }
 
-struct FriendRequestResponse : Decodable {
-    let id: Int
-    let sender_id: UUID
-    let receiver_id: UUID
-    let created_at: Date
+struct UserPublicProfileResponse : Codable{
+    var iq: Int
+    var username: String
+    var profile_picture: String
+    var roasts: [String]
+    var hours: String
+    var last_login: Date?
+    var top_categories: [String]
+}
+
+struct WorldLeaderboardResponse : Codable{
+    var user_id: UUID
+    var username: String
+    var profile_picture: String
+    var iq: Int
 }

@@ -15,6 +15,7 @@ struct Shut_Up_TimerApp: App {
     @StateObject var sessions: Sessions = SessionsLoader.loadSettings();
     @StateObject var todoList: ToDoList = ToDoLoader.getToDo();
     @StateObject var credManager: CredManager = CredManager();
+    // TODO: onReceive is called BEFORE the object is changed, so the updates aren't actually saved !
     
     var body: some Scene {
         WindowGroup {
@@ -33,11 +34,13 @@ struct Shut_Up_TimerApp: App {
                     if credManager.loggedIn {
                         Task {
                             try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": sessions.getIQ()]).execute();
+                            try await credManager.supabaseClient.rpc("change_hours", params: ["new_hours": toISO(sessions.getTotalTimeLocked())]).execute();
+                            try await credManager.supabaseClient.rpc("change_roasts", params: ["new_roasts": sessions.getRoasts()]).execute();
+                            try await credManager.supabaseClient.rpc("change_top_categories", params: ["new_top_categories": sessions.getTopCategories()]).execute();
                         }
                     }
                 }
-                .onReceive(todoList.objectWillChange) { _ in
-                    print("Saving...")
+                .onChange(of: todoList.lst) {
                     ToDoLoader.saveToDo(todo: todoList)
                 }
         }

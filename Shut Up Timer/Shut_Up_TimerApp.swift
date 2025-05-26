@@ -13,7 +13,7 @@ struct Shut_Up_TimerApp: App {
     @StateObject var router: AppRouter = AppRouter();
     @StateObject var settings: Settings = SettingsLoader.loadSettings();
     @StateObject var sessions: Sessions = SessionsLoader.loadSettings();
-    @StateObject var todoList: ToDoList = ToDoLoader.getToDo();
+    @StateObject var todoList: ToDoList = ToDoLoader.getToDo(onUpdate: { newTodo in ToDoLoader.saveToDo(todo: newTodo)});
     @StateObject var credManager: CredManager = CredManager();
     // TODO: onReceive is called BEFORE the object is changed, so the updates aren't actually saved !
     
@@ -22,7 +22,7 @@ struct Shut_Up_TimerApp: App {
             ContentView()
                 .environmentObject(router)
                 .environmentObject(settings)
-                .environmentObject(sessions)
+                .environmentObject(sessions)	
                 .environmentObject(todoList)
                 .environmentObject(credManager)
                 .onReceive(settings.objectWillChange) { _ in
@@ -36,9 +36,6 @@ struct Shut_Up_TimerApp: App {
                             try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": sessions.getIQ()]).execute();
                         }
                     }
-                }
-                .onChange(of: todoList.lst) {
-                    ToDoLoader.saveToDo(todo: todoList)
                 }
         }
     }

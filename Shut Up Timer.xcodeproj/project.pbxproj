@@ -38,9 +38,22 @@
 		C93EE9A42DB5133A00E5080A /* Shut Up TimerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Shut Up TimerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C9784C372DE5071D00BF0281 /* Exceptions for "Shut Up Timer" folder in "Shut Up Timer" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Shut-Up-Timer-Info.plist",
+			);
+			target = C93EE9892DB5133700E5080A /* Shut Up Timer */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C93EE98C2DB5133700E5080A /* Shut Up Timer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C9784C372DE5071D00BF0281 /* Exceptions for "Shut Up Timer" folder in "Shut Up Timer" target */,
+			);
 			path = "Shut Up Timer";
 			sourceTree = "<group>";
 		};
@@ -432,6 +445,7 @@
 				DEVELOPMENT_TEAM = 77B86BDTVZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Shut-Up-Timer-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -468,6 +482,7 @@
 				DEVELOPMENT_TEAM = 77B86BDTVZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Shut-Up-Timer-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

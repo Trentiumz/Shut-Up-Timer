@@ -23,8 +23,8 @@ struct TimerFailedView: View {
                 .padding()
             
             if let roast = roast {
-                Text("Roast: \(roast)")
-                    .font(.headline)
+                Text("\(roast)")
+                    .font(.largeTitle)
                     .padding()
             }             
 

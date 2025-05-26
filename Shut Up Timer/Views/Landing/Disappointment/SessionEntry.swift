@@ -18,7 +18,7 @@ struct SessionEntryView : View {
     
     var body: some View {
         VStack {
-            Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed")")
+            Text("You locked in \(sessionEntry.timeLocked) seconds on \(sessionEntry.started) and \(sessionEntry.success ? "succeeded" : "failed"). \(roast = sessionEntry.roast ? "Your roast is \(roast)" : "")")
                 .padding()
             BulletListView(items: sessionEntry.tasks.map{ "Did \(getTaskName(todoID: $0.todoID)) for \($0.timeIn) seconds"})
         }.background(.gray)

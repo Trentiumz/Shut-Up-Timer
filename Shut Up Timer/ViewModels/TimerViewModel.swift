@@ -63,4 +63,17 @@ class TimerViewModel: ObservableObject, MVVM {
         timer?.invalidate()
         timer = nil
     }
+
+    func toTempSession() -> TempSession {
+        return TempSession(tasks: tasks, 
+                            startTime: startTime, 
+                            lasUpdate: Date(),
+                            plannedTime: TimeInterval(totTime),
+                            isPaused: !isRunning,
+                            timeLocked: TimeInterval(totTime - timeLeft));
+    }
+
+    func saveTempSession() {
+        TempSessionLoader.saveSession(toTempSession());
+    }
 }

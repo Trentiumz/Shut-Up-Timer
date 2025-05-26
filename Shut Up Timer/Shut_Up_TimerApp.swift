@@ -15,7 +15,7 @@ struct Shut_Up_TimerApp: App {
     var settings: Settings = SettingsLoader.loadSettings(onUpdate: { newSettings in
                     SettingsLoader.saveSettings(newSettings);
     });
-    var sessions: Sessions = SessionsLoader.loadSettings(onUpdate: {_ in });
+    var sessions: Sessions = SessionsLoader.loadSessions(onUpdate: {_ in });
     var todoList: ToDoList = ToDoLoader.getToDo(onUpdate: { newTodo in ToDoLoader.saveToDo(todo: newTodo)});
     var credManager: CredManager = CredManager();
     // TODO: onReceive is called BEFORE the object is changed, so the updates aren't actually saved !
@@ -24,7 +24,7 @@ struct Shut_Up_TimerApp: App {
         let credManager = self.credManager;
         let todoList = self.todoList;
         sessions.onUpdate = { newSessions in
-            SessionsLoader.saveSettings(newSessions);
+            SessionsLoader.saveSessions(newSessions);
             // TODO: Update when user logs in - right now it won't update so...
             if credManager.loggedIn {
                 Task {

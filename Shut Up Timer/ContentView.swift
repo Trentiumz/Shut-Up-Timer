@@ -4,6 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var settings: Settings;
+    @EnvironmentObject var sessions: Sessions;
     
     init() {
     }
@@ -28,6 +29,22 @@ struct ContentView: View {
                 }
             }	
                 .environmentObject(router)
+                .onAppear{
+                    if let sessionInProgress = TempSessionLoader.getSession() {
+                        // if there is an active session, navigate to the timer
+                        let curRoast = getRandomRoast();
+                        sessions.sessions.append(
+                            SessionEntry(tasks: sessionInProgress.tasks,
+                                         started: sessionInProgress.startTime,
+                                         ended: sessionInProgress.lasUpdate,
+                                         timeLocked: TimeInterval(sessionInProgress.timeLocked),
+                                         plannedTime: TimeInterval(sessionInProgress.plannedTime),
+                                         success: false,
+                                         roast: curRoast));
+                        TempSessionLoader.clearSession();
+                        router.toTimerFailed(totTime: Int(sessionInProgress.plannedTime), roast: curRoast);
+                    }
+                }
                 .navigationDestination(for: PathElement.self) { elem in
                     switch elem.route {
                     case .timer:

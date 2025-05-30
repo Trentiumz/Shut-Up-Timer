@@ -59,8 +59,8 @@ struct TimerView: View {
     // Schedule local notification after 2 seconds of leaving
     func scheduleComeBackNotification() {
         let content = UNMutableNotificationContent()
-        content.title = "Come back!"
-        content.body = "Your timer is running. Please return soon or it will fail."
+        content.title = "HAIYAAAA"
+        content.body = "Your friend’s IQ just lapped you. Come back."
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)

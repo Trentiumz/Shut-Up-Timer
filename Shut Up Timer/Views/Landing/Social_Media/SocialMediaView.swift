@@ -1,7 +1,7 @@
 import SwiftUI;
 
 struct SocialMediaView: View {
-    let credManager: CredentialManager // assuming you inject this
+    @EnvironmentObject var  credManager: CredManager // assuming you inject this
     @State private var profiles: [UserPublicProfileResponse] = []
 
     var body: some View {
@@ -10,9 +10,9 @@ struct SocialMediaView: View {
                 Text("No roasts available.")
                     .foregroundColor(.secondary)
             } else {
-                ForEach(profiles, id: \.self) { profile in
-                    PublicProfileView(userPublicProfile: profile)
-                    RoastListView(profile: profile)
+                ForEach(profiles.indices, id: \.self) { index in
+                    PublicProfileView(profile: profiles[index])
+                    RoastListView(profile: profiles[index])
                 }
             }
         }
@@ -32,7 +32,7 @@ struct SocialMediaView: View {
                 .value
             
             for friend in friends {
-                let id = friend.id // adjust this to match actual key
+                let id = friend.friend_user_id // adjust this to match actual key
                 let userProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient
                     .rpc("get_user_public_profile", params: ["id": id])
                     .execute()

@@ -1,14 +1,14 @@
 import SwiftUI;
 
 struct PublicProfileView : View {
-    let userPublicProfile: UserPublicProfileResponse?;
+    let profile: UserPublicProfileResponse;
     
     var body: some View {
         VStack(spacing: 20) {
             // Profile Picture and Username
             HStack(spacing: 15) {
                 // Profile Picture
-                if let profile = userPublicProfile, !profile.profile_picture.isEmpty {
+                if !profile.profile_picture.isEmpty {
                     AsyncImage(url: URL(string: profile.profile_picture)) { image in
                         image
                             .resizable()
@@ -28,12 +28,10 @@ struct PublicProfileView : View {
                 
                 VStack {
                     // Username
-                    if let profile = userPublicProfile {
-                        Text(profile.username)
-                            .font(.title)
-                            .fontWeight(.bold)
-                    }
-                    if lastLogin = profile.last_login {
+                    Text(profile.username)
+                        .font(.title)
+                        .fontWeight(.bold)
+                    if let lastLogin = profile.last_login {
                         Text("Last Login: \(lastLogin)")
                             .font(.subheadline)
                             .foregroundColor(.gray)

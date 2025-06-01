@@ -26,6 +26,10 @@ class AppRouter: ObservableObject {
         assert(!timerViewModel.isRunning);
         path.append(PathElement(route: AppRoute.timerFailed(seconds: totTime, roast: roast)))
     }
+
+    func toInviteFriends() {
+        path.append(PathElement(route: AppRoute.inviteFriends));
+    }
     
     func toHome() {
         while !path.isEmpty {

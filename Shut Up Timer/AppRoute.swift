@@ -6,6 +6,7 @@ enum AppRoute {
     case timerCompleted(seconds: Int)
     case timerFailed(seconds: Int, roast: String? = nil)
     case login(onSuccess: () -> Void)
+    case inviteFriends
 }
 
 struct PathElement : Hashable {

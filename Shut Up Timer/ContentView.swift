@@ -67,6 +67,11 @@ struct ContentView: View {
                     case .login(let onSuccess):
                         // login screen
                         LoginView(onLoggedIn: onSuccess)
+                    case .inviteFriends:
+                        // invite friends screen
+                        FriendInvite()
+                            .environmentObject(router)
+                            .navigationBarBackButtonHidden(false)
                     default:
                         Text("Invalid")
                     }

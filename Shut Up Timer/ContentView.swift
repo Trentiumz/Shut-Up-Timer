@@ -25,7 +25,6 @@ struct ContentView: View {
                         SocialMediaView().tabItem {
                             Label("Social Media", systemImage: "person.2")
                         }
-                        FriendInvite().tabItem { Label("Invite", systemImage: "arrow.up")}
                         DisappointmentView().tabItem { Label("Disappointment", systemImage: "gobackward.10.hi")}
                         AccountView().tabItem{ Label("Account", systemImage: "person")}
                     }

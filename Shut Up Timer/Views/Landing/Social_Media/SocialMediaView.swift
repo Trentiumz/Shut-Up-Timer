@@ -7,7 +7,7 @@ struct SocialMediaView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if profiles.isEmpty {
-                Text("No roasts available.")
+                Text("No friends yet!")
                     .foregroundColor(.secondary)
             } else {
                 ForEach(profiles.indices, id: \.self) { index in
@@ -16,6 +16,7 @@ struct SocialMediaView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity)
         .padding()
         .onAppear {
             Task {
@@ -34,7 +35,7 @@ struct SocialMediaView: View {
             for friend in friends {
                 let id = friend.friend_user_id // adjust this to match actual key
                 let userProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient
-                    .rpc("get_user_public_profile", params: ["id": id])
+                    .rpc("get_user_public_profile", params: ["user_id": id])
                     .execute()
                     .value
                 

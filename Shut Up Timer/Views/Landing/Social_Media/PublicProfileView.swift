@@ -7,6 +7,7 @@ struct PublicProfileView : View {
         VStack(spacing: 20) {
             // Profile Picture and Username
             HStack(spacing: 15) {
+                Spacer()
                 // Profile Picture
                 if !profile.profile_picture.isEmpty {
                     AsyncImage(url: URL(string: profile.profile_picture)) { image in
@@ -37,6 +38,7 @@ struct PublicProfileView : View {
                             .foregroundColor(.gray)
                     }
                 }
+                Spacer()
             }
             
             // Stats
@@ -73,3 +75,7 @@ struct PublicProfileView : View {
         .frame(maxWidth: .infinity)
     }
 } 
+
+#Preview {
+    PublicProfileView(profile:UserPublicProfileResponse(iq: 10, username: "Taboo", profile_picture: "", roasts: [], hours: "3H1M", last_login: nil, top_categories: []))
+}

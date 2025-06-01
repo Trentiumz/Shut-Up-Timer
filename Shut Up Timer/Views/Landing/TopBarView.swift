@@ -10,11 +10,6 @@ struct TopBarView : View {
                 .font(.system(size: 32))
             Spacer()
             
-            Text("IQ: \(sessions.getIQ())")
-                .font(.system(size: 32))
-            
-            Spacer()
-            
             Button(action: {
                 router.toInviteFriends();
                 // Add your action here
@@ -23,6 +18,8 @@ struct TopBarView : View {
                     .font(.system(size: 32))
             }
             .buttonStyle(PlainButtonStyle())
+            Text("IQ: \(sessions.getIQ())")
+                .font(.system(size: 32))
         }
         .padding()
         .background(Color(red: 0.9, green: 0.9, blue: 0.9))

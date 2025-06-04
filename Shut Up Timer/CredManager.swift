@@ -24,12 +24,25 @@ class CredManager: ObservableObject {
                     self.session = curSession
                     self.connected = true
                     self.loggedIn = true
+                    self.sendTokenToBackend()
                 }
             } catch {
                 print("Error initializing session: \(error)")
                 await MainActor.run {
                     self.connected = true
                     self.loggedIn = false
+                }
+            }
+        }
+    }
+    
+    func sendTokenToBackend() {
+        print("Sending token??")
+        if self.loggedIn {
+            if let token = UserDefaults.standard.string(forKey: "device-token-push") {
+                print("Sending token \(token)")
+                Task {
+                    try await self.supabaseClient.rpc("set_apn", params: ["new_apn": token]).execute()
                 }
             }
         }
@@ -43,6 +56,7 @@ class CredManager: ObservableObject {
         await MainActor.run {
             self.session = curSession;
             self.loggedIn = true;
+            self.sendTokenToBackend()
         }
     }
 
@@ -57,6 +71,7 @@ class CredManager: ObservableObject {
         await MainActor.run {
             self.session = curSession;
             self.loggedIn = true;
+            self.sendTokenToBackend()
         }
     }
 
@@ -80,6 +95,7 @@ class CredManager: ObservableObject {
         await MainActor.run {
             self.session = curSession;
             self.loggedIn = true;
+            self.sendTokenToBackend()
         }
     }
 }

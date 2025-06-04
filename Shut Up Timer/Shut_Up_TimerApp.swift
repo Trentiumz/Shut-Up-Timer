@@ -11,6 +11,9 @@ import Supabase
 
 @main
 struct Shut_Up_TimerApp: App {
+    // register app delegate for push notifications
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     var router: AppRouter = AppRouter();
     var settings: Settings = SettingsLoader.loadSettings(onUpdate: { newSettings in
                     SettingsLoader.saveSettings(newSettings);

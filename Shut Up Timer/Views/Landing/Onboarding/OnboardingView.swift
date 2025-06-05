@@ -10,7 +10,6 @@ struct OnboardingView : View {
     private var onDone: () -> Void;
     @State private var curStage: OnboardingStage;
     @EnvironmentObject var settings: Settings;
-    @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
     @Namespace private var transitionNS;
     private let rightwardAnimation = AnyTransition.asymmetric(

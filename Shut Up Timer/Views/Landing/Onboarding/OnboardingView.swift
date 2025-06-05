@@ -2,6 +2,7 @@ import SwiftUI
 struct OnboardingView : View {
     enum OnboardingStage {
         case hello;
+        case answerForMe;
         case difficulty;
         case network;
         case loginQuery;
@@ -12,10 +13,24 @@ struct OnboardingView : View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var router: AppRouter;
     @Namespace private var transitionNS;
+    // temporary variable to keep track of whether the next transition should be rightward or left
+    @State private var transitionRight = true;
+    
+    private let leftwardAnimation = AnyTransition.asymmetric(
+        insertion: AnyTransition.move(edge: .trailing),
+        removal: AnyTransition.move(edge: .leading)
+    )
     private let rightwardAnimation = AnyTransition.asymmetric(
         insertion: AnyTransition.move(edge: .leading),
         removal: AnyTransition.move(edge: .trailing)
     )
+    private func getCurTransition() -> AnyTransition {
+        if transitionRight {
+            return rightwardAnimation;
+        } else {
+            return leftwardAnimation;
+        }
+    }
     
     init(onDone: @escaping () -> Void) {
         self.onDone = onDone;
@@ -26,12 +41,34 @@ struct OnboardingView : View {
         ZStack {
             switch curStage {
             case .hello:
-                OnboardingHello(onPress: {
-                    withAnimation {
-                        self.curStage = .difficulty;
-                    }
-                })
-                .transition(rightwardAnimation)
+                OnboardingHello(
+                    infoText: "Welcome to your Asian parent-approved focus companion",
+                    buttonText: "Hello?",
+                    onPress: {
+                        transitionRight = true;
+                        withAnimation {
+                            self.curStage = .answerForMe;
+                        }
+                    },
+                    onPrevious: nil)
+                .transition(getCurTransition())
+            case .answerForMe:
+                OnboardingHello(
+                    infoText: "Answer 5 questions for me lah",
+                    buttonText: "Yes Mother!",
+                    onPress: {
+                        transitionRight = true;
+                        withAnimation {
+                            self.curStage = .difficulty
+                        }
+                    },
+                    onPrevious: {
+                        transitionRight = false;
+                        withAnimation {
+                            self.curStage = .hello
+                        }
+                    })
+                .transition(getCurTransition())
             case .difficulty:
                 DifficultyScreen(onNext: { difficulty in
                     settings.difficulty = difficulty;
@@ -46,14 +83,14 @@ struct OnboardingView : View {
                         curStage = .network;
                     }
                 })
-                .transition(rightwardAnimation)
+                .transition(getCurTransition())
             case .network:
                 NetworkScreen(onNext: { _ in
                     withAnimation {
                         curStage = .loginQuery;
                     }
                 })
-                .transition(rightwardAnimation)
+                .transition(getCurTransition())
             case .loginQuery:
                 LoginQueryView(onNext: { selection in
                     withAnimation {
@@ -65,7 +102,7 @@ struct OnboardingView : View {
                         }
                     }
                 })
-                .transition(rightwardAnimation)
+                .transition(getCurTransition())
             }
         }
         .animation(.easeInOut, value: curStage);

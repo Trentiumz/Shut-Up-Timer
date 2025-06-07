@@ -172,6 +172,30 @@ struct FieldTextbox : View {
     }
 }
 
+struct SmallLinedHeading : View {
+    var text: String;
+    var body : some View {
+        ZStack(alignment: .bottom) {
+            Rectangle()
+                .foregroundColor(.clear)
+                .frame(width: 400, height: 400)
+                .background(
+                    ImageAssets.onboardingHello68
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 478.1739196777344, height: 468)
+                        .clipped()
+                )
+            Text(text)
+                .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
+                .multilineTextAlignment(.center)
+                .foregroundColor(ColorTokens.shade700)
+                .frame(width: 200, height: 45.12397, alignment: .top)
+                .offset(y: -20)
+        }.offset(y: -320)
+    }
+}
+
 /// Handles user login with email/password and Google authentication
 /// 
 /// This screen provides:
@@ -210,25 +234,7 @@ struct EmailLogin: View {
     var body: some View {
         ZStack(alignment: .top) {
             FadedBackground();
-            
-            ZStack(alignment: .bottom) {
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: 400, height: 400)
-                    .background(
-                        ImageAssets.onboardingHello68
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 478.1739196777344, height: 468)
-                            .clipped()
-                    )
-                Text("Email Login")
-                    .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
-                    .multilineTextAlignment(.center)
-                    .foregroundColor(ColorTokens.shade700)
-                    .frame(width: 200, height: 45.12397, alignment: .top)
-                    .offset(y: -20)
-            }.offset(y: -320)
+            SmallLinedHeading(text: "Email Login")
             
             VStack(spacing: 20) {
                 Spacer();
@@ -280,10 +286,14 @@ struct EmailRegister: View {
     @EnvironmentObject var credManager: CredManager
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var retypedPassword: String = ""
+    @State private var nickname: String = ""
+    
     @State private var errorMessage: String? = nil
     @State private var showInvalidEmail: Bool = false
     @State private var showWeakPassword: Bool = false
     @State private var showEmailInUse: Bool = false
+    @State private var showUnmatchedPasswords: Bool = false
     
     /// Navigation callbacks
     var onRegistered: () -> Void
@@ -291,6 +301,10 @@ struct EmailRegister: View {
     
     /// Handles registration with validation and error handling
     private func handleRegister() {
+        if retypedPassword != password {
+            showUnmatchedPasswords = true;
+            return;
+        }
         Task {
             do {
                 try await credManager.register(email: email, password: password)
@@ -314,52 +328,73 @@ struct EmailRegister: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            Rectangle()
-                .fill(Color.red)
-                .frame(width: 200, height: 200)
-                .cornerRadius(10)
+        ZStack(alignment: .top) {
+            FadedBackground();
+            SmallLinedHeading(text: "Sign Up")
             
-            Text("Register")
-                .font(.title2)
-                .fontWeight(.bold)
-            
-            // Error messages
-            if let error = errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.caption)
+            VStack(spacing: 20) {
+                Rectangle()
+                    .fill(.clear)
+                    .frame(height: 50)
+                Spacer()
+                // Error messages
+                if let error = errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
+                if showUnmatchedPasswords {
+                    Text("The passwords do not match.")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
+                if showInvalidEmail {
+                    Text("Please enter a valid email address")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
+                if showWeakPassword {
+                    Text("Password must be at least 6 characters")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
+                if showEmailInUse {
+                    Text("This email is already registered")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
+                VStack (spacing: 0) {
+                    FieldLabel(text: "Email Address")
+                    FieldTextbox("Enter Email Address", $email);
+                }
+                
+                VStack (spacing: 0) {
+                    FieldLabel(text: "Password")
+                    FieldTextbox("Enter Password", $password, secure: true);
+                }
+                
+                VStack (spacing: 0) {
+                    FieldLabel(text: "Re-Typed Password")
+                    FieldTextbox("Enter Password", $retypedPassword, secure: true);
+                }
+                
+                VStack (spacing: 0) {
+                    FieldLabel(text: "Nickname")
+                    FieldTextbox("Enter Nickname", $retypedPassword, secure: false);
+                }
+                
+                OnboardingNextButton(text: "Lock In", onSelect: handleRegister)
+                Spacer()
+                
             }
-            
-            if showInvalidEmail {
-                Text("Please enter a valid email address")
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
-            
-            if showWeakPassword {
-                Text("Password must be at least 6 characters")
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
-            
-            if showEmailInUse {
-                Text("This email is already registered")
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
-            
-            // Input fields
-            TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-            
-            SecureField("Password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
+            .padding()
         }
-        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 } 
 

@@ -58,9 +58,9 @@ struct HomeView: View {
     }
 }
 
-struct Home_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView().environmentObject(AppRouter());
-    }
+#Preview {
+    HomeView()
+        .environmentObject(AppRouter())
+        .environmentObject(SettingsLoader.loadSettings())
+        .environmentObject(ToDoLoader.getToDo())
 }
-

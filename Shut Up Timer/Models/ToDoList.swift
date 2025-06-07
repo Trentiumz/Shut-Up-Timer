@@ -4,6 +4,7 @@ struct ToDoEntry : Codable, Equatable, Identifiable{
     var id: UUID = UUID();
     var todo: String;
     var active: Bool = true;
+    var completed: Bool = false;
 }
 
 class ToDoList : Codable, Equatable, ObservableObject {

@@ -1,4 +1,10 @@
 import SwiftUI;
+// TODO: Fix the other questions
+// - Bottom Selector go next button should be further up, and there should be a space between the options, similar to Q3
+// - Slide to the right instead of left
+// - Smoother transition
+// - Back button doesn't work :(
+// - Fix dimensions so it works on iphone x
 
 struct SelectorList : View {
     let options: [(String, String, String)];
@@ -17,6 +23,7 @@ struct SelectorList : View {
                         selectedOption = option
                     })
             }
+            Spacer()
             OnboardingNextButton(text: nextText, onSelect: {
                 if options.contains(where: { elem in
                     elem.0 == selectedOption;
@@ -24,6 +31,8 @@ struct SelectorList : View {
                     onSelect(selectedOption);
                 }
             })
+            Spacer()
+                .frame(maxHeight: 40)
         }
     }
 }
@@ -102,10 +111,10 @@ struct OnboardingQ3: View {
             VStack {
                 BackButton(onPress: onPrevious);
                 Spacer()
-                LinedPaper(text: "You want motivation? Or humiliation?", iconAlignment: .bottomTrailing, imageHeight: 280)
+                LinedPaper(text: "You want motivation? Or humiliation?", iconAlignment: .bottomTrailing, imageHeight: 180)
                     .offset(y: -10)
-                Rectangle().fill(.clear).frame(height: 40)
                 Spacer()
+                    .frame(maxHeight: 100)
                 SelectorList(options: options, nextText: doneText, onSelect: onPress)
             }
         }
@@ -142,5 +151,5 @@ struct OnboardingQ4: View {
 }
 
 #Preview {
-    OnboardingQ2(onPress: {val in print("Selected \(val)")}, onPrevious: {})
+    OnboardingQ3(onPress: {val in print("Selected \(val)")}, onPrevious: {print("Going previous...")})
 }

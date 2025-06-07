@@ -6,4 +6,5 @@ enum ImageAssets {
     static let onboardingHello68 = Image("onboarding-hello-image 68")
     static let onboardingHello70 = Image("onboarding-hello-image 70")
     static let onboardingHello68Big = Image("onboarding-hello-image 68-big")
+    static let todoPaper39 = Image("todo-paper-image 39")
 }

@@ -1,64 +1,57 @@
 import SwiftUI
 import Supabase
 
-struct LoginView: View {
-    enum LoginState {
-        case login
-        case register
+struct LoginView : View {
+    enum LoginScreen {
+        case general;
+        case emailLogin;
+        case emailRegister;
+    }
+    @EnvironmentObject var appRouter : AppRouter;
+    @State private var curScreen = LoginScreen.general;
+    var onLoggedIn: () -> Void;
+    
+    func handleLoginSuccess() {
+        appRouter.path.removeLast();
+        onLoggedIn();
     }
     
-    @EnvironmentObject var appRouter: AppRouter
-    @State private var currentState: LoginState = .login
-    var onLoggedIn: () -> Void
+    func handleGiveUp() {
+        appRouter.path.removeLast();
+    }
     
-    var body: some View {
-        switch currentState {
-        case .login:
-            LoginScreen(
-                onLoggedIn: {
-                    appRouter.path.removeLast()
-                    onLoggedIn()
-                },
-                onRegister: {
-                    withAnimation {
-                        currentState = .register
-                    }
-                }
-            )
-        case .register:
-            RegisterScreen(
-                onRegistered: {
-                    appRouter.path.removeLast()
-                    onLoggedIn()
-                },
-                onLogin: {
-                    withAnimation {
-                        currentState = .login
-                    }
-                }
-            )
+    var body : some View {
+        switch(curScreen) {
+        case .general:
+            GeneralLogin(onLoggedIn: handleLoginSuccess, emailLoginPressed: { curScreen = .emailLogin; })
+        case .emailLogin:
+            EmailLogin(onLoggedIn: handleLoginSuccess, registerButtonPressed: { curScreen = .emailRegister; })
+        case .emailRegister:
+            EmailRegister(onRegistered: handleLoginSuccess, loginButtonPressed: { curScreen = .emailLogin; })
         }
     }
 }
 
-/// Handles user login with email/password and Google authentication
-/// 
-/// This screen provides:
-/// - Email and password input fields
-/// - Google OAuth login option
-/// - Registration navigation
-/// - Error handling for invalid credentials and other issues
-struct LoginScreen: View {
-    /// Authentication and state management
-    @EnvironmentObject var credManager: CredManager
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var errorMessage: String? = nil
-    @State private var showInvalidCredentials: Bool = false
-    
-    /// Navigation callbacks
-    var onLoggedIn: () -> Void
-    var onRegister: () -> Void
+struct FadedBackground : View {
+    var body : some View {
+        ZStack {
+            Background();
+            Rectangle()
+                .fill(.black)
+                .opacity(0.5)
+                .edgesIgnoringSafeArea(.all)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// Handles the "majority" of the login
+/// NavigationStack uses LoginQueryScreen, which may (or may not) PUSH an email login on as well!
+struct GeneralLogin : View {
+    @EnvironmentObject var appRouter: AppRouter;
+    @EnvironmentObject var credManager: CredManager;
+    var onLoggedIn: () -> Void;
+    var emailLoginPressed: () -> Void;
+    @State var errorMessage: String?;
     
     /// Handles Google OAuth login flow
     private func handleGoogleLogin() {
@@ -71,6 +64,132 @@ struct LoginScreen: View {
             }
         }
     }
+    
+    var body : some View {
+        ZStack(alignment: .top) {
+            FadedBackground()
+            
+            ZStack {
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: 400, height: 400)
+                    .background(
+                        ImageAssets.onboardingHello68
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 465.7317199707031, height: 456)
+                            .clipped()
+                    )
+                Text("Log in now to share with your friends!")
+                    .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(ColorTokens.shade700)
+                    .frame(width: 280, height: 97, alignment: .top)
+                    .offset(y: 150)
+            }.offset(y: -270)
+            
+            VStack(spacing: 20) {
+                Spacer()
+                OnboardingNextButton(text: "Apple Login", onSelect: { })
+                OnboardingNextButton(text: "Google Login", onSelect: handleGoogleLogin)
+                OnboardingNextButton(text: "Email Login", onSelect: emailLoginPressed)
+                
+                // Error messages
+                if let error = errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                Spacer()
+            }
+            
+            VStack {
+                BackButton(onPress: {})
+                    .padding(.horizontal)
+                Spacer();
+            }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct SmallLinedPaper : View {
+    var body : some View {
+        
+    }
+}
+
+struct FieldLabel : View {
+    var text: String;
+    
+    var body : some View {
+        Text(text)
+          .font(Font.custom("ArchitectsDaughter-Regular", size: 20))
+          .foregroundColor(ColorTokens.shade100)
+          .frame(maxWidth: .infinity, maxHeight: 33, alignment: .topLeading)
+          .padding(.horizontal)
+    }
+}
+
+struct FieldTextbox : View {
+    var hint: String;
+    var secure: Bool;
+    @Binding var text: String;
+    
+    init(_ defaultText: String, _ text: Binding<String>, secure: Bool = false) {
+        self.hint = defaultText;
+        self._text = text;
+        self.secure = secure;
+    }
+    
+    var body : some View {
+        ZStack {
+            if text.isEmpty {
+                Text(hint)
+                    .font(Font.custom("ArchitectsDaughter-Regular", size: 20))
+                    .foregroundColor(ColorTokens.shade300)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+            }
+            
+            Group {
+                if self.secure {
+                    TextField("", text: _text)
+                } else {
+                    SecureField("", text: _text)
+                }
+            }
+            .textFieldStyle(PlainTextFieldStyle())
+            .foregroundStyle(ColorTokens.shade100)
+            .background(.clear)
+            .font(Font.custom("ArchitectsDaughter-Regular", size: 20))
+            .padding(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 30)
+                    .inset(by: 1)
+                    .stroke(ColorTokens.shade100, lineWidth: 2)
+            )
+        }
+    }
+}
+
+/// Handles user login with email/password and Google authentication
+/// 
+/// This screen provides:
+/// - Email and password input fields
+/// - Google OAuth login option
+/// - Registration navigation
+/// - Error handling for invalid credentials and other issues
+struct EmailLogin: View {
+    /// Authentication and state management
+    @EnvironmentObject var credManager: CredManager
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var errorMessage: String? = nil
+    @State private var showInvalidCredentials: Bool = false
+    
+    /// Navigation callbacks
+    var onLoggedIn: () -> Void
+    var registerButtonPressed: () -> Void
     
     /// Handles email/password login with error handling
     private func handleEmailLogin() {
@@ -89,40 +208,63 @@ struct LoginScreen: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            Rectangle()
-                .fill(Color.red)
-                .frame(width: 200, height: 200)
-                .cornerRadius(10)
+        ZStack(alignment: .top) {
+            FadedBackground();
             
-            Text("Login")
-                .font(.title2)
-                .fontWeight(.bold)
+            ZStack(alignment: .bottom) {
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: 400, height: 400)
+                    .background(
+                        ImageAssets.onboardingHello68
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 478.1739196777344, height: 468)
+                            .clipped()
+                    )
+                Text("Email Login")
+                    .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(ColorTokens.shade700)
+                    .frame(width: 200, height: 45.12397, alignment: .top)
+                    .offset(y: -20)
+            }.offset(y: -320)
             
-            // Error messages
-            if let error = errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.caption)
+            VStack(spacing: 20) {
+                Spacer();
+                if showInvalidCredentials {
+                    Text("Invalid email or password")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                
+                VStack (spacing: 0) {
+                    FieldLabel(text: "Email Address")
+                    FieldTextbox("Enter Email Address", $email);
+                }
+                
+                VStack(spacing: 0) {
+                    FieldLabel(text: "Password")
+                    FieldTextbox("Enter Password", $password, secure: true)
+                }
+                
+                OnboardingNextButton(text: "Lock In", onSelect: handleEmailLogin)
+                
+                HStack {
+                    Text("Don’t have an account?")
+                      .frame(height: 33, alignment: .top)
+                    Button(action: registerButtonPressed) {
+                        Text("Sign Up")
+                          .frame(height: 33, alignment: .top)
+                    }
+                }
+                .font(Font.custom("ArchitectsDaughter-Regular", size: 20))
+                .foregroundColor(ColorTokens.shade100)
+                
+                Spacer()
             }
-            
-            if showInvalidCredentials {
-                Text("Invalid email or password")
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
-            
-            // Input fields
-            TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-            
-            SecureField("Password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
+            .padding(.horizontal, 40)
         }
-        .padding()
     }
 }
 
@@ -133,7 +275,7 @@ struct LoginScreen: View {
 /// - Registration submission
 /// - Login navigation
 /// - Error handling for various registration issues
-struct RegisterScreen: View {
+struct EmailRegister: View {
     /// Authentication and state management
     @EnvironmentObject var credManager: CredManager
     @State private var email: String = ""
@@ -145,7 +287,7 @@ struct RegisterScreen: View {
     
     /// Navigation callbacks
     var onRegistered: () -> Void
-    var onLogin: () -> Void
+    var loginButtonPressed: () -> Void
     
     /// Handles registration with validation and error handling
     private func handleRegister() {
@@ -220,3 +362,9 @@ struct RegisterScreen: View {
         .padding()
     }
 } 
+
+#Preview {
+    // LoginView(onLoggedIn: {})
+    // EmailLogin(onLoggedIn: {}, registerButtonPressed: {})
+    EmailRegister(onRegistered: {}, loginButtonPressed: {})
+}

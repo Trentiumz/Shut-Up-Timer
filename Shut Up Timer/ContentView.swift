@@ -66,6 +66,7 @@ struct ContentView: View {
                     case .login(let onSuccess):
                         // login screen
                         LoginView(onLoggedIn: onSuccess)
+                            .navigationBarBackButtonHidden(true)
                     case .inviteFriends:
                         // invite friends screen
                         FriendInvite()

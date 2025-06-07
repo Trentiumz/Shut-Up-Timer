@@ -23,11 +23,18 @@ struct LoginView : View {
     var body : some View {
         switch(curScreen) {
         case .general:
-            GeneralLogin(onLoggedIn: handleLoginSuccess, emailLoginPressed: { curScreen = .emailLogin; })
+            GeneralLogin(
+                onLoggedIn: handleLoginSuccess,
+                emailLoginPressed: { curScreen = .emailLogin; },
+                onBack: handleGiveUp)
         case .emailLogin:
-            EmailLogin(onLoggedIn: handleLoginSuccess, registerButtonPressed: { curScreen = .emailRegister; })
+            EmailLogin(
+                onLoggedIn: handleLoginSuccess, registerButtonPressed: { curScreen = .emailRegister; },
+                onBack: {curScreen = .general; })
         case .emailRegister:
-            EmailRegister(onRegistered: handleLoginSuccess, loginButtonPressed: { curScreen = .emailLogin; })
+            EmailRegister(
+                onRegistered: handleLoginSuccess,
+                onBack: { curScreen = .emailLogin; })
         }
     }
 }
@@ -51,6 +58,7 @@ struct GeneralLogin : View {
     @EnvironmentObject var credManager: CredManager;
     var onLoggedIn: () -> Void;
     var emailLoginPressed: () -> Void;
+    var onBack: () -> Void;
     @State var errorMessage: String?;
     
     /// Handles Google OAuth login flow
@@ -104,7 +112,7 @@ struct GeneralLogin : View {
             }
             
             VStack {
-                BackButton(onPress: {})
+                BackButton(onPress: onBack)
                     .padding(.horizontal)
                 Spacer();
             }
@@ -153,11 +161,12 @@ struct FieldTextbox : View {
             
             Group {
                 if self.secure {
-                    TextField("", text: _text)
-                } else {
                     SecureField("", text: _text)
+                } else {
+                    TextField("", text: _text)
                 }
             }
+            .textInputAutocapitalization(.never)
             .textFieldStyle(PlainTextFieldStyle())
             .foregroundStyle(ColorTokens.shade100)
             .background(.clear)
@@ -214,6 +223,7 @@ struct EmailLogin: View {
     /// Navigation callbacks
     var onLoggedIn: () -> Void
     var registerButtonPressed: () -> Void
+    var onBack: () -> Void
     
     /// Handles email/password login with error handling
     private func handleEmailLogin() {
@@ -270,6 +280,12 @@ struct EmailLogin: View {
                 Spacer()
             }
             .padding(.horizontal, 40)
+            
+            VStack {
+                BackButton(onPress: onBack)
+                    .padding(.horizontal)
+                Spacer();
+            }
         }
     }
 }
@@ -297,7 +313,7 @@ struct EmailRegister: View {
     
     /// Navigation callbacks
     var onRegistered: () -> Void
-    var loginButtonPressed: () -> Void
+    var onBack: () -> Void;
     
     /// Handles registration with validation and error handling
     private func handleRegister() {
@@ -308,6 +324,9 @@ struct EmailRegister: View {
         Task {
             do {
                 try await credManager.register(email: email, password: password)
+                if credManager.loggedIn {
+                    try await credManager.supabaseClient.rpc("change_username", params: ["new_username": nickname]).execute()
+                }
                 onRegistered()
             } catch {
                 showInvalidEmail = false
@@ -385,7 +404,7 @@ struct EmailRegister: View {
                 
                 VStack (spacing: 0) {
                     FieldLabel(text: "Nickname")
-                    FieldTextbox("Enter Nickname", $retypedPassword, secure: false);
+                    FieldTextbox("Enter Nickname", $nickname, secure: false);
                 }
                 
                 OnboardingNextButton(text: "Lock In", onSelect: handleRegister)
@@ -393,13 +412,20 @@ struct EmailRegister: View {
                 
             }
             .padding()
+            
+            VStack {
+                BackButton(onPress: onBack)
+                    .padding(.horizontal)
+                Spacer();
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 } 
 
 #Preview {
-    // LoginView(onLoggedIn: {})
+    LoginView(onLoggedIn: {})
+        .environmentObject(AppRouter())
     // EmailLogin(onLoggedIn: {}, registerButtonPressed: {})
-    EmailRegister(onRegistered: {}, loginButtonPressed: {})
+    // EmailRegister(onRegistered: {}, onBack: {} )
 }

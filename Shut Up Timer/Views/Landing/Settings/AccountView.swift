@@ -20,8 +20,10 @@ struct AccountView : View {
                     let privateProfile: [UserProfileResponse] = try await credManager.supabaseClient.rpc("get_profile").execute().value
                     
                     await MainActor.run {
-                        userPublicProfile = publicProfile[0]
-                        userProfile = privateProfile[0]
+                        if privateProfile.count > 0 && publicProfile.count > 0 {
+                            userPublicProfile = publicProfile[0]
+                            userProfile = privateProfile[0]	
+                        }
                     }
                 }
             } catch {

@@ -3,8 +3,11 @@ struct OnboardingView : View {
     enum OnboardingStage {
         case hello;
         case answerForMe;
-        case difficulty;
+        case hours;
         case network;
+        case roastLevel;
+        case difficulty;
+        case qInfo1;
         case loginQuery;
     }
     
@@ -31,6 +34,18 @@ struct OnboardingView : View {
             return leftwardAnimation;
         }
     }
+    private func transitionRightTo(_ to: OnboardingStage) {
+        transitionRight = true;
+        withAnimation {
+            curStage = to;
+        }
+    }
+    private func transitionLeftTo(_ to: OnboardingStage) {
+        transitionRight = false;
+        withAnimation {
+            curStage = to;
+        }
+    }
     
     init(onDone: @escaping () -> Void) {
         self.onDone = onDone;
@@ -45,10 +60,7 @@ struct OnboardingView : View {
                     infoText: "Welcome to your Asian parent-approved focus companion",
                     buttonText: "Hello?",
                     onPress: {
-                        transitionRight = true;
-                        withAnimation {
-                            self.curStage = .answerForMe;
-                        }
+                        transitionRightTo(.answerForMe)
                     },
                     onPrevious: nil)
                 .transition(getCurTransition())
@@ -57,40 +69,71 @@ struct OnboardingView : View {
                     infoText: "Answer 5 questions for me lah",
                     buttonText: "Yes Mother!",
                     onPress: {
-                        transitionRight = true;
-                        withAnimation {
-                            self.curStage = .difficulty
-                        }
+                        transitionRightTo(.hours)
                     },
                     onPrevious: {
-                        transitionRight = false;
-                        withAnimation {
-                            self.curStage = .hello
-                        }
+                        transitionLeftTo(.hello)
                     })
                 .transition(getCurTransition())
-            case .difficulty:
-                DifficultyScreen(onNext: { difficulty in
-                    settings.difficulty = difficulty;
-                    if(difficulty == .easy) {
-                        settings.roastLevel = .low;
-                    } else if(difficulty == .medium) {
-                        settings.roastLevel = .med;
-                    } else if(difficulty == .asian) {
-                        settings.roastLevel = .high;
-                    }
-                    withAnimation {
-                        curStage = .network;
-                    }
-                })
+            case .hours:
+                OnboardingQ1(
+                    onPress: { val in
+                        UserDefaults.standard.set(val, forKey: "onboarding-hours")
+                        transitionRightTo(.network);
+                    },
+                    onPrevious: {
+                        transitionLeftTo(.answerForMe)
+                    })
                 .transition(getCurTransition())
             case .network:
-                NetworkScreen(onNext: { _ in
-                    withAnimation {
-                        curStage = .loginQuery;
+                OnboardingQ2(
+                    onPress: { val in
+                        UserDefaults.standard.set(val, forKey: "onboarding-network")
+                        transitionRightTo(.roastLevel)
+                    },
+                    onPrevious: {
+                        transitionLeftTo(.answerForMe)
                     }
-                })
+                )
                 .transition(getCurTransition())
+            case .roastLevel:
+                OnboardingQ3(
+                    onPress: { val in
+                        settings.roastLevel = switch(val) {
+                        case "low": .low;
+                        case "med": .med;
+                        case "high": .high;
+                        default: .low
+                        }
+                        transitionRightTo(.difficulty)
+                    },
+                    onPrevious: {
+                        transitionLeftTo(.network)
+                    }
+                )
+                .transition(getCurTransition())
+            case .difficulty:
+                OnboardingQ4(
+                    onPress: { val in
+                        settings.difficulty = switch(val) {
+                        case "easy": .easy;
+                        case "medium": .medium;
+                        case "asian": .asian;
+                        default: .easy
+                        }
+                        transitionRightTo(.qInfo1);
+                    },
+                    onPrevious: {
+                        transitionLeftTo(.roastLevel);
+                    }
+                )
+                .transition(getCurTransition())
+            case .qInfo1:
+                OnboardingInfo1(onPress: {
+                    transitionRightTo(.loginQuery)
+                }, onPrevious: {
+                    transitionLeftTo(.difficulty)
+                })
             case .loginQuery:
                 LoginQueryView(onNext: { selection in
                     withAnimation {

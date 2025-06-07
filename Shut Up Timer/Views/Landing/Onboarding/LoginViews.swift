@@ -121,10 +121,6 @@ struct LoginScreen: View {
             SecureField("Password", text: $password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
-            // Action buttons
-            OnboardingSelector(text: "Login with Email", onPress: handleEmailLogin)
-            OnboardingSelector(text: "Login with Google", onPress: handleGoogleLogin)
-            OnboardingSelector(text: "Register", onPress: onRegister)
         }
         .padding()
     }
@@ -220,9 +216,6 @@ struct RegisterScreen: View {
             SecureField("Password", text: $password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
-            // Action buttons
-            OnboardingSelector(text: "Register", onPress: handleRegister)
-            OnboardingSelector(text: "Back to Login", onPress: onLogin)
         }
         .padding()
     }

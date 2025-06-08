@@ -1,10 +1,9 @@
 import SwiftUI
 
-// TODO: Sync up settings (particularly for duration) between the different parts (central settings object??)
-
 struct HomeView: View {
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var settings: Settings;
+    @EnvironmentObject var sessions: Sessions;
     
     @State private var expandedTodo = false;
     @State private var selectedTodo = UUID();
@@ -13,54 +12,71 @@ struct HomeView: View {
     }
     
     var body: some View {
-        VStack {
-            ZStack {
-                VStack {
-                    Spacer().layoutPriority(0.5)
-                    
-                    // display the timer selector
-                    CountdownSelectorView(timerParams: $settings.timerParam)
-                    
-                    // Circle button in the center of the screen
-                    Button(action: {
-                        // Action for the button (can navigate or do something)
-                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo);
-                    }) {
-                        Text("Start Cooking")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .background(.gray)
-                            .cornerRadius(10)
-                    }
-                    Spacer().layoutPriority(0.4)
-                }.overlay {
-                    // if todo is in focus, the blur this
-                    if expandedTodo {
-                        Color.white.opacity(0.4)
+        ZStack {
+            Background()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            VStack {
+                HStack {
+                    Text("\(sessions.getIQ()) IQ")
+                      .font(Font.custom("Architects Daughter", size: 30))
+                      .foregroundColor(ColorTokens.shade700)
+                    Spacer()
+                }
+                Spacer()
+                    .frame(maxHeight: 220)
+                
+                // display the timer selector
+                CountdownSelectorView(timerParams: $settings.timerParam)
+                
+                OnboardingNextButton(text: "Start Cooking", onSelect: {
+                    router.toTimerState(params: settings.timerParam, todoID: selectedTodo)
+                })
+                
+                Spacer()
+            }
+            .safeAreaPadding(.all)
+            
+            Button(action: {
+                if expandedTodo {
+                    withAnimation {
+                        expandedTodo = false;
                     }
                 }
-                
-                // todo list at the top
-                VStack {
-                    HStack {
-                        TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
-                            
-                        Spacer()
-                    }
+            }) {
+                Rectangle()
+                    .fill(expandedTodo ? Color.black.opacity(0.4) : .clear)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .allowsHitTesting(expandedTodo)
+            .edgesIgnoringSafeArea(.all)
+            
+            VStack {
+                Spacer()
+                    .frame(maxHeight: 40)
+                HStack {
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                    
+                    Spacer()
+                }
+                if expandedTodo {
+                    Spacer()
+                        .frame(maxHeight: 100)
+                } else {
                     Spacer()
                 }
             }
+            .safeAreaPadding(.all)
         }
-        .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
 #Preview {
-    HomeView()
+    ContentView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings())
         .environmentObject(ToDoLoader.getToDo())
+        .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
 }

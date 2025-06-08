@@ -6,21 +6,19 @@ struct TodoView : View {
     
     // tracking current list items & what to add
     @EnvironmentObject var todoList: ToDoList;
-    @State private var newTaskText: String;
+    @State private var textInputModalShowed: Bool = false;
     
     @Binding private var selectedTodo: UUID;
     
     init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>) {
         _expanded = expanded;
         _selectedTodo = selectedTodo;
-        newTaskText = "";
     }
     
     // adds a task and saves it
-    func addTask() {
+    func addTask(_ newTaskText: String) {
         DispatchQueue.main.async {
             todoList.lst.append(ToDoEntry(todo: newTaskText))
-            newTaskText = ""
         }
     }
     
@@ -31,7 +29,13 @@ struct TodoView : View {
     
     var body : some View {
         ZStack(alignment: .top) {
-            TodoPaper(width: expanded ? 350 : 150)
+            Button(action: {
+                withAnimation {
+                    expanded = !expanded;
+                }
+            }) {
+                TodoPaper(width: expanded ? 350 : 150)
+            }
             VStack {
                 Spacer()
                     .frame(height: expanded ? 80 : 25)
@@ -39,8 +43,30 @@ struct TodoView : View {
                     VStack {
                         List {
                             // list of items
-                            ForEach(todoList.lst.indices.filter {todoList.lst[$0].active}, id: \.self) { index in
-                                TodoEntryView(entry: $todoList.lst[index], selected: selectedTodo == todoList.lst[index].id, onSelect: { selectedTodo=todoList.lst[index].id})
+                            ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && !todoList.lst[$0].completed}, id: \.self) { index in
+                                TodoEntryView(
+                                    entry: $todoList.lst[index],
+                                    selected: selectedTodo == todoList.lst[index].id,
+                                    onSelect: { selectedTodo=todoList.lst[index].id},
+                                    onUnselect: {
+                                        if selectedTodo == todoList.lst[index].id {
+                                            selectedTodo = UUID();
+                                        }
+                                    })
+                                    .listRowInsets(EdgeInsets())
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.leading, 0)
+                            }
+                            ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && todoList.lst[$0].completed}, id: \.self) { index in
+                                TodoEntryView(
+                                    entry: $todoList.lst[index],
+                                    selected: selectedTodo == todoList.lst[index].id,
+                                    onSelect: { selectedTodo=todoList.lst[index].id},
+                                    onUnselect: {
+                                        if selectedTodo == todoList.lst[index].id {
+                                            selectedTodo = UUID();
+                                        }
+                                    })
                                     .listRowInsets(EdgeInsets())
                                     .frame(maxWidth: .infinity)
                                     .padding(.leading, 0)
@@ -52,14 +78,30 @@ struct TodoView : View {
                         .frame(maxHeight: .infinity)
                         
                         // when expanded, allow adding tasks
-                        if expanded {
-                            HStack {
-                                TextField("Add a new Task", text: $newTaskText, onCommit: addTask)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .padding()
-                                Spacer()
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                textInputModalShowed = true;
+                            }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.blue)
+                                        .frame(width: 50, height: 50)
+                                    Image(systemName: "plus")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 24, weight: .bold))
+                                }
+                                .transition(.opacity)
+                            }.sheet(isPresented: $textInputModalShowed) {
+                                TextInputModal(onSave: { task in
+                                    addTask(task)
+                                }, onCancel: {textInputModalShowed = false}
+                                )
+                                .presentationDetents([.height(200)])
                             }
                         }
+                        .opacity(expanded ? 1 : 0)
+                        .transition(.opacity)
                         
                         Spacer()
                     }.frame(maxHeight: .infinity)
@@ -71,19 +113,53 @@ struct TodoView : View {
     }
 }
 
+struct TextInputModal: View {
+    @State var inputText: String = ""
+    var onSave: (String) -> Void
+    var onCancel: () -> Void = {}
+
+    var body: some View {
+        VStack {
+            TextField("Enter your task...", text: $inputText, onCommit: {
+                onSave(inputText)
+            })
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+            Spacer()
+        }
+        .padding()
+    }
+}
+
+
+struct Checkbox: View {
+    var checked: Bool;
+
+    var body: some View {
+        Image(systemName: checked ? "checkmark.square.fill" : "square")
+            .foregroundColor(checked ? .blue : .gray)
+            .font(.title2)
+    }
+}
+
 struct TodoEntryView : View {
     @Binding private var entry: ToDoEntry;
     var selected: Bool;
     var onSelect: () -> Void;
+    var onUnselect: () -> Void;
     
-    init(entry: Binding<ToDoEntry>, selected: Bool, onSelect: @escaping () -> Void) {
+    init(entry: Binding<ToDoEntry>, selected: Bool, onSelect: @escaping () -> Void, onUnselect: @escaping () -> Void) {
         self._entry = entry;
         self.selected = selected;
         self.onSelect = onSelect;
+        self.onUnselect = onUnselect;
     }
     
     var body : some View {
         HStack {
+            if (selected) {
+                Checkbox(checked: selected)
+            }
             Text(entry.todo)
               .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
               .strikethrough(entry.completed)
@@ -95,15 +171,16 @@ struct TodoEntryView : View {
             Spacer()
         }
         .onTapGesture(count: 2) {
-            print("Removing entry \(entry.todo)")
             withAnimation {
+                onUnselect();
                 entry.completed = !entry.completed;
             }
         }
         .onTapGesture(count: 1) {
-            print("Selecting entry \(entry.todo)")
-            withAnimation {
-                onSelect()
+            if !entry.completed {
+                withAnimation {
+                    onSelect()
+                }
             }
         }
         .swipeActions {
@@ -139,11 +216,18 @@ struct TodoPaper : View {
     }
 }
 
-#Preview {
-//    TodoPaper(width: 200)
-//        .frame(height: 300, alignment: .top)
-//        .clipped()
+struct TodoPreview : PreviewProvider {
+    struct Wrapper : View {
+        @State var selectedTodo: UUID = UUID()
+        @State var expanded: Bool = true;
+        
+        var body : some View {
+            TodoView(expanded: $expanded, selectedTodo: $selectedTodo)
+                .environmentObject(ToDoList(lst: [ToDoEntry(todo: "Hello"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More")]))
+        }
+    }
     
-    TodoView(expanded: .constant(true), selectedTodo: .constant(UUID()))
-        .environmentObject(ToDoList(lst: [ToDoEntry(todo: "Hello"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More")]))
+    static var previews: some View {
+        Wrapper()
+    }
 }

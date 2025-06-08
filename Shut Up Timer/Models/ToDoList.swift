@@ -15,7 +15,7 @@ class ToDoList : Codable, Equatable, ObservableObject {
     }
     var onUpdate: (_: ToDoList) -> Void = {val in };
     
-    init(lst: [ToDoEntry], onUpdate: (@escaping (_: ToDoList) -> Void) = {val in }) {
+    init(lst: [ToDoEntry], onUpdate: (@escaping (ToDoList) -> Void) = {val in }) {
         self.lst = lst;
         self.onUpdate = onUpdate;
     }
@@ -46,25 +46,27 @@ class ToDoList : Codable, Equatable, ObservableObject {
 }
 
 class ToDoLoader {
-    private static var defaultList = ToDoList(lst: [])
     
     static func saveToDo(todo: ToDoList) {
         if let encoded = try? JSONEncoder().encode(todo) {
             UserDefaults.standard.set(encoded, forKey: "todo-list")
         }
     }
-    static func getToDo(onUpdate: @escaping (_: ToDoList) -> Void = {val in }) -> ToDoList {
+    
+    static func getToDo(onUpdate: @escaping (ToDoList) -> Void = {val in }) -> ToDoList {
         let data = UserDefaults.standard.data(forKey: "todo-list")
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(ToDoList.self, from: liveData) {
                 decoded.onUpdate = onUpdate;
                 return decoded;
             }
-            print("Incorrect Data Type")
-            return defaultList
+            print("Incorrect Data Type (todo list), got \(liveData)")
+            let defaultList = ToDoList(lst: [], onUpdate: onUpdate);
+            return defaultList;
         } else {
+            let defaultList =  ToDoList(lst: [], onUpdate: onUpdate);
             saveToDo(todo: defaultList)
-            return defaultList
+            return defaultList;
         }
     }
 }

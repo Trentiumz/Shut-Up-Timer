@@ -15,4 +15,5 @@ enum ImageAssets {
         Image("pan-fry-frame-4"),
         Image("pan-fry-frame-5"),
     ]
+    static let timerSliderLogo = Image("timer-slider-logo")
 }

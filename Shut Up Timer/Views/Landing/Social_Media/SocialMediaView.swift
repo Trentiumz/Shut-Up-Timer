@@ -5,19 +5,21 @@ struct SocialMediaView: View {
     @State private var profiles: [UserPublicProfileResponse] = []
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            if profiles.isEmpty {
-                Text("No friends yet!")
-                    .foregroundColor(.secondary)
-            } else {
-                ForEach(profiles.indices, id: \.self) { index in
-                    PublicProfileView(profile: profiles[index])
-                    RoastListView(profile: profiles[index])
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                if profiles.isEmpty {
+                    Text("No friends yet!")
+                        .foregroundColor(.secondary)
+                } else {
+                    ForEach(profiles.indices, id: \.self) { index in
+                        PublicProfileView(profile: profiles[index])
+                        RoastListView(profile: profiles[index])
+                    }
                 }
             }
+            .frame(maxWidth: .infinity)
+            .padding()
         }
-        .frame(maxWidth: .infinity)
-        .padding()
         .onAppear {
             Task {
                 await fetchFriendsAndProfiles()
@@ -32,6 +34,7 @@ struct SocialMediaView: View {
                 .execute()
                 .value
             
+            var tempProfileList: [UserPublicProfileResponse] = []
             for friend in friends {
                 let id = friend.friend_user_id // adjust this to match actual key
                 let userProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient
@@ -42,10 +45,12 @@ struct SocialMediaView: View {
                 // assuming the RPC returns a single-element list
                 if let profile = userProfile.first {
                     await MainActor.run {
-                        profiles.append(profile)
+                        // TODO: get rid of dependence on username
+                        tempProfileList.append(profile)
                     }
                 }
             }
+            profiles = tempProfileList;
         } catch {
             print("Error fetching profiles: \(error)")
         }

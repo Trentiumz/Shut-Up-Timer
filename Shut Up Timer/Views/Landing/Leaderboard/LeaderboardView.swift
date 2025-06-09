@@ -14,27 +14,29 @@ struct LeaderboardView : View {
     }
     
     var body: some View {
-        VStack {
-            Picker("Leaderboard", selection: $selectedTab) {
-                ForEach(LeaderboardTab.allCases) { tab in
-                    Text(tab.rawValue).tag(tab)
+        ScrollView {
+            VStack {
+                Picker("Leaderboard", selection: $selectedTab) {
+                    ForEach(LeaderboardTab.allCases) { tab in
+                        Text(tab.rawValue).tag(tab)
+                    }
                 }
-            }
-            .pickerStyle(.segmented)
-            .padding()
+                .pickerStyle(.segmented)
+                .padding()
 
-            if credManager.loggedIn {
-                if selectedTab == .friends {
-                    ForEach(friendLB) { user in
-                        LBRowView(name: user.name, pts: user.pts)
+                if credManager.loggedIn {
+                    if selectedTab == .friends {
+                        ForEach(friendLB) { user in
+                            LBRowView(name: user.name, pts: user.pts)
+                        }
+                    } else {
+                        ForEach(worldLB) { user in
+                            LBRowView(name: user.name, pts: user.pts)
+                        }
                     }
                 } else {
-                    ForEach(worldLB) { user in
-                        LBRowView(name: user.name, pts: user.pts)
-                    }
+                    Text("Log in to see your friends' leaderboard")
                 }
-            } else {
-                Text("Log in to see your friends' leaderboard")
             }
         }
         .onAppear {

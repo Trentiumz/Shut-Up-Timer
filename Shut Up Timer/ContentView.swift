@@ -9,6 +9,7 @@ struct ContentView: View {
     @State var selectedScreen: LandingScreen = .home;
     
     init() {
+        
     }
     
     var body: some View {
@@ -28,45 +29,46 @@ struct ContentView: View {
                         DisappointmentView().tag(LandingScreen.disappointment)
                         AccountView().tag(LandingScreen.account)
                     }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
                     BottomBarView(selectedScreen: $selectedScreen);
                 }
-            }	
-                .environmentObject(router)
-                .onAppear{
-                    if let sessionInProgress = TempSessionLoader.getSession() {
-                        // if there is an active session, navigate to the timer
-                        router.toTimerState(sessionInProgress: sessionInProgress)
-                    }
+            }
+            .environmentObject(router)
+            .onAppear{
+                if let sessionInProgress = TempSessionLoader.getSession() {
+                    // if there is an active session, navigate to the timer
+                    router.toTimerState(sessionInProgress: sessionInProgress)
                 }
-                .navigationDestination(for: PathElement.self) { elem in
-                    switch elem.route {
-                    case .timer(let timerModel):
-                        // timer started
-                        TimerView(timerModel: timerModel).environmentObject(router)
-                            .navigationBarBackButtonHidden(true)
-                    case .timerCompleted(let seconds):
-                        // timer completed
-                        TimerCompletedView(timeLocked: seconds)
-                            .environmentObject(router)
-                            .navigationBarBackButtonHidden(true)
-                    case .timerFailed(let seconds, let roast):
-                        // timer failed
-                        TimerFailedView(timeLocked: seconds, roast: roast)
-                            .environmentObject(router)
-                            .navigationBarBackButtonHidden(true)
-                    case .login(let onSuccess):
-                        // login screen
-                        LoginView(onLoggedIn: onSuccess)
-                            .navigationBarBackButtonHidden(true)
-                    case .inviteFriends:
-                        // invite friends screen
-                        FriendInvite()
-                            .environmentObject(router)
-                            .navigationBarBackButtonHidden(false)
-                    default:
-                        Text("Invalid")
-                    }
+            }
+            .navigationDestination(for: PathElement.self) { elem in
+                switch elem.route {
+                case .timer(let timerModel):
+                    // timer started
+                    TimerView(timerModel: timerModel).environmentObject(router)
+                        .navigationBarBackButtonHidden(true)
+                case .timerCompleted(let seconds):
+                    // timer completed
+                    TimerCompletedView(timeLocked: seconds)
+                        .environmentObject(router)
+                        .navigationBarBackButtonHidden(true)
+                case .timerFailed(let seconds, let roast):
+                    // timer failed
+                    TimerFailedView(timeLocked: seconds, roast: roast)
+                        .environmentObject(router)
+                        .navigationBarBackButtonHidden(true)
+                case .login(let onSuccess):
+                    // login screen
+                    LoginView(onLoggedIn: onSuccess)
+                        .navigationBarBackButtonHidden(true)
+                case .inviteFriends:
+                    // invite friends screen
+                    FriendInvite()
+                        .environmentObject(router)
+                        .navigationBarBackButtonHidden(false)
+                default:
+                    Text("Invalid")
                 }
+            }
         }.onAppear {
             requestNotificationPermission()
         }

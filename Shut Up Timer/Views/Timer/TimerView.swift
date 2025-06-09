@@ -127,6 +127,9 @@ struct TimerView: View {
                 Spacer()
                     .frame(maxHeight: 40)
                 HStack {
+                    if todoExpanded {
+                        Spacer();
+                    }
                     TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
                     Spacer()
                 }

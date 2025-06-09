@@ -30,13 +30,11 @@ class TimerViewModel: ObservableObject, MVVM {
     
     // starts a timer that counts down totTime (if we don't already have one)
     func startSession() {
-        if let timer = self.timer {
-            timer.invalidate();
-            self.timer = nil;
-        }
-        curSession.resume();
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            self.curSession.tick(phase: self.curScenePhase)
+        if timer == nil {
+            curSession.resume();
+            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                self.curSession.tick(phase: self.curScenePhase)
+            }
         }
     }
     

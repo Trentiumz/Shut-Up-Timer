@@ -36,7 +36,7 @@ struct CountdownSelectorView : View{
                 VStack(spacing: 0) {
                     Text("\(formatTime(duration))")
                         .font(FontTokens.architectsDaughter(size: 60))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(ColorTokens.shade100)
                     
                     // panfry button!
                     Button (action: {
@@ -45,12 +45,6 @@ struct CountdownSelectorView : View{
                         
                         PanFrame(0, 240, 220)
                             .padding(.horizontal)
-                            .foregroundStyle(.orange)
-                            .background(
-                                ImageAssets.panFryFrames[0]
-                                    .resizable()
-                                    .frame(width: 150, height: 150)
-                            )
                             .frame(width: 240, height: 160, alignment: .bottom)
                     }.sheet(isPresented: $showingPicker) {
                         DurationPickerModal(duration: $duration)

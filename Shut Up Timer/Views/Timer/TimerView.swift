@@ -28,7 +28,7 @@ struct TimerView: View {
         )
     }
     
-    func failTimer() {
+    func failureTransition() {
         TempSessionLoader.clearSession();
         timerViewModel.stopSession();
         let chosenRoast = getRandomRoast();
@@ -37,12 +37,20 @@ struct TimerView: View {
         sessions.sessions.append(curSession.getSession(endTime: Date()));
     }
 
-    func succeedTimer() {
+    func successTransition() {
         TempSessionLoader.clearSession();
 
         timerViewModel.stopSession();
         router.toTimerCompleted(timerModel: timerViewModel);
         sessions.sessions.append(curSession.getSession(endTime: Date()));
+    }
+    
+    func handleStatus(_ curStatus: SessionStatus) {
+        if curStatus == .succeeded {
+            successTransition()
+        } else if curStatus == .failed {
+            failureTransition()
+        }
     }
     
     // Schedule local notification after 2 seconds of leaving
@@ -65,52 +73,34 @@ struct TimerView: View {
     
     var body: some View {
         ZStack {
+            Background()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             VStack {
                 Spacer()
+                
                 Text("\(formatTime(curSession.curParam.getTotTime()))")
-                    .frame(width: 150, height: 150)
-                    .padding()
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.orange)
-                    .background(.gray)
-                    .cornerRadius(10)
+                    .font(FontTokens.architectsDaughter(size: 60))
+                    .foregroundStyle(ColorTokens.shade100)
                 
-                Button(action: {
-                    switch(curSession.status) {
-                    case .inProgress:
-                        timerViewModel.stopSession()
-                        self.timerViewModel.saveTempSession();
-                    case .paused:
-                        timerViewModel.startSession()
-                        self.timerViewModel.saveTempSession();
-                    default: break;
-                    }
-                }) {
-                    Text(curSession.status == .inProgress ? "Pause Timer" : "Start Timer")
-                        .font(.title)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(curSession.status == .inProgress ? Color.red : Color.green)
-                        .cornerRadius(10)
-                }
-                .padding(.top, 20)
+                PanFrame(0, 240, 240)
+                    .padding(.horizontal)
+                    .background(
+                        ImageAssets.panFryFrames[0]
+                            .resizable()
+                            .frame(width: 150, height: 150)
+                    )
+                    .frame(width: 240, height: 160, alignment: .bottom)
                 
-                Button(action: {
+                Text("Farming IQ points...")
+                    .font(FontTokens.architectsDaughter(size: 30))
+                    .foregroundStyle(ColorTokens.shade100)
+                
+                OnboardingNextButton(text: "Give Up", onSelect: {
                     quitExpanded = true;
-                }) {
-                    Text("Give up")
-                        .font(.title)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.gray)
-                        .cornerRadius(10)
-                }
-                .sheet(isPresented: $quitExpanded) {
+                }).sheet(isPresented: $quitExpanded) {
                     VStack {
                         Slider(onActivate: {
                             curSession.failTimer();
-                            failTimer();
                             quitExpanded = false;
                         }, message: "Do you really want to give up?")
                     }
@@ -121,19 +111,44 @@ struct TimerView: View {
             .edgesIgnoringSafeArea(.bottom)
             .padding()
             
+            Button(action: {
+                if todoExpanded {
+                    withAnimation {
+                        todoExpanded = false;
+                    }
+                }
+            }) {
+                Rectangle()
+                    .fill(todoExpanded ? Color.black.opacity(0.4) : .clear)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .allowsHitTesting(todoExpanded)
+            .edgesIgnoringSafeArea(.all)
+            
             VStack {
+                Spacer()
+                    .frame(maxHeight: 40)
                 HStack {
                     TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
                     Spacer()
                 }
-                Spacer()
+                if todoExpanded {
+                    Spacer()
+                        .frame(maxHeight: 40)
+                } else {
+                    Spacer()
+                }
             }
         }
         .onAppear {
-            // Keep screen awake
-            UIApplication.shared.isIdleTimerDisabled = true
-            timerViewModel.startSession()
+            // save starting state
             self.timerViewModel.saveTempSession();
+            UIApplication.shared.isIdleTimerDisabled = true
+            
+            // begin the session & initial updates (for continuation)
+            timerViewModel.startSession()
+            curSession.tick(phase: .active)
+            handleStatus(curSession.status);
         }
         .onDisappear {
             // Allow screen to sleep when leaving view
@@ -141,14 +156,16 @@ struct TimerView: View {
             cancelNotifications()
             timerViewModel.destroy()
         }
-        .onReceive(timerViewModel.$curSession) { val in
-            if val.status == .succeeded {
-                succeedTimer()
-            } else if val.status == .failed {
-                failTimer()
-            }
+        .onChange(of: curSession.status) { oldVal, newVal in
+            handleStatus(newVal);
         }
         .onChange(of: scenePhase) {
+            if curSession.status == .inProgress {
+                print("In progress scene change -> \(scenePhase)")
+                if scenePhase == .background {
+                    scheduleComeBackNotification();
+                }
+            }
             timerViewModel.updateScenePhase(scenePhase);
         }
     }

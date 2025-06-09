@@ -2,9 +2,9 @@ import SwiftUI
 
 struct TimerCompletedView: View {
     @EnvironmentObject var router: AppRouter;
-    private var timeLocked: Int;
+    private var timeLocked: TimeInterval;
     
-    init(timeLocked: Int) {
+    init(timeLocked: TimeInterval) {
         self.timeLocked = timeLocked;
     }
     

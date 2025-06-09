@@ -25,7 +25,7 @@ struct CountdownSelectorView : View{
     func syncParamsToVars() {
         switch timerType {
         case .countdown:
-            timerParams = .countdown(seconds: Int(duration.rounded()));
+            timerParams = .countdown(seconds: duration);
         }
     }
     

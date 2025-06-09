@@ -37,7 +37,7 @@ struct TimerSelector : View {
             } else {
                 cdDuration = 0;
             }
-            timerParam = .countdown(seconds: Int(cdDuration.rounded()));
+            timerParam = .countdown(seconds: cdDuration.rounded());
         }
     }
     

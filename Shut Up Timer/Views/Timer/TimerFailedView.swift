@@ -2,10 +2,10 @@ import SwiftUI
 
 struct TimerFailedView: View {
     @EnvironmentObject var router: AppRouter;
-    private var timeLocked: Int;
+    private var timeLocked: TimeInterval;
     private var roast: String?;
     
-    init(timeLocked: Int, roast: String? = nil) {
+    init(timeLocked: TimeInterval, roast: String? = nil) {
         self.timeLocked = timeLocked;
         self.roast = roast;
     }

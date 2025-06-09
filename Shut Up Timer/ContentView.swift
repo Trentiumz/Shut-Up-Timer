@@ -35,24 +35,14 @@ struct ContentView: View {
                 .onAppear{
                     if let sessionInProgress = TempSessionLoader.getSession() {
                         // if there is an active session, navigate to the timer
-                        let curRoast = getRandomRoast();
-                        sessions.sessions.append(
-                            SessionEntry(tasks: sessionInProgress.tasks,
-                                         started: sessionInProgress.startTime,
-                                         ended: sessionInProgress.lasUpdate,
-                                         timeLocked: TimeInterval(sessionInProgress.timeLocked),
-                                         plannedTime: TimeInterval(sessionInProgress.plannedTime),
-                                         success: false,
-                                         roast: curRoast));
-                        TempSessionLoader.clearSession();
-                        router.toTimerFailed(totTime: Int(sessionInProgress.plannedTime), roast: curRoast);
+                        router.toTimerState(sessionInProgress: sessionInProgress)
                     }
                 }
                 .navigationDestination(for: PathElement.self) { elem in
                     switch elem.route {
-                    case .timer:
+                    case .timer(let timerModel):
                         // timer started
-                        TimerView(timerViewModel: router.timerViewModel, selectedTodo: $router.timerViewModel.curTodo).environmentObject(router)
+                        TimerView(timerModel: timerModel).environmentObject(router)
                             .navigationBarBackButtonHidden(true)
                     case .timerCompleted(let seconds):
                         // timer completed

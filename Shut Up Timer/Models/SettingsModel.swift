@@ -16,7 +16,14 @@ enum RoastLevel : String, Codable, CaseIterable, Identifiable {
 }
 
 enum TimerParam : Codable, Equatable {
-    case countdown (seconds: Int);
+    case countdown (seconds: TimeInterval);
+    
+    func getTotTime() -> TimeInterval {
+        return switch(self) {
+        case .countdown(let seconds):
+            seconds
+        }
+    }
 }
 enum TimerType: String, Codable, CaseIterable, Identifiable {
     case countdown;

@@ -4,6 +4,8 @@ import UserNotifications
 struct TimerView: View {
     // holds the model
     @ObservedObject var timerViewModel: TimerViewModel;
+    @ObservedObject var curSession: SessionInProgress; // this is exactly timerViewModel.curSession
+    
     // access for page transitions
     @EnvironmentObject var router: AppRouter;
     @Environment(\.scenePhase) private var scenePhase;
@@ -17,43 +19,30 @@ struct TimerView: View {
 
     @EnvironmentObject var sessions: Sessions;
     
-    // New state for background countdown
-    @State private var lastOnScreen: Double = Date().timeIntervalSince1970
-    @State private var checkerTimer: Timer? = nil
-    
-    init(timerViewModel: TimerViewModel, selectedTodo: Binding<UUID>) {
-        self.timerViewModel = timerViewModel;
-        self._selectedTodo = selectedTodo;
+    init(timerModel: TimerViewModel) {
+        self.timerViewModel = timerModel;
+        self.curSession = timerModel.curSession;
+        self._selectedTodo = Binding(
+            get: { timerModel.selectedTodo },
+            set: { timerModel.selectedTodo = $0 }
+        )
     }
     
     func failTimer() {
         TempSessionLoader.clearSession();
-
-        timerViewModel.stopTimer()
+        timerViewModel.stopSession();
         let chosenRoast = getRandomRoast();
-        router.toTimerFailed(totTime: timerViewModel.totTime, roast: chosenRoast);
-        sessions.sessions.append(
-            SessionEntry(tasks: timerViewModel.tasks,
-                         started: timerViewModel.startTime,
-                         ended: Date(),
-                         timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
-                         plannedTime: TimeInterval(timerViewModel.totTime),
-                         success: false,
-                         roast: chosenRoast));
+        
+        router.toTimerFailed(timerModel: timerViewModel, roast: chosenRoast);
+        sessions.sessions.append(curSession.getSession(endTime: Date()));
     }
 
     func succeedTimer() {
         TempSessionLoader.clearSession();
 
-        timerViewModel.stopTimer();
-        router.toTimerCompleted(totTime: timerViewModel.totTime);
-        sessions.sessions.append(
-            SessionEntry(tasks: timerViewModel.tasks,
-                         started: timerViewModel.startTime,
-                         ended: Date(),
-                         timeLocked: Double(timerViewModel.totTime - timerViewModel.timeLeft),
-                         plannedTime: TimeInterval(timerViewModel.totTime),
-                         success: true));
+        timerViewModel.stopSession();
+        router.toTimerCompleted(timerModel: timerViewModel);
+        sessions.sessions.append(curSession.getSession(endTime: Date()));
     }
     
     // Schedule local notification after 2 seconds of leaving
@@ -78,7 +67,7 @@ struct TimerView: View {
         ZStack {
             VStack {
                 Spacer()
-                Text("\(formatTime(Double(timerViewModel.timeLeft)))")
+                Text("\(formatTime(curSession.curParam.getTotTime()))")
                     .frame(width: 150, height: 150)
                     .padding()
                     .font(.title)
@@ -88,19 +77,21 @@ struct TimerView: View {
                     .cornerRadius(10)
                 
                 Button(action: {
-                    if timerViewModel.isRunning {
-                        timerViewModel.stopTimer()
+                    switch(curSession.status) {
+                    case .inProgress:
+                        timerViewModel.stopSession()
                         self.timerViewModel.saveTempSession();
-                    } else {
-                        timerViewModel.startTimer()
+                    case .paused:
+                        timerViewModel.startSession()
                         self.timerViewModel.saveTempSession();
+                    default: break;
                     }
                 }) {
-                    Text(timerViewModel.isRunning ? "Pause Timer" : "Start Timer")
+                    Text(curSession.status == .inProgress ? "Pause Timer" : "Start Timer")
                         .font(.title)
                         .foregroundColor(.white)
                         .padding()
-                        .background(timerViewModel.isRunning ? Color.red : Color.green)
+                        .background(curSession.status == .inProgress ? Color.red : Color.green)
                         .cornerRadius(10)
                 }
                 .padding(.top, 20)
@@ -118,6 +109,7 @@ struct TimerView: View {
                 .sheet(isPresented: $quitExpanded) {
                     VStack {
                         Slider(onActivate: {
+                            curSession.failTimer();
                             failTimer();
                             quitExpanded = false;
                         }, message: "Do you really want to give up?")
@@ -140,57 +132,24 @@ struct TimerView: View {
         .onAppear {
             // Keep screen awake
             UIApplication.shared.isIdleTimerDisabled = true
-            self.timerViewModel.startTimer()
-            checkerTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                if timerViewModel.isRunning {
-                    let currentTime = Date().timeIntervalSince1970
-                    if currentTime - lastOnScreen > 20 {
-                        failTimer()
-                    }
-                    if scenePhase == .active {
-                        lastOnScreen = Date().timeIntervalSince1970
-                    }
-                } else {
-                    checkerTimer?.invalidate()
-                    checkerTimer = nil
-                }
-            }
-            
+            timerViewModel.startSession()
             self.timerViewModel.saveTempSession();
         }
         .onDisappear {
             // Allow screen to sleep when leaving view
             UIApplication.shared.isIdleTimerDisabled = false
             cancelNotifications()
-            checkerTimer?.invalidate()
-            checkerTimer = nil
+            timerViewModel.destroy()
         }
-        .onChange(of: timerViewModel.timeLeft) {
-            if timerViewModel.timeLeft == 0 {
+        .onReceive(timerViewModel.$curSession) { val in
+            if val.status == .succeeded {
                 succeedTimer()
+            } else if val.status == .failed {
+                failTimer()
             }
         }
         .onChange(of: scenePhase) {
-            switch scenePhase {
-            case .active:
-                // User came back, cancel fail timer & notifications
-                cancelNotifications()
-                self.timerViewModel.saveTempSession();
-                
-            case .inactive:
-                // User left app, start 20 second fail timer and schedule notification after 2 seconds
-                if timerViewModel.isRunning {
-                    scheduleComeBackNotification()
-                }
-                self.timerViewModel.saveTempSession();
-                
-            case .background:
-                // Similar to inactive, can also handle if needed
-                self.timerViewModel.saveTempSession();
-                
-            @unknown default:
-                break
-            }
+            timerViewModel.updateScenePhase(scenePhase);
         }
     }
 }

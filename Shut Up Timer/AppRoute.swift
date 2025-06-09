@@ -2,9 +2,9 @@ import SwiftUI;
 
 enum AppRoute {
     case home
-    case timer
-    case timerCompleted(seconds: Int)
-    case timerFailed(seconds: Int, roast: String? = nil)
+    case timer(timerModel: TimerViewModel)
+    case timerCompleted(seconds: TimeInterval)
+    case timerFailed(seconds: TimeInterval, roast: String? = nil)
     case login(onSuccess: () -> Void)
     case inviteFriends
 }

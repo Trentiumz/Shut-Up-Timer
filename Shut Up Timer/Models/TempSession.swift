@@ -1,20 +1,10 @@
 import SwiftUI
 
-struct TempSession: Codable, Equatable {
-    var tasks: [TaskLog]
-    var startTime: Date
-    var lasUpdate: Date
-    var plannedTime: TimeInterval
-    var isPaused: Bool
-
-    var timeLocked: TimeInterval
-}
-
 class TempSessionLoader {
-    static func getSession() -> TempSession? {
+    static func getSession() -> SessionInProgress? {
         let data = UserDefaults.standard.data(forKey: "session-in-progress");
         if let liveData = data {
-            if let decoded = try? JSONDecoder().decode(TempSession.self, from: liveData) {
+            if let decoded = try? JSONDecoder().decode(SessionInProgress.self, from: liveData) {
                 return decoded;
             }
             print("Incorrect Data Type");
@@ -24,7 +14,7 @@ class TempSessionLoader {
         }
     }
 
-    static func saveSession(_ session: TempSession) {
+    static func saveSession(_ session: SessionInProgress) {
         if let encoded = try? JSONEncoder().encode(session) {
             UserDefaults.standard.set(encoded, forKey: "session-in-progress");
         }

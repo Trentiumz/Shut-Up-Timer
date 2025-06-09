@@ -2,78 +2,59 @@ import SwiftUI
 
 // Countdown timer that changes per second. Either manually stop it, or it will stop itself & call onFinish
 class TimerViewModel: ObservableObject, MVVM {
-    // used to track timer running
-    var totTime: Int = 0;
-    var startTime: Date = Date();
-    @Published var curTodo: UUID = UUID();
-    var tasks: [TaskLog] = []
-
-    @Published var timeLeft: Int = 0;
-    @Published var isRunning: Bool = false;
+    @Published var curSession: SessionInProgress;
+    var selectedTodo: UUID {
+        didSet {
+            curSession.updateCurTodo(curTodo: selectedTodo)
+        }
+    }
     
     // the timer
     private var timer: Timer? = nil;
+    private var curScenePhase: SceneMiniPhase;
     
-    init() {
-        
+    init(startParams: TimerParam, startTodo: UUID, startPhase: ScenePhase) {
+        self.curSession = SessionInProgress(initialParam: startParams, startTime: Date(), curParam: startParams, tasks: [], lastActiveUpdate: Date(), curTodo: startTodo, status: .paused);
+        self.selectedTodo = startTodo;
+        curScenePhase = SceneMiniPhase.from(startPhase);
+    }
+    init(from: SessionInProgress, startPhase: ScenePhase) {
+        curSession = from;
+        curScenePhase = SceneMiniPhase.from(startPhase);
+        selectedTodo = from.curTodo;
     }
     
-    // resets the model to its initial state
-    func reset(totTime: Int, startTime: Date, todoID: UUID) {
-        destroy();
-        self.totTime = totTime;
-        self.startTime = startTime;
-        self.timeLeft = totTime;
-        self.timer = nil;
-        self.isRunning = false;
-        self.tasks = []
-        self.curTodo = todoID;
+    func updateScenePhase(_ scenePhase: ScenePhase) {
+        curScenePhase = SceneMiniPhase.from(scenePhase)
     }
     
-    // starts a timer that counts down totTime
-    func startTimer() {
-        if(!isRunning) {
-            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-                if(self.timeLeft <= 0) {
-                    self.stopTimer();
-                } else {
-                    DispatchQueue.main.async {
-                        self.timeLeft -= 1;
-                        if !self.tasks.isEmpty && self.tasks.last?.todoID == self.curTodo {
-                            self.tasks[self.tasks.count - 1].timeIn += 1;
-                        } else {
-                            self.tasks.append(TaskLog(todoID: self.curTodo, timeIn: 1));
-                        }
-                    }
-                }
-            }
-            isRunning = true;
+    // starts a timer that counts down totTime (if we don't already have one)
+    func startSession() {
+        if let timer = self.timer {
+            timer.invalidate();
+            self.timer = nil;
+        }
+        curSession.resume();
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            self.curSession.tick(phase: self.curScenePhase)
         }
     }
     
     // stops and destroys the timer
-    func stopTimer() {
+    func stopSession() {
+        curSession.pause();
         timer?.invalidate();
-        isRunning = false;
         timer = nil;
     }
     
     // destroys the object before dereferencing
     func destroy() {
+        curSession.pause();
         timer?.invalidate()
         timer = nil
     }
 
-    func toTempSession() -> TempSession {
-        return TempSession(tasks: tasks, 
-                            startTime: startTime, 
-                            lasUpdate: Date(),
-                            plannedTime: TimeInterval(totTime),
-                            isPaused: !isRunning,
-                            timeLocked: TimeInterval(totTime - timeLeft));
-    }
-
     func saveTempSession() {
-        TempSessionLoader.saveSession(toTempSession());
+        TempSessionLoader.saveSession(curSession);
     }
 }

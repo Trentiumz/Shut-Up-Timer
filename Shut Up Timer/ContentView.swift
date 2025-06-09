@@ -6,12 +6,14 @@ struct ContentView: View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var sessions: Sessions;
     
+    @State var selectedScreen: LandingScreen = .home;
+    
     init() {
     }
     
     var body: some View {
         NavigationStack(path:$router.path){
-            VStack {
+            VStack(spacing: 0) {
                 if(settings.firstTime) {
                     // onboarding
                     OnboardingView(onDone: {
@@ -19,15 +21,14 @@ struct ContentView: View {
                     })
                 } else {
                     TopBarView()
-                    TabView {
-                        HomeView().tabItem { Label("Home", systemImage: "house")}
-                        LeaderboardView().tabItem { Label("Leaderboard", systemImage: "list.number")}
-                        SocialMediaView().tabItem {
-                            Label("Social Media", systemImage: "person.2")
-                        }
-                        DisappointmentView().tabItem { Label("Disappointment", systemImage: "gobackward.10.hi")}
-                        AccountView().tabItem{ Label("Account", systemImage: "person")}
+                    TabView(selection: $selectedScreen) {
+                        HomeView().tag(LandingScreen.home)
+                        SocialMediaView().tag(LandingScreen.socialMedia)
+                        LeaderboardView().tag(LandingScreen.leaderboard)
+                        DisappointmentView().tag(LandingScreen.disappointment)
+                        AccountView().tag(LandingScreen.account)
                     }
+                    BottomBarView(selectedScreen: $selectedScreen);
                 }
             }	
                 .environmentObject(router)
@@ -90,5 +91,10 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView().environmentObject(AppRouter());
+    ContentView()
+        .environmentObject(Settings(firstTime: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20)))
+        .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
+        .environmentObject(ToDoLoader.getToDo(onUpdate: {_ in}))
+        .environmentObject(CredManager())
+        .environmentObject(AppRouter());
 }

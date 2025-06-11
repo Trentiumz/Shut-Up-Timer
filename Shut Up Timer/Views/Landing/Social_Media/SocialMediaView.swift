@@ -1,28 +1,38 @@
 import SwiftUI;
 
 struct SocialMediaView: View {
-    @EnvironmentObject var  credManager: CredManager // assuming you inject this
+    @EnvironmentObject var  credManager: CredManager
     @State private var profiles: [UserPublicProfileResponse] = []
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                if profiles.isEmpty {
-                    Text("No friends yet!")
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(profiles.indices, id: \.self) { index in
-                        PublicProfileView(profile: profiles[index])
-                        RoastListView(profile: profiles[index])
+        ZStack {
+            Background()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Spacer()
+                        .frame(maxWidth: 20)
+                    if profiles.isEmpty {
+                        Text("No friends yet!")
+                            .foregroundColor(.secondary)
+                    } else {
+                        ForEach(profiles.indices, id: \.self) { index in
+                            PublicProfileView(profile: profiles[index])
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            RoastListView(profile: profiles[index])
+                                .frame(maxWidth: .infinity)
+                        }
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 5)
             }
-            .frame(maxWidth: .infinity)
-            .padding()
         }
         .onAppear {
             Task {
-                await fetchFriendsAndProfiles()
+                // await fetchFriendsAndProfiles()
+                // For testing purposes (preview!)
+                profiles = [UserPublicProfileResponse(iq: 10, username: "Taboo", profile_picture: "", roasts: ["Hello there!", "goodbye", "one more life", "woooosh"], hours: "3H1M", last_login: nil, top_categories: [])]
             }
         }
     }
@@ -55,4 +65,9 @@ struct SocialMediaView: View {
             print("Error fetching profiles: \(error)")
         }
     }
+}
+
+#Preview {
+    SocialMediaView()
+        .environmentObject(CredManager())
 }

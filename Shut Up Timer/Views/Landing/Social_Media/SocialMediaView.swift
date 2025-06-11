@@ -30,9 +30,9 @@ struct SocialMediaView: View {
         }
         .onAppear {
             Task {
-                // await fetchFriendsAndProfiles()
+                await fetchFriendsAndProfiles()
                 // For testing purposes (preview!)
-                profiles = [UserPublicProfileResponse(iq: 10, username: "Taboo", profile_picture: "", roasts: ["Hello there!", "goodbye", "one more life", "woooosh"], hours: "3H1M", last_login: nil, top_categories: [])]
+                // profiles = [UserPublicProfileResponse(iq: 10, username: "Taboo", profile_picture: "", roasts: ["Hello there!", "goodbye", "one more life", "woooosh"], hours: "3H1M", last_login: nil, top_categories: [])]
             }
         }
     }

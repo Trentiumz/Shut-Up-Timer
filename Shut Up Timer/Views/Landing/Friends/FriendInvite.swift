@@ -14,7 +14,7 @@ struct FriendInvite : View {
     /// Fetches the user's profile information including their friend code (only works if we are logged in)
     func updateUserProfile() {
         userProfile = nil;
-
+        
         guard credManager.loggedIn else { return }
         Task {
             do {
@@ -35,7 +35,7 @@ struct FriendInvite : View {
         
         Task {
             do {
-                try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": friendCode]).execute() 
+                try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": friendCode]).execute()
                 await MainActor.run {
                     friendCode = ""
                     errorMessage = nil
@@ -51,59 +51,58 @@ struct FriendInvite : View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            if credManager.loggedIn {
-                // Display incoming friend requests at the top
-                RequestList()
-                    .frame(maxHeight: 200)
-                    .id(requestListRefreshTrigger) // This will force a refresh when the trigger changes
-                
-                if let profile = userProfile {
-                    VStack(spacing: 20) {
-                        // Display the user's friend code
-                        Text("Your Friend Code")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        
-                        HStack {
-                            Image(systemName: "person.2.fill")
-                                .foregroundColor(.blue)
-                                .font(.title)
-                            Text(profile.friend_code)
-                                .font(.title)
-                                .fontWeight(.semibold)
-                        }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(15)
-                        
-                        // Input section for sending friend requests
-                        VStack(spacing: 10) {
-                            Text("Send Friend Request")
-                                .font(.headline)
+        ZStack {
+            Background()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            VStack(spacing: 20) {
+                if credManager.loggedIn {
+                    // Display incoming friend requests at the top
+                    RequestList()
+                        .frame(maxHeight: 200)
+                        .id(requestListRefreshTrigger) // This will force a refresh when the trigger changes
+                    
+                    if let profile = userProfile {
+                        VStack(spacing: 20) {
+                            FriendQRInvite(data: "shutuptimer://friend-invite?code=\(profile.friend_code)")
                             
-                            TextField("Send Request (code)", text: $friendCode, onCommit: sendFriendRequest)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .autocapitalization(.none)
+                            // Display the user's friend code
+                            CodeDisplay(code: profile.friend_code)
                             
-                            if let error = errorMessage {
-                                Text(error)
-                                    .foregroundColor(.red)
-                                    .font(.caption)
+                            // Input section for sending friend requests
+                            VStack(spacing: 10) {
+                                Text("Send Friend Request")
+                                    .font(.headline)
+                                
+                                TextField("Send Request (code)", text: $friendCode, onCommit: sendFriendRequest)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .autocapitalization(.none)
+                                
+                                if let error = errorMessage {
+                                    Text(error)
+                                        .foregroundColor(.red)
+                                        .font(.caption)
+                                }
                             }
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(15)
                         }
-                        .padding()
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(15)
+                    } else {
+                        Text("Loading...")
                     }
                 } else {
-                    Text("Loading...")
+                    ZStack {
+                        FormattedImages.FriendCodeStripe(width: 350)
+                        Text("Login to get friends!")
+                            .font(FontTokens.architectsDaughter(size: 30))
+                            .minimumScaleFactor(0.5)
+                            .foregroundColor(ColorTokens.shade100)
+                            .frame(maxWidth: 300)
+                    }
                 }
-            } else {
-                Text("Log in to see your friend code")
             }
+            .padding()
         }
-        .padding()
         .onAppear {
             updateUserProfile()
         }
@@ -113,7 +112,20 @@ struct FriendInvite : View {
     }
 }
 
+struct CodeDisplay : View {
+    var code: String;
+    var body : some View {
+        ZStack {
+            FormattedImages.FriendCodeStripe(width: 320)
+            Text("Code: \(code)")
+                .font(FontTokens.architectsDaughter(size: 30))
+                .foregroundColor(ColorTokens.shade100)
+        }
+    }
+}
+
 #Preview {
     FriendInvite()
         .environmentObject(CredManager())
-} 
+    // CodeDisplay(code: "12345678")
+}

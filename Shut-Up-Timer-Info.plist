@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIAppFonts</key>
-	<array>
-		<string>ArchitectsDaughter-Regular.ttf</string>
-	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -14,14 +10,28 @@
 				<string>com.googleusercontent.apps.379065476005-bjgaifp729ikrutpj2olhf3i7kb7p13f</string>
 			</array>
 		</dict>
-	</array>
-	<key>UTImportedTypeDeclarations</key>
-	<array>
-		<dict/>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.shutuptimer</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>shutuptimer</string>
+			</array>
+		</dict>
 	</array>
 	<key>GIDClientID</key>
 	<string>379065476005-bjgaifp729ikrutpj2olhf3i7kb7p13f.apps.googleusercontent.com</string>
 	<key>GIDServerClientID</key>
 	<string>379065476005-6tfmpnc3sscqmnl3m0l5cr0ip6ge83n6.apps.googleusercontent.com</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>ArchitectsDaughter-Regular.ttf</string>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict/>
+	</array>
 </dict>
 </plist>

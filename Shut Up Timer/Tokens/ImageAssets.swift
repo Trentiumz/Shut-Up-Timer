@@ -19,6 +19,8 @@ enum ImageAssets {
     static let roastBackground = Image("roast-image 93")
     static let linedImageBackground = Image("leaderboard-paper-image 106")
     static let leaderboardBandage = Image("leaderboard-bandage-image 107")
+    static let friendCodeStripe = Image("friendcode-stripe-image 102")
+    static let friendQRBG = Image("friend-qr-bg-image 93")
 }
 
 struct FormattedImages {
@@ -94,8 +96,79 @@ struct FormattedImages {
             .scaleEffect(scaleFactor)
         }
     }
+    
+    struct FriendCodeStripe : View {
+        private var oWidth: CGFloat = 330;
+        private var oHeight: CGFloat = 70;
+        var scaleFactor: CGFloat;
+        
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if height == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+        
+        var body : some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: 330, height: 70)
+                  .background(
+                    ImageAssets.friendCodeStripe
+                      .resizable()
+                      .aspectRatio(contentMode: .fill)
+                      .frame(width: 419, height: 90)
+                      .clipped()
+                      .offset(x: -5, y: -15)
+                  )
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
+    
+    struct FriendQRBackground : View {
+        private var oWidth: CGFloat = 300;
+        private var oHeight: CGFloat = 340;
+        var scaleFactor: CGFloat;
+        
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if height == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+        
+        var body : some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: 300, height: 340)
+                  .background(
+                    ImageAssets.friendQRBG
+                      .resizable()
+                      .aspectRatio(contentMode: .fill)
+                      .frame(width: 430.391357421875, height: 430.3922119140625)
+                      .clipped()
+                  )
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
 }
 
 #Preview {
-    FormattedImages.LeaderboardBandage(width: 300)
+    FormattedImages.FriendQRBackground(width: 200)
 }

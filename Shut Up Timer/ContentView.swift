@@ -5,8 +5,11 @@ struct ContentView: View {
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var sessions: Sessions;
+    @EnvironmentObject var credManager: CredManager;
     
     @State var selectedScreen: LandingScreen = .home;
+    @State var showAlert: Bool = false;
+    @State var alertMessage: String = "";
     
     init() {
         
@@ -71,6 +74,30 @@ struct ContentView: View {
             }
         }.onAppear {
             requestNotificationPermission()
+        }.onOpenURL(perform: { url in
+            if url.scheme == "shutuptimer",
+               url.host == "friend-invite",
+                let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                 let data = components.queryItems?.first(where: { $0.name == "code" })?.value {
+                if credManager.loggedIn {
+                    Task {
+                        do {
+                            try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": data]).execute()
+                            alertMessage = "Successfully sent friend invite to \(data)"
+                            showAlert = true
+                        } catch {
+                            print("failed url friend invite, \(error.localizedDescription)")
+                            alertMessage = "Something went wrong"
+                            showAlert = true
+                        }
+                    }
+                }
+            }
+        })
+        .alert("Friend Invite Result", isPresented: $showAlert) {
+            Button("Okay", role: .cancel) {}
+        } message: {
+            Text(alertMessage)
         }
     }
 

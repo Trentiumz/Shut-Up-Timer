@@ -7,7 +7,6 @@ import SwiftUI;
 struct FriendInvite : View {
     @EnvironmentObject var credManager: CredManager;
     @State private var userProfile: UserProfileResponse? = nil;
-    @State private var friendCode: String = "";
     @State private var errorMessage: String? = nil;
     @State private var requestListRefreshTrigger = UUID();
     
@@ -29,7 +28,7 @@ struct FriendInvite : View {
     }
     
     /// Sends a friend request to another user using their friend code
-    func sendFriendRequest() {
+    func sendFriendRequest(friendCode: String) {
         guard credManager.loggedIn else { return };
         guard !friendCode.isEmpty else { return };
         
@@ -37,7 +36,6 @@ struct FriendInvite : View {
             do {
                 try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": friendCode]).execute()
                 await MainActor.run {
-                    friendCode = ""
                     errorMessage = nil
                     // Trigger a refresh of the request list
                     requestListRefreshTrigger = UUID()
@@ -51,57 +49,54 @@ struct FriendInvite : View {
     }
     
     var body: some View {
-        ZStack {
-            Background()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            VStack(spacing: 20) {
-                if credManager.loggedIn {
-                    // Display incoming friend requests at the top
-                    RequestList()
-                        .frame(maxHeight: 200)
-                        .id(requestListRefreshTrigger) // This will force a refresh when the trigger changes
-                    
-                    if let profile = userProfile {
-                        VStack(spacing: 20) {
-                            FriendQRInvite(data: "shutuptimer://friend-invite?code=\(profile.friend_code)")
-                            
-                            // Display the user's friend code
-                            CodeDisplay(code: profile.friend_code)
-                            
-                            // Input section for sending friend requests
-                            VStack(spacing: 10) {
-                                Text("Send Friend Request")
-                                    .font(.headline)
+        ScrollView {
+            ZStack {
+                Background()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                VStack(spacing: 20) {
+                    if credManager.loggedIn {
+                        // Display incoming friend requests at the top
+                        RequestList()
+                            .frame(maxHeight: 200)
+                            .id(requestListRefreshTrigger) // This will force a refresh when the trigger changes
+                        
+                        if let profile = userProfile {
+                            VStack(spacing: 20) {
+                                FriendQRInvite(data: "shutuptimer://friend-invite?code=\(profile.friend_code)")
                                 
-                                TextField("Send Request (code)", text: $friendCode, onCommit: sendFriendRequest)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .autocapitalization(.none)
+                                // Display the user's friend code
+                                CodeDisplay(code: profile.friend_code)
                                 
-                                if let error = errorMessage {
-                                    Text(error)
-                                        .foregroundColor(.red)
-                                        .font(.caption)
+                                // Input section for sending friend requests
+                                VStack(spacing: 10) {
+                                    FriendCodeAdd(onCommit: sendFriendRequest)
+                                    
+                                    if let error = errorMessage {
+                                        Text(error)
+                                            .foregroundColor(.red)
+                                            .font(.caption)
+                                    }
                                 }
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(15)
                             }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(15)
+                        } else {
+                            Text("Loading...")
                         }
                     } else {
-                        Text("Loading...")
-                    }
-                } else {
-                    ZStack {
-                        FormattedImages.FriendCodeStripe(width: 350)
-                        Text("Login to get friends!")
-                            .font(FontTokens.architectsDaughter(size: 30))
-                            .minimumScaleFactor(0.5)
-                            .foregroundColor(ColorTokens.shade100)
-                            .frame(maxWidth: 300)
+                        ZStack {
+                            FormattedImages.FriendCodeStripe(width: 350)
+                            Text("Login to get friends!")
+                                .font(FontTokens.architectsDaughter(size: 30))
+                                .minimumScaleFactor(0.5)
+                                .foregroundColor(ColorTokens.shade100)
+                                .frame(maxWidth: 300)
+                        }
                     }
                 }
+                .padding()
             }
-            .padding()
         }
         .onAppear {
             updateUserProfile()
@@ -124,8 +119,37 @@ struct CodeDisplay : View {
     }
 }
 
+struct FriendCodeAdd : View {
+    @State var text: String = "";
+    var onCommit: (String) -> Void
+    
+    var body : some View {
+        ZStack {
+            FormattedImages.FriendCodeStripe(width: 320)
+            TextField("", text: $text, onCommit: {
+                onCommit(text)
+                text = ""
+            })
+                .font(FontTokens.architectsDaughter(size: 25))
+                .minimumScaleFactor(0.2)
+                .foregroundColor(ColorTokens.shade100)
+                .frame(width: 280)
+            if text.isEmpty {
+                Text("Enter Friend Code")
+                    .font(FontTokens.architectsDaughter(size: 25))
+                    .minimumScaleFactor(0.2)
+                    .foregroundStyle(ColorTokens.shade300)
+                    .multilineTextAlignment(.leading)
+                    .frame(width: 280, alignment: .leading)
+                    .allowsHitTesting(false)
+            }
+        }
+    }
+}
+
 #Preview {
     FriendInvite()
         .environmentObject(CredManager())
     // CodeDisplay(code: "12345678")
+    // FriendCodeAdd(onCommit: {_ in })
 }

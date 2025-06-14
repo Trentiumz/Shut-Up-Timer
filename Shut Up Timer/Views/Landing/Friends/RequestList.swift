@@ -79,39 +79,35 @@ struct RequestList : View {
     }
     
     var body: some View {
-        VStack {
-            if credManager.loggedIn {
-                if requests.isEmpty {
-                    Text("No friend requests")
-                        .foregroundColor(.gray)
-                } else {
-                    // Display each friend request in a simple format
-                    List(requests, id: \.id) { request in
-                        HStack {
-                            Text("From \(userProfiles[request.sender_id]?.username ?? request.sender_id.uuidString) to \(userProfiles[request.receiver_id]?.username ?? request.receiver_id.uuidString)")
-                            Spacer()
-                            // Only show buttons if current user is the receiver
-                            if credManager.session?.user.id == request.receiver_id {
-                                Button(action: {
-                                    respondToRequest(requestId: request.id, action: "accept")
-                                }) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
-                                        .frame(width: 40, height: 40);
-                                }.buttonStyle(PlainButtonStyle())
-                                Button(action: {
-                                    respondToRequest(requestId: request.id, action: "reject")
-                                }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.red)
-                                        .frame(width: 40, height: 40);
-                                }.buttonStyle(PlainButtonStyle())
+        ZStack(alignment: .topLeading) {
+            FormattedImages.LinedImageBackground(width: 300)
+            HStack {
+                Spacer().frame(maxWidth: 40)
+                VStack {
+                    Spacer().frame(maxHeight: 10)
+                    if credManager.loggedIn {
+                        if requests.isEmpty {
+                            Text("No friend requests")
+                                .font(FontTokens.architectsDaughter(size: 25))
+                                .foregroundColor(ColorTokens.shade700)
+                        } else {
+                            // Display each friend request in a simple format
+                            List(requests, id: \.id) { request in
+                                SingleRequestView(display: "From \(userProfiles[request.sender_id]?.username ?? request.sender_id.uuidString) to \(userProfiles[request.receiver_id]?.username ?? request.receiver_id.uuidString)", canRespond: credManager.session?.user.id == request.receiver_id, onAccept: {respondToRequest(requestId: request.id, action: "accept")}, onDecline: {respondToRequest(requestId: request.id, action: "reject")})
+                                    .listRowInsets(EdgeInsets())
                             }
+                            .scrollContentBackground(.hidden)
+                            .listStyle(.plain)
+                            .background(Color.clear)
+                            .frame(width: 250, height: 200)
+                            
                         }
+                    } else {
+                        Text("Log in to see friend requests")
+                            .font(FontTokens.architectsDaughter(size: 25))
+                            .foregroundColor(ColorTokens.shade700)
                     }
                 }
-            } else {
-                Text("Log in to see friend requests")
             }
         }
         .padding()
@@ -124,7 +120,43 @@ struct RequestList : View {
     }
 }
 
+struct SingleRequestView : View {
+    var display: String;
+    var canRespond: Bool;
+    var onAccept: () -> Void;
+    var onDecline: () -> Void;
+    
+    var body : some View {
+        HStack {
+            Text(display)
+                .font(FontTokens.architectsDaughter(size: 25))
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+            Spacer()
+        }
+        .swipeActions(edge: .leading) {
+            if canRespond {
+                Button {
+                    onAccept()
+                } label: {
+                    Label("Check", systemImage: "checkmark")
+                }
+                .tint(.green)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            Button() {
+                onDecline()
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+            .tint(.red)
+        }
+    }
+}
+
 #Preview {
-    RequestList()
-        .environmentObject(CredManager())
-} 
+    List {
+        SingleRequestView(display: "Hello There!!", canRespond: true, onAccept: { print("Accept") }, onDecline: { print("Decline") })
+    }
+}

@@ -7,16 +7,6 @@ struct FriendQRInvite : View {
     var body : some View {
         ZStack(alignment: .top) {
             FormattedImages.FriendQRBackground(width: 300)
-            Rectangle()
-                .foregroundColor(.clear)
-                .frame(width: 141, height: 141)
-                .background(
-                    ImageAssets.roastBackground
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 180, height: 180)
-                        .clipped()
-                )
             QRCodeView(data: data, width: 240, height: 220)
                 .offset(y: 8)
                 .rotationEffect(Angle(degrees: -0.5))

@@ -78,10 +78,9 @@ struct AccountView : View {
                         }
                     }
                     
-                    Text("Settings")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding(.top)
+                    HStack {
+                        AccountView.SectionStripe("Settings")
+                    }
                     
                     SettingsView(
                         userPublicProfile: $userPublicProfile,

@@ -9,22 +9,21 @@ struct SettingsView : View {
     // Profile data
     @Binding var userPublicProfile: UserPublicProfileResponse?;
     @Binding var userProfile: UserProfileResponse?;
-    @State private var usernameDisplay: String = "";
     
     // Callbacks
     let updateUserProfile: () -> Void;
     
-    func updateUsername() {
+    func updateUsername(newUsername: String) {
         guard (credManager.session?.user.id) != nil else { return }
         
         Task {
             do {
                 // Call the change_username function
-                try await credManager.supabaseClient.rpc("change_username", params: ["new_username": usernameDisplay]).execute()
+                try await credManager.supabaseClient.rpc("change_username", params: ["new_username": newUsername]).execute()
                 
                 // Update local profile
                 if var profile = userPublicProfile {
-                    profile.username = usernameDisplay
+                    profile.username = newUsername
                     await MainActor.run {
                         userPublicProfile = profile
                     }
@@ -71,11 +70,14 @@ struct SettingsView : View {
         VStack {
             TimerSettings()
             
-            // Login/Logout button
-            HStack {
-                Spacer()
-                if credManager.loggedIn {
-                    Button(action: {
+            // User Profile Section
+            if credManager.loggedIn, let publicProfile = userPublicProfile, let privateProfile = userProfile {
+                AccountSettings(
+                    publicProfile: publicProfile,
+                    privateProfile: privateProfile,
+                    updateUsername: updateUsername,
+                    updateVisibility: updateVisibility,
+                    toLogout: {
                         Task {
                             do {
                                 try await credManager.logOut();
@@ -85,92 +87,59 @@ struct SettingsView : View {
                                 print("Error signing out: \(error)")
                             }
                         }
-                    }) {
-                        Text("Log Out")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(10)
-                    }
-                } else {
-                    Button(action: {
-                        router.toLogin(onSuccess: {})
-                    }) {
-                        Text("Log In")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                    }
-                }
-            }
-            
-            // User Profile Section
-            if credManager.loggedIn, let publicProfile = userPublicProfile, let privateProfile = userProfile {
-                VStack(spacing: 20) {
-                    // Username editing section
-                    HStack {
-                        Text("Username:")
-                        TextField("Username", text: $usernameDisplay, onCommit: updateUsername)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
-                    .padding(.horizontal)
-                    
-                    // Profile Picture
-                    if !publicProfile.profile_picture.isEmpty {
-                        AsyncImage(url: URL(string: publicProfile.profile_picture)) { image in
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
-                                .clipShape(Circle())
-                        } placeholder: {
-                            Circle()
-                                .fill(Color.gray)
-                                .frame(width: 100, height: 100)
-                        }
-                    }
-                    
-                    // Username and IQ
-                    VStack(spacing: 10) {
-                        Text("Username: \(publicProfile.username)")
-                            .font(.title)
-                            .fontWeight(.bold)
-                        
-                        HStack {
-                            Image(systemName: "star.fill")
-                                .foregroundColor(.yellow)
-                            Text("IQ: \(publicProfile.iq)")
-                                .font(.title2)
-                        }
-                        
-                        // Friend Code
-                        HStack {
-                            Image(systemName: "person.2.fill")
-                                .foregroundColor(.blue)
-                            Text("Friend Code: \(privateProfile.friend_code)")
-                                .font(.title3)
-                        }
-                        
-                        // Privacy Settings
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Privacy Settings")
-                                .font(.headline)
-                                .padding(.top)
-                            
-                            Toggle("Public Profile", isOn: Binding(
-                                get: { privateProfile.is_public_profile_visible },
-                                set: { updateVisibility(field: "public_profile", newValue: $0) }
-                            ))
-                        }
-                    }
-                }
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(15)
+                    });
+            } else {
+                SettingButton(text: "Log In", onSelect: { router.toLogin(onSuccess: {} )})
             }
         }
         .padding()
+    }
+    
+    struct AccountSettings : View {
+        @State private var usernameDisplay: String = "";
+        var publicProfile: UserPublicProfileResponse;
+        var privateProfile: UserProfileResponse;
+        var updateUsername: (String) -> Void;
+        var updateVisibility: (_: String, _: Bool) -> Void;
+        var toLogout: () -> Void;
+        
+        var body : some View {
+            VStack {
+                ZStack(alignment: .top) {
+                    FormattedImages.LinedImageBackground(width: 350)
+                    VStack(spacing: 20) {
+                        HStack {
+                            AccountView.SectionStripe("Account")
+                            Spacer()
+                        }
+                        // Username editing section
+                        HStack {
+                            SettingLabel("Set Username: ")
+                            TextField("Username", text: $usernameDisplay, onCommit: { updateUsername(usernameDisplay) })
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        
+                        HStack {
+                            SettingLabel("Public Profile Visibility: ")
+                                .frame(width: 200)
+                            Spacer()
+                            Toggle("", isOn: Binding(
+                                get: { privateProfile.is_public_profile_visible },
+                                set: { updateVisibility( "public_profile", $0) }
+                            ))
+                        }
+                        
+                        SettingButton(text: "Log Out", onSelect: toLogout)
+                    }
+                    .padding(.leading, 45)
+                    .padding(.trailing, 10)
+                    .padding(.top, 5)
+                    .padding(.bottom, 5)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(15)
+                }
+            }.frame(width: 350, height: 240)
+        }
     }
     
     struct TimerSettings: View {
@@ -218,7 +187,7 @@ struct SettingsView : View {
                     .padding(.trailing, 10)
                     .padding(.top, 5)
                     .padding(.bottom, 5)
-                }.frame(width: 350, height: 220)
+                }.frame(width: 350, height: 240)
             }
         }
     }
@@ -273,6 +242,36 @@ struct SettingsView : View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(ColorTokens.shade700, lineWidth: 1)
                 )
+        }
+    }
+    
+    struct SettingButton: View {
+        var text: String;
+        var onSelect: () -> Void;
+        
+        var body : some View {
+            ZStack {
+                Button(action: {
+                    onSelect();
+                }){
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 280, height: 40)
+                        .background(ColorTokens.red300)
+                        .cornerRadius(30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .inset(by: 1)
+                                .stroke(ColorTokens.shade700, lineWidth: 2)
+                        )
+                }
+                Text(text)
+                  .font(Font.custom("ArchitectsDaughter-Regular", size: 30))
+                  .foregroundColor(ColorTokens.shade100)
+                  .frame(width: 230, height: 30)
+                  .minimumScaleFactor(0.2)
+                  .lineLimit(2)
+            }
         }
     }
 }

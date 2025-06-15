@@ -17,7 +17,7 @@ struct SocialMediaView: View {
                             .foregroundColor(.secondary)
                     } else {
                         ForEach(profiles.indices, id: \.self) { index in
-                            PublicProfileView(profile: profiles[index])
+                            UserInfoView(userResponse: profiles[index])
                                 .frame(maxWidth: .infinity, alignment: .center)
                             RoastListView(profile: profiles[index])
                                 .frame(maxWidth: .infinity)

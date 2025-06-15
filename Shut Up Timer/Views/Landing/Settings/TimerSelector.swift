@@ -45,26 +45,28 @@ struct TimerSelector : View {
         VStack {
             // change timer type
             HStack {
-                Text("Timer Type")
+                SettingsView.SettingLabel("Timer Type")
                 Spacer()
-                Picker("Difficulty", selection: $timerType) {
+                Menu {
                     ForEach(TimerType.allCases) { type in
-                        Text(type.rawValue.capitalized).tag(type)
+                        SettingsView.StylizedOption(onClick: { timerType = type}, text: type.rawValue.capitalized)
+                            .tag(type)
                     }
+                } label: {
+                    SettingsView.StylizedLabel(timerType.rawValue.capitalized)
                 }
-                .pickerStyle(.menu)
             }
             
             switch timerParam {
             case .countdown(let seconds):
                 // selector for duration
                 HStack {
-                    Text("Duration")
+                    SettingsView.SettingLabel("Duration")
                     Spacer()
                     Button (action: {
                         showCDPicker = true;
                     }) {
-                        Text("\(formatTime(Double(seconds)))")
+                        SettingsView.StylizedLabel( "\(formatTime(Double(seconds)))")
                     }.sheet(isPresented: $showCDPicker) {
                         DurationPickerModal(duration: $cdDuration)
                     }
@@ -82,15 +84,22 @@ struct TimerSelector : View {
     }
 }
 
-
-#Preview {
-    PreviewContainer()
-}
-
-private struct PreviewContainer: View {
-    @State private var timerParam: TimerParam = .countdown(seconds: 1200)
-
-    var body: some View {
-        TimerSelector(param: $timerParam);
+struct TimerSelectorPreview : PreviewProvider {
+    
+    struct Wrapper : View {
+        @State private var timerParam: TimerParam = .countdown(seconds: 1200)
+        
+        var body : some View {
+            TimerSelector(param: $timerParam)
+            .environmentObject(AppRouter())
+            .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
+            .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
+            .environmentObject(ToDoLoader.getToDo(onUpdate: { _ in }))
+            .environmentObject(CredManager())
+        }
+    }
+    
+    static var previews : some View {
+        Wrapper()
     }
 }

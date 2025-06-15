@@ -69,30 +69,7 @@ struct SettingsView : View {
     
     var body: some View {
         VStack {
-            // difficulty selector
-            HStack {
-                Text("Difficulty")
-                Spacer()
-                Picker("Difficulty", selection: $settings.difficulty) {
-                    ForEach(Difficulty.allCases) { difficulty in
-                        Text(difficulty.rawValue.capitalized).tag(difficulty)
-                    }
-                }
-                .pickerStyle(.menu)
-            }
-            // roast level selector
-            HStack {
-                Text("Roast Level")
-                Spacer()
-                Picker("Difficulty", selection: $settings.roastLevel) {
-                    ForEach(RoastLevel.allCases) { level in
-                        Text(level.rawValue.capitalized).tag(level)
-                    }
-                }
-                .pickerStyle(.menu)
-            }
-            
-            TimerSelector(param: $settings.timerParam)
+            TimerSettings()
             
             // Login/Logout button
             HStack {
@@ -195,4 +172,133 @@ struct SettingsView : View {
         }
         .padding()
     }
-} 
+    
+    struct TimerSettings: View {
+        @EnvironmentObject var settings: Settings;
+        
+        var body : some View {
+            VStack {
+                ZStack(alignment: .top) {
+                    FormattedImages.LinedImageBackground(width: 350)
+                    VStack {
+                        HStack {
+                            AccountView.SectionStripe("Timer >")
+                            Spacer()
+                        }
+                        // difficulty selector
+                        HStack {
+                            SettingLabel("Difficulty")
+                            Spacer()
+                            Menu {
+                                ForEach(Difficulty.allCases) { difficulty in
+                                    StylizedOption(onClick: { settings.difficulty = difficulty}, text: difficulty.rawValue.capitalized)
+                                        .tag(difficulty)
+                                }
+                            } label: {
+                                StylizedLabel(settings.difficulty.rawValue.capitalized)
+                            }
+                        }
+                        // roast level selector
+                        HStack {
+                            SettingLabel("Roast Level")
+                            Spacer()
+                            Menu {
+                                ForEach(RoastLevel.allCases) { level in
+                                    StylizedOption(onClick: { settings.roastLevel = level}, text: level.rawValue.capitalized)
+                                        .tag(level)
+                                }
+                            } label: {
+                                StylizedLabel(settings.roastLevel.rawValue.capitalized)
+                            }
+                        }
+                        TimerSelector(param: $settings.timerParam)
+                        Spacer()
+                    }
+                    .padding(.leading, 45)
+                    .padding(.trailing, 10)
+                    .padding(.top, 5)
+                    .padding(.bottom, 5)
+                }.frame(width: 350, height: 220)
+            }
+        }
+    }
+    
+    struct SettingLabel: View {
+        var message: String;
+        init(_ message: String) {
+            self.message = message
+        }
+        
+        var body : some View {
+            Text(message)
+                .font(FontTokens.architectsDaughter(size: 18))
+                .foregroundColor(ColorTokens.shade700)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .frame(alignment: .topLeading)
+        }
+    }
+    
+    struct StylizedOption : View {
+        var onClick: () -> Void;
+        var text: String;
+        
+        var body : some View {
+            Button {
+                onClick();
+            } label: {
+                Text(text)
+                    .font(FontTokens.architectsDaughter(size: 20))
+                    .foregroundStyle(ColorTokens.shade700)
+            }
+        }
+    }
+
+    struct StylizedLabel : View {
+        var text: String;
+        init(_ text: String) {
+            self.text = text;
+        }
+        
+        var body : some View {
+            Text(text)
+                .font(FontTokens.architectsDaughter(size: 20))
+                .foregroundStyle(ColorTokens.shade700)
+                .frame(width: 130)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(ColorTokens.shade300)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(ColorTokens.shade700, lineWidth: 1)
+                )
+        }
+    }
+}
+
+struct SettingsPreview : PreviewProvider {
+    
+    struct Wrapper : View {
+        @State var userPublicProfile: UserPublicProfileResponse? = nil;
+        @State var userProfile: UserProfileResponse? = nil;
+        
+        var body : some View {
+            SettingsView(
+                userPublicProfile: $userPublicProfile,
+                userProfile: $userProfile,
+                updateUserProfile: {}
+            )
+            .environmentObject(AppRouter())
+            .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
+            .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
+            .environmentObject(ToDoLoader.getToDo(onUpdate: { _ in }))
+            .environmentObject(CredManager())
+        }
+    }
+    
+    static var previews : some View {
+        Wrapper()
+        
+    }
+}

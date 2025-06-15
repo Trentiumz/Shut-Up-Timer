@@ -59,27 +59,36 @@ struct AccountView : View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack {
-                UserInfoView(userPublicProfile: userPublicProfile)
-                
-                if credManager.loggedIn {
-                    FriendsList(
-                        friends: friends,
-                        removeFriend: removeFriend
+        ZStack {
+            Background()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ScrollView {
+                VStack {
+                    Spacer()
+                        .frame(maxHeight: 30)
+                    
+                    if credManager.loggedIn {
+                        VStack(spacing: 20) {
+                            LocalUserInfoView(userPublicProfile: userPublicProfile)
+                            HStack {
+                                SectionStripe("Friends >")
+                                Spacer()
+                            }
+                            FriendsListView(friends)
+                        }
+                    }
+                    
+                    Text("Settings")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.top)
+                    
+                    SettingsView(
+                        userPublicProfile: $userPublicProfile,
+                        userProfile: $userProfile,
+                        updateUserProfile: updateUserProfile
                     )
-                }
-                
-                Text("Settings")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding(.top)
-                
-                SettingsView(
-                    userPublicProfile: $userPublicProfile,
-                    userProfile: $userProfile,
-                    updateUserProfile: updateUserProfile
-                )
+                }.padding(.horizontal)
             }
         }
         .onAppear {
@@ -91,78 +100,42 @@ struct AccountView : View {
             updateFriends()
         }
     }
-}
-
-struct FriendsList : View {
-    @EnvironmentObject var credManager: CredManager
-    var friends: [FriendProfileResponse]
-    var removeFriend: (UUID) -> Void
     
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Friends")
-                .font(.title)
-                .fontWeight(.bold)
-                .padding(.top)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 15) {
-                    ForEach(friends, id: \.friend_user_id) { friend in
-                        FriendCard(
-                            friend: friend,
-                            removeFriend: removeFriend
-                        )
-                    }
-                }
-                .padding(.horizontal)
+    struct SectionStripe : View {
+        var text: String;
+        
+        init(_ text: String){
+            self.text = text;
+        }
+        
+        var body : some View {
+            ZStack {
+                FormattedImages.FriendCodeStripe(width: 200);
+                Text(text)
+                    .font(FontTokens.architectsDaughter(size: 20))
+                    .foregroundColor(ColorTokens.shade100)
+                    .frame(width: 96.88741, alignment: .topLeading)
             }
         }
     }
 }
 
-struct FriendCard : View {
-    var friend: FriendProfileResponse
-    var removeFriend: (UUID) -> Void
-
-    var body: some View {
-        VStack {
-            if !friend.friend_profile_picture.isEmpty {
-                AsyncImage(url: URL(string: friend.friend_profile_picture)) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
-                } placeholder: {
-                    Circle()
-                        .fill(Color.gray)
-                        .frame(width: 60, height: 60)
-                }
-            } else {
-                Circle()
-                    .fill(Color.gray)
-                    .frame(width: 60, height: 60)
-            }
-            
-            Text(friend.friend_username)
-                .font(.headline)
-            
-            Text("IQ: \(friend.friend_iq)")
-                .font(.subheadline)
-            
-            Button(action: {
-                removeFriend(friend.friend_user_id)
-            }) {
-                Image(systemName: "person.fill.xmark")
-                    .foregroundColor(.red)
-            }
-        }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(10)
+struct LocalUserInfoView : View {
+    @EnvironmentObject var sessions: Sessions;
+    @EnvironmentObject var credManager: CredManager;
+    @EnvironmentObject var todoList: ToDoList
+    var userPublicProfile: UserPublicProfileResponse?;
+    
+    var body : some View {
+        UserInfoView(iq: sessions.getIQ(), username: userPublicProfile?.username ?? "", profile_picture: userPublicProfile?.profile_picture ?? "", roasts: sessions.getRoasts(), hours: "\(sessions.getTotalTimeLocked())", top_categories: sessions.getTopCategoryStrings(toDoList: todoList))
     }
 }
 
 #Preview {
-    AccountView();
+    AccountView()
+        .environmentObject(AppRouter())
+        .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
+        .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
+        .environmentObject(ToDoLoader.getToDo(onUpdate: { _ in }))
+        .environmentObject(CredManager())
 }

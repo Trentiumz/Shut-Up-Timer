@@ -3,7 +3,7 @@ import SwiftUI;
 enum AppRoute {
     case home
     case timer(timerModel: TimerViewModel)
-    case timerCompleted(seconds: TimeInterval)
+    case timerCompleted(session: SessionEntry)
     case timerFailed(seconds: TimeInterval, roast: String? = nil)
     case login(onSuccess: () -> Void)
     case inviteFriends

@@ -15,13 +15,9 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.login(onSuccess: onSuccess)))
     }
     
-    func toTimerCompleted(timerModel: TimerViewModel) {
-        assert(timerModel.curSession.status == .succeeded) // ensure we actually completed!
-        let totTime = switch(timerModel.curSession.initialParam) {
-        case .countdown(let seconds):
-            seconds
-        }
-        path.append(PathElement(route: AppRoute.timerCompleted(seconds: totTime)))
+    func toTimerCompleted(curSession: SessionEntry) {
+        assert(curSession.success) // ensure we actually completed!
+        path.append(PathElement(route: AppRoute.timerCompleted(session: curSession)))
     }
     
     func toTimerFailed(timerModel: TimerViewModel, roast: String? = nil) {

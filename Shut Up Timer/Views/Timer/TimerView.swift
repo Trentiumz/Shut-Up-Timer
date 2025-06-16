@@ -33,15 +33,17 @@ struct TimerView: View {
         timerViewModel.stopSession();
         let chosenRoast = getRandomRoast();
         
+        let sessionResult = curSession.getSession(endTime: Date())
         router.toTimerFailed(timerModel: timerViewModel, roast: chosenRoast);
-        sessions.sessions.append(curSession.getSession(endTime: Date()));
+        sessions.sessions.append(sessionResult);
     }
 
     func successTransition() {
         TempSessionLoader.clearSession();
-
         timerViewModel.stopSession();
-        router.toTimerCompleted(timerModel: timerViewModel);
+        
+        let sessionResult = curSession.getSession(endTime: Date())
+        router.toTimerCompleted(curSession: sessionResult);
         sessions.sessions.append(curSession.getSession(endTime: Date()));
     }
     

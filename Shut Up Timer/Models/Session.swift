@@ -15,6 +15,25 @@ struct SessionEntry: Identifiable, Codable, Equatable {
     var plannedTime: TimeInterval
     var success: Bool
     var roast: String?
+    
+    var iqChange: Double { success ? (plannedTime <= 3600 ? plannedTime / 3600 : 1 + 2 * (plannedTime - 3600) / 3600) : -1 }
+    var sortedCategories: [(todoID: UUID, time: TimeInterval)] {
+        // Create a dictionary to store total seconds per todoID
+        var categorySeconds: [UUID: TimeInterval] = [:]
+        
+        // Calculate total seconds for each todoID
+        for taskLog in self.tasks {
+            let seconds = taskLog.timeIn
+            categorySeconds[taskLog.todoID, default: 0] += seconds
+        }
+        
+        // Convert dictionary to array of tuples and sort by seconds
+        let sortedCategories = categorySeconds.map { (todoID: $0.key, time: $0.value) }
+            .sorted { $0.time > $1.time }
+        
+        return sortedCategories
+    }
+    
 }
 
 class Sessions : Codable, Equatable, ObservableObject {
@@ -50,14 +69,10 @@ class Sessions : Codable, Equatable, ObservableObject {
         try container.encode(sessions, forKey: .sessions);
     }
 
-    func getIQ() -> Int {
-        var cIq: Int = 0;
+    func getIQ() -> Double {
+        var cIq: Double = 0;
         for session in sessions {
-            if session.success {
-                cIq += Int(session.timeLocked);
-            } else {
-                cIq -= 1;
-            }
+            cIq += session.iqChange;
         }
         return cIq;
     }

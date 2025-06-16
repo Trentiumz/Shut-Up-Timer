@@ -21,6 +21,12 @@ enum ImageAssets {
     static let leaderboardBandage = Image("leaderboard-bandage-image 107")
     static let friendCodeStripe = Image("friendcode-stripe-image 102")
     static let friendQRBG = Image("friend-qr-bg-image 93")
+    static let madFrames = [
+        Image("mad_frame_000"),
+        Image("mad_frame_001"),
+        Image("mad_frame_002"),
+        Image("mad_frame_003")
+    ]
 }
 
 struct FormattedImages {
@@ -177,8 +183,77 @@ struct FormattedImages {
             .scaleEffect(scaleFactor)
         }
     }
+    
+    struct MadMotherImage : View {
+        private var oWidth: CGFloat = 330;
+        private var oHeight: CGFloat = 270;
+        private var ind : Int;
+        var scaleFactor: CGFloat;
+        
+        init(_ ind: Int, width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            self.ind = ind;
+            assert(0 <= ind && ind < 4);
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if height == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight);
+            }
+        }
+        
+        var body : some View {
+            Group {
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: 330, height: 270)
+                    .background(
+                        ImageAssets.madFrames[ind]
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 462, height: 450)
+                            .allowsHitTesting(false)
+                            .offset(y: 10)
+                            .clipped()
+                    )
+                    .clipped()
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
+    
+    struct AnimatedMadMother : View {
+        var timeDis : TimeInterval;
+        
+        @State private var animationPhase : Int = 0;
+        @State private var timer: Timer? = nil;
+        private var width: CGFloat;
+        
+        init(width: CGFloat, _ timeDis: TimeInterval = 0.2) {
+            self.width = width;
+            self.timeDis = timeDis;
+        }
+        
+        var body : some View {
+            MadMotherImage(animationPhase, width: width)
+                .onAppear {
+                    timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                        DispatchQueue.main.async {
+                            animationPhase = (self.animationPhase + 1) % 4;
+                        }
+                    }
+                }
+                .onDisappear {
+                    self.timer?.invalidate()
+                    self.timer = nil
+                }
+        }
+    }
 }
 
 #Preview {
-    FormattedImages.LinedImageBackground(width: 350)
+    FormattedImages.AnimatedMadMother(width: 300)
 }

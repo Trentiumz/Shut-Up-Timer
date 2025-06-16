@@ -1,7 +1,7 @@
 import SwiftUI;
 
 struct UserInfoView : View {
-    var iq: Int
+    var iq: Double
     var username: String
     var profile_picture: String
     var roasts: [String]
@@ -9,7 +9,7 @@ struct UserInfoView : View {
     var last_login: Date?
     var top_categories: [String]
     
-    init(iq: Int, username: String, profile_picture: String, roasts: [String], hours: String, last_login: Date? = nil, top_categories: [String]) {
+    init(iq: Double, username: String, profile_picture: String, roasts: [String], hours: String, last_login: Date? = nil, top_categories: [String]) {
         self.iq = iq
         self.username = username
         self.profile_picture = profile_picture
@@ -20,7 +20,7 @@ struct UserInfoView : View {
     }
     
     init(userResponse: UserPublicProfileResponse) {
-        self.iq = userResponse.iq;
+        self.iq = Double(userResponse.iq);
         self.username = userResponse.username;
         self.profile_picture = userResponse.profile_picture;
         self.roasts = userResponse.roasts;

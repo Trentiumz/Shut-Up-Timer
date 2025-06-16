@@ -250,10 +250,10 @@ struct SettingsView : View {
         var onSelect: () -> Void;
         
         var body : some View {
-            ZStack {
-                Button(action: {
-                    onSelect();
-                }){
+            Button(action: {
+                onSelect();
+            }){
+                ZStack {
                     Rectangle()
                         .foregroundColor(.clear)
                         .frame(width: 280, height: 40)
@@ -264,13 +264,13 @@ struct SettingsView : View {
                                 .inset(by: 1)
                                 .stroke(ColorTokens.shade700, lineWidth: 2)
                         )
+                    Text(text)
+                        .font(Font.custom("ArchitectsDaughter-Regular", size: 30))
+                        .foregroundColor(ColorTokens.shade100)
+                        .frame(width: 230, height: 30)
+                        .minimumScaleFactor(0.2)
+                        .lineLimit(2)
                 }
-                Text(text)
-                  .font(Font.custom("ArchitectsDaughter-Regular", size: 30))
-                  .foregroundColor(ColorTokens.shade100)
-                  .frame(width: 230, height: 30)
-                  .minimumScaleFactor(0.2)
-                  .lineLimit(2)
             }
         }
     }

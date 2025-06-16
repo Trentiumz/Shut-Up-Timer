@@ -34,7 +34,7 @@ struct CountdownSelectorView : View{
             switch timerType {
             case .countdown:
                 VStack(spacing: 0) {
-                    Text("\(formatTime(duration))")
+                    Text("\(Utils.formatTime(duration))")
                         .font(FontTokens.architectsDaughter(size: 60))
                         .foregroundStyle(ColorTokens.shade100)
                     

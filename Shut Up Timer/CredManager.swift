@@ -2,6 +2,7 @@ import SwiftUI
 import Supabase
 import GoogleSignIn
 
+/// Handles credentials and utility functions for communicating with various endpoints
 class CredManager: ObservableObject {
     @Published var session: Session?
     @Published var connected: Bool = false
@@ -96,6 +97,19 @@ class CredManager: ObservableObject {
             self.session = curSession;
             self.loggedIn = true;
             self.sendTokenToBackend()
+        }
+    }
+    
+    // ----------------------- Utility functions -----------------------
+    func acceptFriendRequest(_ id: Int) async throws {
+        if loggedIn {
+            try await supabaseClient.rpc("accept_friend_request", params: ["request_id": "\(id)"]).execute()
+        }
+    }
+    
+    func removeFriendRequest(_ id: Int) async throws {
+        if loggedIn {
+            try await supabaseClient.rpc("remove_friend_request", params: ["request_id": "\(id)"]).execute()
         }
     }
 }

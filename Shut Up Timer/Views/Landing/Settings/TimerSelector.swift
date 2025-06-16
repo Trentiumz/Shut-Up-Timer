@@ -66,7 +66,7 @@ struct TimerSelector : View {
                     Button (action: {
                         showCDPicker = true;
                     }) {
-                        SettingsView.StylizedLabel( "\(formatTime(Double(seconds)))")
+                        SettingsView.StylizedLabel( "\(Utils.formatTime(Double(seconds)))")
                     }.sheet(isPresented: $showCDPicker) {
                         DurationPickerModal(duration: $cdDuration)
                     }

@@ -68,11 +68,15 @@ struct ContentView: View {
                     FriendInvite()
                         .environmentObject(router)
                         .navigationBarBackButtonHidden(false)
+                case .viewRequests:
+                    RequestListView()
                 default:
                     Text("Invalid")
                 }
             }
-        }.onAppear {
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear {
             requestNotificationPermission()
         }.onOpenURL(perform: { url in
             if url.scheme == "shutuptimer",

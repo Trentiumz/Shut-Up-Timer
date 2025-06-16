@@ -4,7 +4,7 @@ struct FriendsListView : View {
     private var chunkedFriends: [[(pfp: String, username: String)]];
     
     init(_ friends: [FriendProfileResponse]) {
-        chunkedFriends = FriendsListView.chunked(friends.map({ profile in
+        chunkedFriends = Utils.chunked(friends.map({ profile in
             (pfp: profile.friend_profile_picture, username: profile.friend_username)
         }))
     }
@@ -16,12 +16,6 @@ struct FriendsListView : View {
                     SingleFriendsListView(friends: chunk)
                 }
             }
-        }
-    }
-    
-    static func chunked<T>(_ array: [T], size: Int = 6) -> [[T]] {
-        stride(from: 0, to: array.count, by: size).map {
-            Array(array[$0..<min($0 + size, array.count)])
         }
     }
     

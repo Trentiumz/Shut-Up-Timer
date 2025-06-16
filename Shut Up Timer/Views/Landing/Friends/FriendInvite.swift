@@ -6,6 +6,7 @@ import SwiftUI;
 /// - Allowing users to send friend requests to others
 struct FriendInvite : View {
     @EnvironmentObject var credManager: CredManager;
+    @EnvironmentObject var router: AppRouter;
     @State private var userProfile: UserProfileResponse? = nil;
     @State private var errorMessage: String? = nil;
     @State private var requestListRefreshTrigger = UUID();
@@ -18,8 +19,10 @@ struct FriendInvite : View {
         Task {
             do {
                 let privateProfile: [UserProfileResponse] = try await credManager.supabaseClient.rpc("get_profile").execute().value
-                await MainActor.run {
-                    userProfile = privateProfile[0]
+                if !privateProfile.isEmpty {
+                    await MainActor.run {
+                        userProfile = privateProfile[0]
+                    }
                 }
             } catch {
                 print("Error fetching user profile: \(error)")
@@ -49,16 +52,14 @@ struct FriendInvite : View {
     }
     
     var body: some View {
-        ScrollView {
-            ZStack {
-                Background()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ZStack {
+            Background()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ScrollView {
                 VStack(spacing: 20) {
                     if credManager.loggedIn {
                         // Display incoming friend requests at the top
-                        RequestList()
-                            .frame(maxHeight: 200)
-                            .id(requestListRefreshTrigger) // This will force a refresh when the trigger changes
+                        SettingsView.SettingButton(text: "View Requests", onSelect: { router.toViewRequests() })
                         
                         if let profile = userProfile {
                             VStack(spacing: 20) {
@@ -98,6 +99,7 @@ struct FriendInvite : View {
                 .padding()
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             updateUserProfile()
         }

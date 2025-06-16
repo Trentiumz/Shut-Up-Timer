@@ -37,6 +37,10 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.inviteFriends));
     }
     
+    func toViewRequests() {
+        path.append(PathElement(route: AppRoute.viewRequests))
+    }
+    
     func toHome() {
         while !path.isEmpty {
             path.removeLast();

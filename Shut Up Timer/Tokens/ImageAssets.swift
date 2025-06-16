@@ -53,8 +53,11 @@ struct FormattedImages {
                       .frame(width: 380, height: 396.3481140136719, alignment: .top)
                       .clipped()
                       .offset(x: -5, y: -35)
+                      .allowsHitTesting(false)
+                      .zIndex(-1)
                   )
                   .rotationEffect(Angle(degrees: 2))
+                  .clipped()
             }
             .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
             .scaleEffect(scaleFactor)
@@ -90,7 +93,10 @@ struct FormattedImages {
                             .frame(width: 402, height: 133)
                             .clipped()
                             .offset(y: -47)
+                            .allowsHitTesting(false)
+                            .zIndex(-1)
                     )
+                    .clipped()
             }
             .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
             .scaleEffect(scaleFactor)
@@ -126,7 +132,9 @@ struct FormattedImages {
                       .frame(width: 419, height: 90)
                       .clipped()
                       .offset(x: -5, y: -15)
+                      .allowsHitTesting(false)
                   )
+                  .clipped()
             }
             .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
             .scaleEffect(scaleFactor)
@@ -161,7 +169,9 @@ struct FormattedImages {
                       .aspectRatio(contentMode: .fill)
                       .frame(width: 430.391357421875, height: 430.3922119140625)
                       .clipped()
+                      .allowsHitTesting(false)
                   )
+                  .clipped()
             }
             .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
             .scaleEffect(scaleFactor)
@@ -170,5 +180,5 @@ struct FormattedImages {
 }
 
 #Preview {
-    FormattedImages.FriendQRBackground(width: 200)
+    FormattedImages.LinedImageBackground(width: 350)
 }

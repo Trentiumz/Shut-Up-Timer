@@ -17,7 +17,16 @@ struct FriendProfileResponse : Codable{
 struct FriendRequestResponse : Codable{
     var id: Int
     var sender_id: UUID
+    var pfp: String
+    var username: String
+    var created_at: Date
+}
+
+struct SentRequestResponse : Codable{
+    var id: Int
     var receiver_id: UUID
+    var pfp: String
+    var username: String
     var created_at: Date
 }
 

@@ -78,7 +78,7 @@ struct TimerView: View {
             VStack {
                 Spacer()
                 
-                Text("\(formatTime(curSession.curParam.getTotTime()))")
+                Text("\(Utils.formatTime(curSession.curParam.getTotTime()))")
                     .font(FontTokens.architectsDaughter(size: 60))
                     .foregroundStyle(ColorTokens.shade100)
                 

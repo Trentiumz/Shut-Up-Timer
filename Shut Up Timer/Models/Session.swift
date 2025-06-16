@@ -15,6 +15,7 @@ struct SessionEntry: Identifiable, Codable, Equatable {
     var plannedTime: TimeInterval
     var success: Bool
     var roast: String?
+    var imageName: String?
     
     var iqChange: Double { success ? (plannedTime <= 3600 ? plannedTime / 3600 : 1 + 2 * (plannedTime - 3600) / 3600) : -1 }
     var sortedCategories: [(todoID: UUID, time: TimeInterval)] {

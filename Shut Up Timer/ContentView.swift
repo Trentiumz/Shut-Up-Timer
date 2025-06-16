@@ -52,12 +52,13 @@ struct ContentView: View {
                 case .timerCompleted(let session):
                     // timer completed
                     TimerCompletedView(session: session)
-                        .environmentObject(router)
                         .navigationBarBackButtonHidden(true)
-                case .timerFailed(let seconds, let roast):
+                case .timerFailed(let session):
                     // timer failed
-                    TimerFailedView(timeLocked: seconds, roast: roast)
-                        .environmentObject(router)
+                    TimerFailedView(session: session)
+                        .navigationBarBackButtonHidden(true)
+                case .timerFailedCamera(let sessionID):
+                    FailedCameraView(sessionID: sessionID)
                         .navigationBarBackButtonHidden(true)
                 case .login(let onSuccess):
                     // login screen
@@ -66,7 +67,6 @@ struct ContentView: View {
                 case .inviteFriends:
                     // invite friends screen
                     FriendInvite()
-                        .environmentObject(router)
                         .navigationBarBackButtonHidden(false)
                 case .viewRequests:
                     RequestListView()

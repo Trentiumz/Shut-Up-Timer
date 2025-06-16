@@ -4,7 +4,8 @@ enum AppRoute {
     case home
     case timer(timerModel: TimerViewModel)
     case timerCompleted(session: SessionEntry)
-    case timerFailed(seconds: TimeInterval, roast: String? = nil)
+    case timerFailed(session: SessionEntry)
+    case timerFailedCamera(sessionID: UUID)
     case login(onSuccess: () -> Void)
     case inviteFriends
     case viewRequests

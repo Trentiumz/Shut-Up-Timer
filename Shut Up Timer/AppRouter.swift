@@ -20,13 +20,13 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.timerCompleted(session: curSession)))
     }
     
-    func toTimerFailed(timerModel: TimerViewModel, roast: String? = nil) {
-        assert(timerModel.curSession.status == .failed) // ensure we actually failed
-        let totTime = switch(timerModel.curSession.initialParam) {
-        case .countdown(let seconds):
-            seconds
-        }
-        path.append(PathElement(route: AppRoute.timerFailed(seconds: totTime, roast: roast)))
+    func toTimerFailed(session: SessionEntry) {
+        assert(!session.success) // ensure we actually failed
+        path.append(PathElement(route: AppRoute.timerFailed(session: session)))
+    }
+    
+    func toTimerCameraView(sessionID: UUID) {
+        path.append(PathElement(route: AppRoute.timerFailedCamera(sessionID: sessionID)))
     }
 
     func toInviteFriends() {

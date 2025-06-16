@@ -33,8 +33,9 @@ struct TimerView: View {
         timerViewModel.stopSession();
         let chosenRoast = getRandomRoast();
         
-        let sessionResult = curSession.getSession(endTime: Date())
-        router.toTimerFailed(timerModel: timerViewModel, roast: chosenRoast);
+        var sessionResult = curSession.getSession(endTime: Date());
+        sessionResult.roast = chosenRoast;
+        router.toTimerFailed(session: sessionResult);
         sessions.sessions.append(sessionResult);
     }
 

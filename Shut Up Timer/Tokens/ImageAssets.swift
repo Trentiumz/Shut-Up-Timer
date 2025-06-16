@@ -27,6 +27,8 @@ enum ImageAssets {
         Image("mad_frame_002"),
         Image("mad_frame_003")
     ]
+    static let disappointmentBook = Image("leaderboard-book-image 120")
+    static let disappointmentStrip = Image("leaderboard-strip-image 122")
 }
 
 struct FormattedImages {
@@ -252,8 +254,91 @@ struct FormattedImages {
                 }
         }
     }
+    
+    struct DisappointmentBook : View {
+        private var oWidth: CGFloat = 140;
+        private var oHeight: CGFloat = 130;
+        private var text: String;
+        var scaleFactor: CGFloat;
+        
+        init(_ text: String = "", width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if height == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+            self.text = text;
+        }
+        
+        var body : some View {
+            Group {
+                ZStack(alignment: .topLeading) {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 140, height: 130)
+                        .background(
+                            ImageAssets.disappointmentBook
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 158, height: 158)
+                                .clipped()
+                                .allowsHitTesting(false)
+                        )
+                        .clipped()
+                    Text(text)
+                        .font(FontTokens.architectsDaughter(size: 20))
+                        .foregroundColor(ColorTokens.shade700)
+                        .frame(width: 95, height: 25)
+                        .minimumScaleFactor(0.5)
+                        .offset(x: 25, y: 35)
+                }
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
+    
+    struct DisappointmentStrip : View {
+        private var oWidth: CGFloat = 300;
+        private var oHeight: CGFloat = 65;
+        var scaleFactor: CGFloat;
+        
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if height == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+        
+        var body : some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: 300, height: 65)
+                  .background(
+                    ImageAssets.disappointmentStrip
+                      .resizable()
+                      .aspectRatio(contentMode: .fill)
+                      .frame(width: 329, height: 70)
+                      .offset(x: -10, y: -95)
+                      .allowsHitTesting(false)
+                  )
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
 }
 
 #Preview {
-    FormattedImages.AnimatedMadMother(width: 300)
+    FormattedImages.DisappointmentStrip(width: 300)
 }

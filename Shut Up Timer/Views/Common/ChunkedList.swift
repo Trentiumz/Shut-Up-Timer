@@ -23,7 +23,7 @@ struct ChunkedPageList<Data, RowContent: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(0..<chunks.count, id: \.self) { chunkIndex in
-                ZStack {
+                ZStack(alignment: .top) {
                     FormattedImages.LinedImageBackground(width: 350)
                     VStack(spacing: itemSpacing) {
                         ForEach(Array(chunks[chunkIndex].enumerated()), id: \.offset) { _, item in

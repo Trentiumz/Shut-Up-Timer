@@ -73,14 +73,15 @@ struct AccountView : View {
                             HStack {
                                 SectionStripe("Friends >")
                                 Spacer()
-                            }
-                            FriendsListView(friends)
+                            }.padding(.horizontal, 20)
+                            FriendsListView(friends, removeFriend: removeFriend)
                         }
                     }
                     
                     HStack {
                         AccountView.SectionStripe("Settings")
-                    }
+                        Spacer()
+                    }.padding(.horizontal, 20)
                     
                     SettingsView(
                         userPublicProfile: $userPublicProfile,

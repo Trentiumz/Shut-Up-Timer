@@ -29,6 +29,7 @@ enum ImageAssets {
     ]
     static let disappointmentBook = Image("leaderboard-book-image 120")
     static let disappointmentStrip = Image("leaderboard-strip-image 122")
+    static let disappointmentChevron = Image("DisappointmentChevron-Polygon 1")
 }
 
 struct FormattedImages {
@@ -332,6 +333,84 @@ struct FormattedImages {
                       .offset(x: -10, y: -95)
                       .allowsHitTesting(false)
                   )
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
+    
+    struct DisappointmentChevron: View {
+        private var oWidth: CGFloat = 35
+        private var oHeight: CGFloat = 75
+        var scaleFactor: CGFloat
+
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1
+            } else if height == .infinity {
+                scaleFactor = width / oWidth
+            } else if width == .infinity {
+                scaleFactor = height / oHeight
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+
+        var body: some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: 35, height: 75)
+                  .background(
+                    ImageAssets.disappointmentChevron
+                      .resizable()
+                      .aspectRatio(contentMode: .fill)
+                      .frame(width: 43, height: 79, alignment: .top)
+                      .clipped()
+                      .allowsHitTesting(false)
+                      .offset(x: -3, y: -1)
+                      .zIndex(-1)
+                  )
+                  .clipped()
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
+
+    struct OnboardingHello70: View {
+        private var oWidth: CGFloat = 105
+        private var oHeight: CGFloat = 75
+        var scaleFactor: CGFloat
+
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1
+            } else if height == .infinity {
+                scaleFactor = width / oWidth
+            } else if width == .infinity {
+                scaleFactor = height / oHeight
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+
+        var body: some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: 105, height: 75)
+                  .background(
+                    ImageAssets.onboardingHello70
+                      .resizable()
+                      .aspectRatio(contentMode: .fill)
+                      .frame(width: 120, height: 120, alignment: .top)
+                      .clipped()
+                      .allowsHitTesting(false)
+                      .offset(x: 3, y: -1)
+                      .zIndex(-1)
+                  )
+                  .clipped()
             }
             .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
             .scaleEffect(scaleFactor)

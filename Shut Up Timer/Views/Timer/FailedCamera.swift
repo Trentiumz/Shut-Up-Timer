@@ -44,8 +44,9 @@ struct FailedCameraView : View {
                         if let image {
                             Image(uiImage: image)
                                 .resizable()
-                                .scaledToFit()
+                                .scaledToFill()
                                 .frame(width: geo.size.width, height: geo.size.height)
+                                .clipped()
                         } else {
                             CameraView(image: $image)
                         }

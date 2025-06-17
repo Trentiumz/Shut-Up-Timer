@@ -18,7 +18,7 @@ struct HomeView: View {
             
             VStack {
                 HStack {
-                    Text("\(sessions.getIQ()) IQ")
+                    Text(String(format: "%.1f IQ", sessions.getIQ()))
                       .font(Font.custom("Architects Daughter", size: 30))
                       .foregroundColor(ColorTokens.shade700)
                     Spacer()

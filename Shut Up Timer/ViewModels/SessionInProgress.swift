@@ -92,6 +92,7 @@ class SessionInProgress : Codable, ObservableObject {
         if status == .inProgress {
             if curTime.timeIntervalSince(lastActiveUpdate) > 30 {
                 failTimer()
+                return;
             }
             
             // update our task logs

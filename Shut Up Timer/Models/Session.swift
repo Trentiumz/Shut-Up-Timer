@@ -114,6 +114,14 @@ class Sessions : Codable, Equatable, ObservableObject {
         
         return categoryStrings
     }
+    
+    func getDateHours() -> [Date: TimeInterval] {
+        var acc: [Date: TimeInterval] = [:]
+        for session in sessions {
+            acc[Calendar.current.startOfDay(for: session.started), default: 0] += session.timeLocked
+        }
+        return acc
+    }
 
     func getRoasts() -> [String] {
         let roasts = sessions.compactMap{ $0.roast }

@@ -36,7 +36,7 @@ struct Shut_Up_TimerApp: App {
                     try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": newSessions.getIQ()]).execute();
                     try await credManager.supabaseClient.rpc("change_hours", params: ["new_hours": toISO(TimeInterval(newSessions.getTotalTimeLocked()))]).execute();
                     try await credManager.supabaseClient.rpc("change_top_categories", params: ["new_top_categories": newSessions.getTopCategoryStrings(toDoList: todoList)]).execute();
-                    try await credManager.supabaseClient.rpc("change_roasts", params: ["new_roasts": newSessions.getRoasts()]).execute();
+                    try await credManager.supabaseClient.rpc("change_roasts", params: ["new_roasts": newSessions.getLatestRoasts()]).execute();
                 }
             }
         }

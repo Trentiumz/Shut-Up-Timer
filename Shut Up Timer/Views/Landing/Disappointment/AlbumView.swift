@@ -47,11 +47,11 @@ struct AlbumView: View {
     }
 
     // Get images for display (most recent first)
-    func getImages() -> [(String, Date)] {
+    func getImages() -> [(String, SessionEntry)] {
         let entries = selectedTab == .month ? getMonthSessions() : getYearSessions()
         return entries.compactMap { entry in
             if let imageName = entry.imageName {
-                return (imageName, entry.started)
+                return (imageName, entry)
             } else {
                 return nil
             }
@@ -59,23 +59,75 @@ struct AlbumView: View {
     }
 
     // Get roasts for display (most recent first)
-    func getRoasts() -> [(String, Date)] {
+    func getRoasts() -> [(String, SessionEntry)] {
         let entries = selectedTab == .month ? getMonthSessions() : getYearSessions()
         return entries.compactMap { entry in
             if let roast = entry.roast {
-                return (roast, entry.started)
+                return (roast, entry)
             } else {
                 return nil
             }
         }
     }
     
-    func getItems() -> [(String, String)] {
+    /// returns items, which is either ("image", image name, Session) or ("roast", roast, Session)
+    func getItems() -> [(String, String, SessionEntry)] {
         var entries = getImages().map { ("image", $0.0, $0.1 )} + getRoasts().map{ ("roast", $0.0, $0.1 )}
-        entries = entries.sorted{ $0.2 > $1.2 }
-        return entries.map{ ($0.0, $0.1) }
+        entries = entries.sorted{ $0.2.started > $1.2.started }
+        return entries
     }
-
+    
+    func removeRoast(id: UUID) {
+        if let ind = sessions.sessions.firstIndex(where: { $0.id == id }) {
+            sessions.sessions[ind].roast = nil
+        }
+    }
+    
+    func removeImage(id: UUID) {
+        if let ind = sessions.sessions.firstIndex(where: { $0.id == id }) {
+            _ = ImageLoader.deleteImage(name: sessions.sessions[ind].imageName!)
+            sessions.sessions[ind].imageName = nil
+        }
+    }
+    
+    struct ImagesRow : View {
+        var items: [(String, String, SessionEntry)]
+        var removeImage: (UUID) -> Void
+        var removeRoast: (UUID) -> Void
+        
+        var body : some View {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 18) {
+                    ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                        if item.0 == "image" {
+                            if let image = ImageLoader.loadImage(name: item.1) {
+                                FailImageDisplay(image: image)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            removeImage(item.2.id)
+                                        } label: {
+                                            Label("Remove Image", systemImage: "trash")
+                                        }
+                                    }
+                            }
+                        } else {
+                            RoastDisplay(message: item.1)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        removeRoast(item.2.id)
+                                    } label: {
+                                        Label("Remove Roast", systemImage: "trash")
+                                    }
+                                }
+                        }
+                    }
+                }
+                .padding(.horizontal, 10)
+            }
+            .frame(height: 170)
+        }
+    }
+    
     var body: some View {
         ZStack {
             Background()
@@ -91,21 +143,7 @@ struct AlbumView: View {
                     .frame(maxWidth: .infinity)
                     
                     // --- Images Row ---
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 18) {
-                            ForEach(Array(getItems().enumerated()), id: \.offset) { _, item in
-                                if item.0 == "image" {
-                                    if let image = ImageLoader.loadImage(name: item.1) {
-                                        FailImageDisplay(image: image)
-                                    }
-                                } else {
-                                    RoastDisplay(message: item.1)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 10)
-                    }
-                    .frame(height: 170)
+                    ImagesRow(items: getItems(), removeImage: removeImage, removeRoast: removeRoast)
                     
                     Spacer()
                         .frame(height: 60)

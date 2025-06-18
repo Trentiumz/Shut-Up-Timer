@@ -27,4 +27,14 @@ class ImageLoader {
         }
     }
     
+    static func deleteImage(name: String) -> Bool {
+        let url = getImageURL(name)
+        do {
+            try FileManager.default.removeItem(at: url)
+            return true
+        } catch {
+            print("Failed to delete image:", error)
+            return false
+        }
+    }
 }

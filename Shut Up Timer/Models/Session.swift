@@ -123,8 +123,9 @@ class Sessions : Codable, Equatable, ObservableObject {
         return acc
     }
 
-    func getRoasts() -> [String] {
-        let roasts = sessions.compactMap{ $0.roast }
+    /// gets roasts, sorted in reverse chronological order
+    func getLatestRoasts() -> [String] {
+        let roasts = sessions.sorted{ $0.started > $1.started }.compactMap{ $0.roast }
         return roasts;
     }
 }

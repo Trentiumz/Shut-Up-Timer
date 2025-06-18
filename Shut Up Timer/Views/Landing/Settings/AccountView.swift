@@ -127,7 +127,7 @@ struct LocalUserInfoView : View {
     var userPublicProfile: UserPublicProfileResponse?;
     
     var body : some View {
-        UserInfoView(iq: sessions.getIQ(), username: userPublicProfile?.username ?? "", profile_picture: userPublicProfile?.profile_picture ?? "", roasts: sessions.getRoasts(), hours: "\(sessions.getTotalTimeLocked())", top_categories: sessions.getTopCategoryStrings(toDoList: todoList))
+        UserInfoView(iq: sessions.getIQ(), username: userPublicProfile?.username ?? "", profile_picture: userPublicProfile?.profile_picture ?? "", roasts: sessions.getLatestRoasts(), hours: "\(sessions.getTotalTimeLocked())", top_categories: sessions.getTopCategoryStrings(toDoList: todoList))
     }
 }
 

@@ -29,7 +29,7 @@ struct DisappointmentView: View {
 
     // Example: ["You're one more '5-minute break' away...", ...]
     var favouriteRoasts: [String] {
-        sessions.getRoasts()
+        sessions.getLatestRoasts()
     }
 
     // Called when a book is tapped

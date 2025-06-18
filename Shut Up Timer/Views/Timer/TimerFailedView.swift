@@ -10,11 +10,9 @@ struct TimerFailedView: View {
     
     var body: some View {
         ZStack {
-            FormattedImages.MadMotherImage(0, width: 1200)
-                .offset(x: -150, y: -300)
-            VStack {
+            VStack(spacing: 0) {
                 Spacer()
-                    .frame(maxHeight: 600)
+                    .frame(minHeight: 470)
                 
                 if let roast = session.roast {
                     Text(roast)
@@ -23,17 +21,19 @@ struct TimerFailedView: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                         .minimumScaleFactor(0.5)
-                        .frame(width: 360, alignment: .center)
+                        .frame(width: 350, alignment: .center)
                 }
+                
+                Spacer()
+                    .frame(maxHeight: 10)
                 
                 OnboardingNextButton(text: "Take a Picture", onSelect: {
                     router.toTimerCameraView(sessionID: session.id)
                 })
                 
                 Spacer()
-                    .frame(maxHeight: 60)
+                    .frame(maxHeight: 20)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // Full-screen view
             .cornerRadius(20)
             
             Text("You failed!")
@@ -42,6 +42,10 @@ struct TimerFailedView: View {
                 .multilineTextAlignment(.center)
                 .frame(width: 360, alignment: .center)
                 .foregroundColor(ColorTokens.red300)
+                .offset(y: -50)
+        }.background(alignment: .top) {
+            FormattedImages.MadMotherImage(0, width: 1200)
+                .offset(x: -150, y: -500)
         }
     }
 }

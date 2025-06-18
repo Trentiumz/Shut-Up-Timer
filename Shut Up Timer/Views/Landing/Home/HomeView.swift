@@ -8,8 +8,6 @@ struct HomeView: View {
     @State private var expandedTodo = false;
     @State private var selectedTodo = UUID();
     
-    @Namespace private var todoAnimation
-    
     init() {
     }
     
@@ -27,7 +25,7 @@ struct HomeView: View {
                     
                     if !expandedTodo {
                         TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
-                            .matchedGeometryEffect(id: "todo-card", in: todoAnimation)
+                            .transition(.opacity)
                     } else {
                         Rectangle()
                             .fill(.clear)
@@ -67,26 +65,21 @@ struct HomeView: View {
             
             VStack {
                 Spacer()
-                    .frame(maxHeight: 40)
                 HStack {
                     if expandedTodo {
                         TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
-                            .matchedGeometryEffect(id: "todo-card", in: todoAnimation)
+                            .transition(.opacity)
                     }
                     
                     Spacer()
                 }
-                if expandedTodo {
-                    Spacer()
-                        .frame(maxHeight: 100)
-                } else {
-                    Spacer()
-                }
+                Spacer()
             }
             .safeAreaPadding(.all)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
+        .coordinateSpace(name: "todo-card")
     }
 }
 

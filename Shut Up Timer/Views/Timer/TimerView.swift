@@ -80,27 +80,43 @@ struct TimerView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             VStack {
                 Spacer()
+                if !todoExpanded {
+                    HStack {
+                        TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
+                        Spacer()
+                    }
+                } else {
+                    Rectangle()
+                        .fill(.clear)
+                        .frame(width: 150, height: 180)
+                        .allowsHitTesting(false)
+                }
                 
                 Text("\(Utils.formatTime(curSession.curParam.getTotTime()))")
                     .font(FontTokens.architectsDaughter(size: 60))
                     .foregroundStyle(ColorTokens.shade100)
                 
-                PanFrame(0, 240, 240)
-                    .padding(.horizontal)
-                    .background(
-                        ImageAssets.panFryFrames[0]
-                            .resizable()
-                            .frame(width: 150, height: 150)
-                    )
-                    .frame(width: 240, height: 160, alignment: .bottom)
+                ViewThatFits {
+                    PanFrame(0, 240, 240)
+                        .padding(.horizontal)
+                        .frame(width: 240, height: 160, alignment: .bottom)
+                    PanFrame(0, 180, 180)
+                        .padding(.horizontal)
+                        .frame(width: 180, height: 100, alignment: .bottom)
+                }
                 
                 Text("Farming IQ points...")
                     .font(FontTokens.architectsDaughter(size: 30))
                     .foregroundStyle(ColorTokens.shade100)
                 
-                OnboardingNextButton(text: "Give Up", onSelect: {
-                    quitExpanded = true;
-                }).sheet(isPresented: $quitExpanded) {
+                ViewThatFits {
+                    OnboardingNextButton(text: "Give Up", onSelect: {
+                        quitExpanded = true;
+                    })
+                    OnboardingNextButton(text: "Give Up", onSelect: {
+                        quitExpanded = true;
+                    }, isSmall: true)
+                }.sheet(isPresented: $quitExpanded) {
                     GiveUpSlider(onGiveUp: {
                         curSession.failTimer()
                         quitExpanded = false;
@@ -128,20 +144,19 @@ struct TimerView: View {
             
             VStack {
                 Spacer()
-                    .frame(maxHeight: 40)
                 HStack {
+                    Spacer();
                     if todoExpanded {
-                        Spacer();
+                        TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
+                    } else {
+                        Rectangle()
+                            .fill(.clear)
+                            .frame(width: 350, height: 400)
+                            .allowsHitTesting(false)
                     }
-                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
                     Spacer()
                 }
-                if todoExpanded {
-                    Spacer()
-                        .frame(maxHeight: 40)
-                } else {
-                    Spacer()
-                }
+                Spacer()
             }
         }
         .onAppear {

@@ -3,10 +3,28 @@ import SwiftUI
 // --- DisappointmentView Main ---
 struct DisappointmentView: View {
     @EnvironmentObject var sessions: Sessions
+    @EnvironmentObject var router: AppRouter
 
-    // Example: ["May 2025", "June 2025"]
-    var albums: [String] {
-        sessions.getMonthlyAlbums()
+    /// albums: [(StringWriting, Month, Year)]
+    var albums: [(String, Int, Int)] {
+        let earliest = sessions.sessions.map { $0.started }.min(by: <) ?? Date()
+        let calendar = Calendar.current
+        let now = Date()
+        var current = startOfMonth(earliest)
+        var dates: [Date] = []
+        while current <= now {
+            dates.append(current)
+            current = calendar.date(byAdding: .month, value: 1, to: current)!
+        }
+        
+        return dates.map{ getMonthRep($0) }
+    }
+    
+    func getMonthRep(_ date: Date) -> (String, Int, Int){
+        let month = Calendar.current.component(.month, from: date)
+        let year = Calendar.current.component(.year, from: date)
+        let formatter = DateFormatter()
+        return ("\(formatter.monthSymbols[month]) \(year)", month, year)
     }
 
     // Example: ["You're one more '5-minute break' away...", ...]
@@ -27,8 +45,8 @@ struct DisappointmentView: View {
                     // --- Monthly Albums ---
                     SectionStripe("Monthly Albums >")
                     HorizontalScroller(data: albums, itemWidth: 140, numItems: 2) { album in
-                        Button(action: { onAlbumTap(album) }) {
-                            FormattedImages.DisappointmentBook(album, width: 140)
+                        Button(action: { router.toAlbumView(month: album.1, year: album.2) }) {
+                            FormattedImages.DisappointmentBook(album.0, width: 140)
                         }
                     }
                     .padding(.leading, 10)
@@ -69,7 +87,7 @@ struct DisappointmentView: View {
 }
 
 // --- Section Stripe ---
-fileprivate struct SectionStripe: View {
+struct SectionStripe: View {
     var text: String
     init(_ text: String){
         self.text = text;
@@ -115,6 +133,17 @@ fileprivate struct RoastPaper : View {
                     .frame(width: 250, height: 45, alignment: .topLeading)
             }
         }
+    }
+}
+
+fileprivate func startOfMonth(_ date: Date) -> Date {
+    let calendar = Calendar.current
+    let components = calendar.dateComponents([.year, .month], from: date)
+    if let date = calendar.date(from: components) {
+        return date
+    } else {
+        print("Failed to get start of week for \(date)")
+        return Date()
     }
 }
 
@@ -239,14 +268,6 @@ fileprivate struct StatsSummaryView: View {
             .padding(.leading, 40)
         }
         .frame(width: 340, height: 210)
-    }
-}
-
-// --- Example Sessions extension for mock data ---
-extension Sessions {
-    func getMonthlyAlbums() -> [String] {
-        // Replace with real logic
-        ["May 2025", "June 2025"]
     }
 }
 

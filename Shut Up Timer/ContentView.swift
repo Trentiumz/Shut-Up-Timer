@@ -70,6 +70,8 @@ struct ContentView: View {
                         .navigationBarBackButtonHidden(false)
                 case .viewRequests:
                     RequestListView()
+                case .albumView(let month, let year):
+                    AlbumView(month: month, year: year)
                 default:
                     Text("Invalid")
                 }

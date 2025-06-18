@@ -9,6 +9,7 @@ enum AppRoute {
     case login(onSuccess: () -> Void)
     case inviteFriends
     case viewRequests
+    case albumView(month: Int, year: Int)
 }
 
 struct PathElement : Hashable {

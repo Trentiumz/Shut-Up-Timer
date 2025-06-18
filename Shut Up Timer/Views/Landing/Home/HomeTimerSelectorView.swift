@@ -43,9 +43,14 @@ struct CountdownSelectorView : View{
                         showingPicker = true;
                     }) {
                         
-                        PanFrame(0, 240, 220)
-                            .padding(.horizontal)
-                            .frame(width: 240, height: 160, alignment: .bottom)
+                        ViewThatFits {
+                            PanFrame(0, 240, 220)
+                                .padding(.horizontal)
+                                .frame(width: 240, height: 160, alignment: .bottom)
+                            PanFrame(0, 160, 147)
+                                .padding(.horizontal)
+                                .frame(width: 160, height: 107, alignment: .bottom)
+                        }
                     }.sheet(isPresented: $showingPicker) {
                         DurationPickerModal(duration: $duration)
                     }.onChange(of: duration) {

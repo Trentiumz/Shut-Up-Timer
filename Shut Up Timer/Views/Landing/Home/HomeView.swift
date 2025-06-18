@@ -8,6 +8,8 @@ struct HomeView: View {
     @State private var expandedTodo = false;
     @State private var selectedTodo = UUID();
     
+    @Namespace private var todoAnimation
+    
     init() {
     }
     
@@ -16,24 +18,36 @@ struct HomeView: View {
             Background()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            VStack {
-                HStack {
+            VStack(spacing: 0) {
+                HStack(alignment: .top) {
                     Text(String(format: "%.1f IQ", sessions.getIQ()))
-                      .font(Font.custom("Architects Daughter", size: 30))
-                      .foregroundColor(ColorTokens.shade700)
+                        .font(Font.custom("Architects Daughter", size: 30))
+                        .foregroundColor(ColorTokens.shade700)
                     Spacer()
-                }
+                    
+                    if !expandedTodo {
+                        TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                            .matchedGeometryEffect(id: "todo-card", in: todoAnimation)
+                    } else {
+                        Rectangle()
+                            .fill(.clear)
+                            .frame(width: 120, height: 160)
+                    }
+                }.padding(.horizontal, 10)
+                
                 Spacer()
-                    .frame(maxHeight: 220)
                 
                 // display the timer selector
                 CountdownSelectorView(timerParams: $settings.timerParam)
+                
+                Spacer()
                 
                 OnboardingNextButton(text: "Start Cooking", onSelect: {
                     router.toTimerState(params: settings.timerParam, todoID: selectedTodo)
                 })
                 
                 Spacer()
+                    .frame(maxHeight: 10)
             }
             .safeAreaPadding(.all)
             
@@ -55,7 +69,10 @@ struct HomeView: View {
                 Spacer()
                     .frame(maxHeight: 40)
                 HStack {
-                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                    if expandedTodo {
+                        TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                            .matchedGeometryEffect(id: "todo-card", in: todoAnimation)
+                    }
                     
                     Spacer()
                 }
@@ -74,7 +91,7 @@ struct HomeView: View {
 }
 
 #Preview {
-    ContentView()
+    HomeView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings())
         .environmentObject(ToDoLoader.getToDo())

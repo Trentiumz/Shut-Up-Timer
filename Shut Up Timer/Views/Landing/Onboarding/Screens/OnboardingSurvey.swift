@@ -13,26 +13,54 @@ struct SelectorList : View {
     @State var selectedOption: String = "none";
     
     var body : some View {
-        VStack(spacing: 10) {
-            ForEach(options, id: \.0) { (option, text, selectedText) in
-                OnboardingSelector(
-                    text: text,
-                    selectedText: selectedText,
-                    isSelected: selectedOption == option,
-                    onSelect: {
-                        selectedOption = option
-                    })
-            }
-            Spacer()
-            OnboardingNextButton(text: nextText, onSelect: {
-                if options.contains(where: { elem in
-                    elem.0 == selectedOption;
-                }) {
-                    onSelect(selectedOption);
+        ViewThatFits {
+            VStack(spacing: 10) {
+                ForEach(options, id: \.0) { (option, text, selectedText) in
+                    OnboardingSelector(
+                        text: text,
+                        selectedText: selectedText,
+                        isSelected: selectedOption == option,
+                        onSelect: {
+                            selectedOption = option
+                        })
                 }
-            })
-            Spacer()
-                .frame(maxHeight: 40)
+                Spacer()
+                OnboardingNextButton(text: nextText, onSelect: {
+                    if options.contains(where: { elem in
+                        elem.0 == selectedOption;
+                    }) {
+                        onSelect(selectedOption);
+                    }
+                })
+                Spacer()
+                    .frame(maxHeight: 40)
+            }
+            
+            VStack(spacing: 10) {
+                ForEach(options, id: \.0) { (option, text, selectedText) in
+                    OnboardingSelector(
+                        text: text,
+                        selectedText: selectedText,
+                        isSelected: selectedOption == option,
+                        onSelect: {
+                            selectedOption = option
+                        },
+                        isSmall: true)
+                }
+                Spacer()
+                OnboardingNextButton(
+                    text: nextText,
+                    onSelect: {
+                        if options.contains(where: { elem in
+                            elem.0 == selectedOption;
+                        }) {
+                            onSelect(selectedOption);
+                        }
+                    },
+                    isSmall: true)
+                Spacer()
+                    .frame(maxHeight: 40)
+            }
         }
     }
 }
@@ -54,8 +82,12 @@ struct OnboardingQ1: View {
             VStack {
                 BackButton(onPress: onPrevious);
                 Spacer()
-                LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 280)
-                    .offset(y: -10)
+                ViewThatFits {
+                    LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 280)
+                        .offset(y: -10)
+                    LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 220)
+                        .offset(y: -10)
+                }
                 Rectangle().fill(.clear).frame(height: 40)
                 Spacer()
                 SelectorList(options: options, nextText: doneText, onSelect: onPress)
@@ -83,11 +115,16 @@ struct OnboardingQ2: View {
             VStack {
                 BackButton(onPress: onPrevious);
                 Spacer()
-                LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 280)
-                    .offset(y: -10)
+                ViewThatFits {
+                    LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 280)
+                        .offset(y: -10)
+                    LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 200)
+                        .offset(y: -10)
+                }
                 Rectangle().fill(.clear).frame(height: 40)
                 Spacer()
                 SelectorList(options: options, nextText: doneText, onSelect: onPress)
+                Spacer()
             }
         }
         .background(ColorTokens.shade300)
@@ -139,8 +176,12 @@ struct OnboardingQ4: View {
             VStack {
                 BackButton(onPress: onPrevious);
                 Spacer();
-                LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 280)
-                    .offset(y: -10)
+                ViewThatFits {
+                    LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 280)
+                        .offset(y: -10)
+                    LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 200)
+                        .offset(y: -10)
+                }
                 Rectangle().fill(.clear).frame(height: 40)
                 Spacer()
                 SelectorList(options: options, nextText: doneText, onSelect: onPress)
@@ -151,5 +192,5 @@ struct OnboardingQ4: View {
 }
 
 #Preview {
-    OnboardingQ3(onPress: {val in print("Selected \(val)")}, onPrevious: {print("Going previous...")})
+    OnboardingQ4(onPress: {val in print("Selected \(val)")}, onPrevious: {print("Going previous...")})
 }

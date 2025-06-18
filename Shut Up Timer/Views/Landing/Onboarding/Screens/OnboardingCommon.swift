@@ -53,7 +53,7 @@ struct LinedPaper : View {
                 .frame(width: 292, alignment: .center)
                 .rotationEffect(Angle(degrees: -2))
                 .offset(x: 0, y: 20)
-        }
+        }.allowsHitTesting(false)
     }
 }
 
@@ -66,8 +66,9 @@ struct Background : View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .clipped()
+                    .ignoresSafeArea()
             )
-            .edgesIgnoringSafeArea(.all)
+            .ignoresSafeArea()
     }
 }
 

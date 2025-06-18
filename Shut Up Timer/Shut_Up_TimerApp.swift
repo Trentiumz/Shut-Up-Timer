@@ -50,6 +50,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(sessions)	
                 .environmentObject(todoList)
                 .environmentObject(credManager)
+                .preferredColorScheme(.light)
         }
     }
 }

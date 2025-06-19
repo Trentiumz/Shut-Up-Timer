@@ -30,6 +30,7 @@ enum ImageAssets {
     static let disappointmentBook = Image("leaderboard-book-image 120")
     static let disappointmentStrip = Image("leaderboard-strip-image 122")
     static let disappointmentChevron = Image("DisappointmentChevron-Polygon 1")
+    static let feedbackUpvoteButton = Image("feedback-upvote-image 140")
 }
 
 struct FormattedImages {
@@ -416,8 +417,47 @@ struct FormattedImages {
             .scaleEffect(scaleFactor)
         }
     }
+    
+    struct FeedbackUpvoteButton: View {
+        private var oWidth: CGFloat = 48
+        private var oHeight: CGFloat = 52
+        var scaleFactor: CGFloat
+
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1
+            } else if height == .infinity {
+                scaleFactor = width / oWidth
+            } else if width == .infinity {
+                scaleFactor = height / oHeight
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+
+        var body: some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: oWidth, height: oHeight)
+                  .background(alignment: .topLeading) {
+                      ImageAssets.feedbackUpvoteButton
+                          .resizable()
+                          .aspectRatio(contentMode: .fill)
+                          .frame(width: 52, height: 52, alignment: .top)
+                          .clipped()
+                          .allowsHitTesting(false)
+                          .offset(x: -2, y: 0)
+                          .zIndex(-1)
+                  }
+                  .clipped()
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
 }
 
 #Preview {
-    FormattedImages.DisappointmentStrip(width: 300)
+    FormattedImages.FeedbackUpvoteButton(width: 300)
 }

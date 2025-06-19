@@ -62,3 +62,13 @@ struct WorldLeaderboardResponse : Codable{
     var profile_picture: String
     var iq: Int
 }
+
+struct FeedbackResponse : Codable {
+    var id: UUID
+    var username: String
+    var pfp: String
+    var stars: Int
+    var feedback: String
+    var created_at: Date
+    var upvotes: Int
+}

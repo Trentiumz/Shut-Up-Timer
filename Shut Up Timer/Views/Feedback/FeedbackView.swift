@@ -2,12 +2,18 @@ import SwiftUI
 
 struct FeedbackView: View {
     @State private var feedbacks: [FeedbackResponse] = []
-    @State private var sortBy: String = "Upvotes"
+    @State private var sortBy: FeedbackCategories = .upvotes
     
     @State private var addFeedbackShowing: Bool = false
     @EnvironmentObject var credManager : CredManager
     
     @State private var curUser: UserPublicProfileResponse?
+    
+    enum FeedbackCategories : String, CaseIterable {
+        case upvotes = "Upvotes"
+        case recent = "Recent"
+        case my = "My"
+    }
     
     var avgStars: Double {
         guard !feedbacks.isEmpty else { return 0 }
@@ -23,9 +29,18 @@ struct FeedbackView: View {
     
     func updateFeedbacks() {
         Task {
-            let feedbacks = await credManager.getUpvotedFeedback()
+            let feedbacks = switch(sortBy) {
+            case .upvotes:
+                await credManager.getFeedbackByUpvotes()
+            case .recent:
+                await credManager.getFeedbackByRecent()
+            case .my:
+                await credManager.getMyFeedback()
+            }
             await MainActor.run {
-                self.feedbacks = feedbacks;
+                withAnimation {
+                    self.feedbacks = feedbacks;
+                }
             }
         }
     }
@@ -90,7 +105,17 @@ struct FeedbackView: View {
                     
                     // Sort & Feedback Buttons
                     HStack(spacing: 16) {
-                        Button(action: {}) {
+                        Menu {
+                            ForEach(FeedbackCategories.allCases, id: \.rawValue) { cat in
+                                Button(action: {
+                                    sortBy = cat;
+                                    updateFeedbacks()
+                                }) {
+                                    Text(cat.rawValue)
+                                }
+                                .tag(cat)
+                            }
+                        } label: {
                             HStack {
                                 Image(systemName: "arrow.up.arrow.down")
                                 Text("Sorted by")
@@ -131,7 +156,9 @@ struct FeedbackView: View {
                     
                     if addFeedbackShowing {
                         AddFeedbackView(curUser: curUser, onAdded: {
-                            addFeedbackShowing = false
+                            withAnimation {
+                                addFeedbackShowing = false
+                            }
                             updateFeedbacks()
                         })
                     }

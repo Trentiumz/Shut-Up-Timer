@@ -143,10 +143,34 @@ class CredManager: ObservableObject {
         return false;
     }
     
-    func getUpvotedFeedback() async -> [FeedbackResponse] {
+    func getFeedbackByUpvotes() async -> [FeedbackResponse] {
         if loggedIn {
             do {
                 let feedbacks: [FeedbackResponse] = try await supabaseClient.rpc("get_upvoted_feedback").execute().value
+                return feedbacks
+            } catch {
+                return []
+            }
+        }
+        return [];
+    }
+    
+    func getFeedbackByRecent() async -> [FeedbackResponse] {
+        if loggedIn {
+            do {
+                let feedbacks: [FeedbackResponse] = try await supabaseClient.rpc("get_recent_feedback").execute().value
+                return feedbacks
+            } catch {
+                return []
+            }
+        }
+        return [];
+    }
+    
+    func getMyFeedback() async -> [FeedbackResponse] {
+        if loggedIn {
+            do {
+                let feedbacks: [FeedbackResponse] = try await supabaseClient.rpc("get_my_feedback").execute().value
                 return feedbacks
             } catch {
                 return []

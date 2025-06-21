@@ -29,7 +29,9 @@ struct AddFeedbackView: View {
                                 .frame(width: 18, height: 18)
                                 .foregroundColor(ColorTokens.red300)
                                 .onTapGesture {
-                                    curStars = i;
+                                    withAnimation {
+                                        curStars = i;
+                                    }
                                 }
                         }
                     }
@@ -65,8 +67,8 @@ struct AddFeedbackView: View {
                                     withAnimation {
                                         curStars = 0;
                                         curResponse = "";
-                                        onAdded();
                                     }
+                                    onAdded();
                                 }
                             }
                         }

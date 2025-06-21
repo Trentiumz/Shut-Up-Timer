@@ -1,66 +1,102 @@
 import SwiftUI
 
 struct AddFeedbackView: View {
-    @Binding var isPresented: Bool
-    @State private var stars: Int = 0
-    @State private var feedbackText: String = ""
+    var curUser: UserPublicProfileResponse
+    @State var onAdded: () -> Void
     
-    var onSubmit: ((Int, String) -> Void)?
+    @State var curStars: Int = 0
+    @State var curResponse: String = ""
+    
+    @EnvironmentObject var credManager : CredManager
     
     var body: some View {
-        VStack(spacing: 24) {
-            // Star selection
-            HStack(spacing: 8) {
-                ForEach(1...5, id: \.self) { i in
-                    Image(systemName: i <= stars ? "star.fill" : "star")
-                        .resizable()
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(ColorTokens.red300)
-                        .onTapGesture {
-                            stars = i
+        ZStack(alignment: .top) {
+            FormattedImages.LinedImageBackground(width: 340)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .center, spacing: 8) {
+                    AsyncImage(url: URL(string: curUser.profile_picture)) { image in
+                        image.resizable().scaledToFill()
+                    } placeholder: {
+                        Circle().fill(Color.gray)
+                    }
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
+                    
+                    HStack(spacing: 2) {
+                        ForEach(1...5, id: \.self) { i in
+                            Image(systemName: curStars >= i ? "star.fill" : "star")
+                                .resizable()
+                                .frame(width: 18, height: 18)
+                                .foregroundColor(ColorTokens.red300)
+                                .onTapGesture {
+                                    curStars = i;
+                                }
                         }
-                        .accessibilityLabel("\(i) star\(i > 1 ? "s" : "")")
-                }
-            }
-            
-            // Feedback text field
-            TextEditor(text: $feedbackText)
-                .font(FontTokens.architectsDaughter(size: 20))
-                .foregroundColor(ColorTokens.shade700)
-                .frame(minHeight: 120, maxHeight: 200)
-                .padding()
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(ColorTokens.shade300, lineWidth: 2)
-                )
-                .background(ColorTokens.shade100)
-                .cornerRadius(12)
-                .padding(.horizontal)
-            
-            // Submit & Cancel buttons
-            HStack(spacing: 24) {
-                Button("Cancel") {
-                    isPresented = false
-                }
-                .font(FontTokens.architectsDaughter(size: 20))
-                .foregroundColor(ColorTokens.shade700)
-                
-                Button("Submit") {
-                    if stars > 0 && !feedbackText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        onSubmit?(stars, feedbackText)
-                        isPresented = false
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .trailing, spacing: 0) {
+                        Text(Date(), style: .date)
+                            .font(FontTokens.architectsDaughter(size: 14))
+                            .foregroundColor(ColorTokens.shade700)
+                        Text(Date(), style: .time)
+                            .font(FontTokens.architectsDaughter(size: 14))
+                            .foregroundColor(ColorTokens.shade700)
                     }
                 }
-                .font(FontTokens.architectsDaughter(size: 20))
-                .foregroundColor(ColorTokens.red300)
-                .disabled(stars == 0 || feedbackText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .padding(.top, 8)
+                
+                TextField("your feedback", text: $curResponse)
+                    .lineLimit(5)
+                    .minimumScaleFactor(0.7)
+                    .font(FontTokens.architectsDaughter(size: 18))
+                    .foregroundColor(ColorTokens.shade700)
+                    .padding(.vertical, 4)
+                
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action:{
+                        Task {
+                            let success = await credManager.addFeedback(stars: curStars, feedback: curResponse)
+                            if success {
+                                await MainActor.run {
+                                    withAnimation {
+                                        curStars = 0;
+                                        curResponse = "";
+                                        onAdded();
+                                    }
+                                }
+                            }
+                        }
+                    }) {
+                        Rectangle()
+                            .foregroundColor(.clear)
+                            .frame(width: 100, height: 37)
+                            .background(Color(red: 0.51, green: 0.16, blue: 0.17))
+                            .cornerRadius(20)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .inset(by: 1)
+                                    .stroke(.black, lineWidth: 2)
+                            )
+                            .overlay(
+                                Text("Submit")
+                                    .font(FontTokens.architectsDaughter(size: 20))
+                                    .foregroundColor(ColorTokens.shade100)
+                            )
+                    }
+                    FormattedImages.FeedbackUpvoteButton(height: 52)
+                }
             }
-            .padding(.top, 8)
+            .padding(.leading, 30)
+            .padding(.top, 10)
+            .frame(width: 300, height: 210)
         }
-        .padding()
     }
 }
 
 #Preview {
-    AddFeedbackView(isPresented: .constant(true))
+    AddFeedbackView(curUser: UserPublicProfileResponse(iq: 0, username: "tester", profile_picture: "alkdsfj", roasts: [], hours: "", top_categories: []), onAdded: {})
 }

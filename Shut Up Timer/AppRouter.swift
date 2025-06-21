@@ -41,6 +41,10 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.albumView(month: month, year: year)))
     }
     
+    func toFeedbackView() {
+        path.append(PathElement(route: AppRoute.feedbackView))
+    }
+    
     func toHome() {
         while !path.isEmpty {
             path.removeLast();

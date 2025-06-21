@@ -1,8 +1,13 @@
 import SwiftUI
 
 struct FeedbackView: View {
-    @State private var feedbacks: [FeedbackResponse] = FeedbackView.sampleFeedbacks()
+    @State private var feedbacks: [FeedbackResponse] = []
     @State private var sortBy: String = "Upvotes"
+    
+    @State private var addFeedbackShowing: Bool = false
+    @EnvironmentObject var credManager : CredManager
+    
+    @State private var curUser: UserPublicProfileResponse?
     
     var avgStars: Double {
         guard !feedbacks.isEmpty else { return 0 }
@@ -10,122 +15,164 @@ struct FeedbackView: View {
         return Double(total) / Double(feedbacks.count)
     }
     
-    var body: some View {
-        ZStack {
-            Background()
-            VStack(spacing: 0) {
-                // AVG Star Rating
-                VStack(spacing: 4) {
-                    Text("AVG Star Rating")
-                        .font(FontTokens.architectsDaughter(size: 24))
-                        .foregroundColor(ColorTokens.shade700)
-                    HStack(spacing: 2) {
-                        ForEach(1...5, id: \.self) { i in
-                            Image(systemName: avgStars >= Double(i) ? "star.fill" : (avgStars >= Double(i) - 0.5 ? "star.lefthalf.fill" : "star"))
-                                .resizable()
-                                .frame(width: 28, height: 28)
-                                .foregroundColor(ColorTokens.red300)
-                        }
-                    }
-                }
-                .padding(.vertical, 8)
-                .background(alignment: .top) {
-                    FormattedImages.LinedImageBackground(width: 320)
-                        .rotationEffect(Angle(degrees: 180))
-                        .frame(width: 320, height: 90, alignment: .top)
-                        .clipped()
-                }
-                .padding(.bottom, 16)
-                
-                // Sort & Feedback Buttons
-                HStack(spacing: 16) {
-                    Button(action: {}) {
-                        HStack {
-                            Image(systemName: "arrow.up.arrow.down")
-                            Text("Sorted by \(sortBy)")
-                                .font(FontTokens.architectsDaughter(size: 18))
-                                .minimumScaleFactor(0.5)
-                                .lineLimit(1)
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: 180)
-                        .background(alignment: .leading) {
-                            FormattedImages.FriendCodeStripe(width: 190)
-                        }
-                    }
-                    Button(action: {}) {
-                        Text("+ feedback")
-                            .font(FontTokens.architectsDaughter(size: 18))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .foregroundColor(ColorTokens.shade100)
-                            .background{
-                                Rectangle()
-                                  .foregroundColor(.clear)
-                                  .frame(width: 128, height: 38)
-                                  .background(Color(red: 0.51, green: 0.16, blue: 0.17))
-                                  .overlay(
-                                    Rectangle()
-                                      .inset(by: 1)
-                                      .stroke(.black, lineWidth: 2)
-                                  )
-                            }
-                    }
-                }
-                .padding(.bottom, 8)
-                
-                // Feedback List
-                ScrollView {
-                    VStack(spacing: 18) {
-                        ForEach(feedbacks, id: \.id) { feedback in
-                            FeedbackPaperView(feedback: feedback)
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.bottom, 60)
-                }
+    func updateUser() {
+        Task {
+            curUser = await self.credManager.getMyProfile()
+        }
+    }
+    
+    func updateFeedbacks() {
+        Task {
+            let feedbacks = await credManager.getUpvotedFeedback()
+            await MainActor.run {
+                self.feedbacks = feedbacks;
             }
         }
     }
     
-    // Temporary sample data function
-    static func sampleFeedbacks() -> [FeedbackResponse] {
-        [
-            FeedbackResponse(
-                id: UUID(),
-                username: "user1",
-                pfp: "https://randomuser.me/api/portraits/women/1.jpg",
-                stars: 2,
-                feedback: "i hate this app lowkey idk why i just dont like it, doesnt vibe with me hehahahahahaah",
-                created_at: Date(),
-                upvotes: 23
-            ),
-            FeedbackResponse(
-                id: UUID(),
-                username: "user1",
-                pfp: "https://randomuser.me/api/portraits/women/1.jpg",
-                stars: 2,
-                feedback: "i hate this app lowkey idk why i just dont like it, doesnt vibe with me hehahahahahaah",
-                created_at: Date(),
-                upvotes: 23
-            ),
-            FeedbackResponse(
-                id: UUID(),
-                username: "user1",
-                pfp: "https://randomuser.me/api/portraits/women/1.jpg",
-                stars: 2,
-                feedback: "i hate this app lowkey idk why i just dont like it, doesnt vibe with me hehahahahahaah",
-                created_at: Date(),
-                upvotes: 23
-            )
-        ]
+    func upvoteFeedback(feedbackID: UUID) {
+        Task {
+            let success = await credManager.upvoteFeedback(feedbackID: feedbackID)
+            if success {
+                updateFeedbacks()
+            }
+        }
+    }
+    
+    func removeUpvote(feedbackID: UUID) {
+        Task {
+            let success = await credManager.removeUpvote(feedbackID: feedbackID)
+            if success {
+                updateFeedbacks()
+            }
+        }
+    }
+    
+    var body: some View {
+        ZStack(alignment: .top) {
+            Background()
+            if let curUser = curUser {
+                VStack(spacing: 0) {
+                    // AVG Star Rating
+                    VStack(spacing: 4) {
+                        Text("AVG Star Rating")
+                            .font(FontTokens.architectsDaughter(size: 24))
+                            .foregroundColor(ColorTokens.shade700)
+                        HStack(spacing: 2) {
+                            ForEach(1...5, id: \.self) { i in
+                                Image(systemName: avgStars >= Double(i) ? "star.fill" : (avgStars >= Double(i) - 0.5 ? "star.lefthalf.fill" : "star"))
+                                    .resizable()
+                                    .frame(width: 28, height: 28)
+                                    .foregroundColor(ColorTokens.red300)
+                            }
+                        }
+                    }
+                    .padding(.top, 6)
+                    .background(alignment: .top) {
+                        FormattedImages.LinedImageBackground(width: 320)
+                            .rotationEffect(Angle(degrees: -178.45))
+                            .frame(width: 320, height: 90, alignment: .top)
+                            .offset(y: 4)
+                            .clipped()
+                    }
+                    
+                    Spacer()
+                        .frame(maxHeight: 36)
+                    
+                    // Sort & Feedback Buttons
+                    HStack(spacing: 16) {
+                        Button(action: {}) {
+                            HStack {
+                                Image(systemName: "arrow.up.arrow.down")
+                                Text("Sorted by")
+                                    .font(FontTokens.architectsDaughter(size: 18))
+                                    .minimumScaleFactor(0.5)
+                                    .lineLimit(1)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: 180)
+                            .background(alignment: .leading) {
+                                FormattedImages.FriendCodeStripe(width: 180)
+                            }
+                        }
+                        Button(action: {
+                            addFeedbackShowing = !addFeedbackShowing
+                        }) {
+                            Text(addFeedbackShowing ? "- feedback" : "+ feedback")
+                                .font(FontTokens.architectsDaughter(size: 18))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .foregroundColor(ColorTokens.shade100)
+                                .background{
+                                    Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(width: 128, height: 38)
+                                        .background(Color(red: 0.51, green: 0.16, blue: 0.17))
+                                        .overlay(
+                                            Rectangle()
+                                                .inset(by: 1)
+                                                .stroke(.black, lineWidth: 2)
+                                        )
+                                }
+                        }
+                    }
+                    .padding(.bottom, 8)
+                    
+                    if addFeedbackShowing {
+                        AddFeedbackView(curUser: curUser, onAdded: {
+                            addFeedbackShowing = false
+                            updateFeedbacks()
+                        })
+                    }
+                    
+                    // Feedback List
+                    ScrollView {
+                        VStack(spacing: 2) {
+                            Spacer()
+                                .frame(height: 36)
+                            ForEach(feedbacks, id: \.id) { feedback in
+                                FeedbackPaperView(feedback: feedback,
+                                                  onUpvote: {upvoteFeedback(feedbackID: feedback.id)},
+                                                  onRemoveUpvote: { removeUpvote(feedbackID: feedback.id)})
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 60)
+                    }
+                }
+            } else {
+                VStack(spacing: 4) {
+                    Text("Log in to view feedback")
+                        .font(FontTokens.architectsDaughter(size: 22))
+                        .foregroundColor(ColorTokens.shade700)
+                }
+                .padding(.top, 16)
+                .background(alignment: .top) {
+                    FormattedImages.LinedImageBackground(width: 320)
+                        .rotationEffect(Angle(degrees: -178.45))
+                        .frame(width: 320, height: 90, alignment: .top)
+                        .offset(y: 4)
+                        .clipped()
+                        .offset(x: 10)
+                }
+            }
+        }
+        .onAppear{
+            updateUser()
+            updateFeedbacks()
+        }
+        .onChange(of: credManager.loggedIn) {
+            updateUser()
+        }
     }
 }
 
 struct FeedbackPaperView: View {
     var feedback: FeedbackResponse
+    var onUpvote: () -> Void
+    var onRemoveUpvote: () -> Void
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -172,7 +219,20 @@ struct FeedbackPaperView: View {
                 HStack {
                     Spacer()
                     ZStack {
-                        FormattedImages.FeedbackUpvoteButton(width: 50)
+                        if feedback.user_upvoted {
+                            Button(action: {
+                                onRemoveUpvote()
+                            }) {
+                                FormattedImages.FeedbackUpvoteButton(width: 50)
+                            }
+                        } else {
+                            Button (action: {
+                                onUpvote()
+                            }) {
+                                FormattedImages.FeedbackUpvoteButton(width: 50)
+                                    .opacity(0.5)
+                            }
+                        }
                         Text("\(feedback.upvotes)")
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade100)
@@ -185,9 +245,14 @@ struct FeedbackPaperView: View {
             .padding(.top, 10)
             .frame(width: 300, height: 200)
         }
+        .overlay(alignment: .top) {
+            FormattedImages.LeaderboardBandage(width: 150)
+                .offset(y: -26)
+        }
     }
 }
 
 #Preview {
     FeedbackView()
+        .environmentObject(CredManager())
 }

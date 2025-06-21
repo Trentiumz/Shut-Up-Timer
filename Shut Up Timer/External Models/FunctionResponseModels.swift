@@ -71,4 +71,5 @@ struct FeedbackResponse : Codable {
     var feedback: String
     var created_at: Date
     var upvotes: Int
+    var user_upvoted: Bool
 }

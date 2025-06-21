@@ -44,6 +44,15 @@ struct TopBarView : View {
                 Image(systemName: "star.fill")
                     .font(.system(size: 32))
             }
+            
+            Button(action: {
+                router.toFeedbackView();
+            }) {
+                Image(systemName: "pencil.line")
+                    .resizable()
+                    .foregroundStyle(ColorTokens.shade700)
+                    .frame(width: 32, height: 32)
+            }
             Spacer()
             
             Button(action: {

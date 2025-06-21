@@ -72,6 +72,8 @@ struct ContentView: View {
                     RequestListView()
                 case .albumView(let month, let year):
                     AlbumView(month: month, year: year)
+                case .feedbackView:
+                    FeedbackView()
                 default:
                     Text("Invalid")
                 }

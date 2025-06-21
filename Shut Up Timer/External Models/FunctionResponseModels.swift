@@ -65,6 +65,7 @@ struct WorldLeaderboardResponse : Codable{
 
 struct FeedbackResponse : Codable {
     var id: UUID
+    var user_id: UUID
     var username: String
     var pfp: String
     var stars: Int

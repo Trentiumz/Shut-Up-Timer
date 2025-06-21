@@ -39,6 +39,15 @@ struct FeedbackView: View {
         }
     }
     
+    func removeFeedback(feedbackID: UUID) {
+        Task {
+            let success = await credManager.removeFeedback(feedbackID: feedbackID)
+            if success {
+                updateFeedbacks()
+            }
+        }
+    }
+    
     func removeUpvote(feedbackID: UUID) {
         Task {
             let success = await credManager.removeUpvote(feedbackID: feedbackID)
@@ -133,9 +142,13 @@ struct FeedbackView: View {
                             Spacer()
                                 .frame(height: 36)
                             ForEach(feedbacks, id: \.id) { feedback in
-                                FeedbackPaperView(feedback: feedback,
-                                                  onUpvote: {upvoteFeedback(feedbackID: feedback.id)},
-                                                  onRemoveUpvote: { removeUpvote(feedbackID: feedback.id)})
+                                FeedbackPaperView(
+                                    feedback: feedback,
+                                    onUpvote: {upvoteFeedback(feedbackID: feedback.id)},
+                                    onRemoveUpvote: { removeUpvote(feedbackID: feedback.id)},
+                                    deleteFeedback: {
+                                        removeFeedback(feedbackID: feedback.id)
+                                })
                             }
                         }
                         .padding(.horizontal, 8)
@@ -173,6 +186,11 @@ struct FeedbackPaperView: View {
     var feedback: FeedbackResponse
     var onUpvote: () -> Void
     var onRemoveUpvote: () -> Void
+    
+    @EnvironmentObject var credManager: CredManager;
+    
+    @State var showRemovalAlert: Bool = false;
+    var deleteFeedback: () -> Void
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -216,7 +234,17 @@ struct FeedbackPaperView: View {
                 
                 Spacer()
                 
-                HStack {
+                HStack(alignment: .bottom) {
+                    if feedback.user_id == credManager.getUserId() {
+                        Button(action: {
+                            showRemovalAlert = true
+                        }) {
+                            Image(systemName: "trash.circle")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .foregroundStyle(ColorTokens.red100)
+                        }
+                    }
                     Spacer()
                     ZStack {
                         if feedback.user_upvoted {
@@ -248,6 +276,12 @@ struct FeedbackPaperView: View {
         .overlay(alignment: .top) {
             FormattedImages.LeaderboardBandage(width: 150)
                 .offset(y: -26)
+        }
+        .alert("Delete this feedback?", isPresented: $showRemovalAlert) {
+            Button("Delete", role: .destructive) {
+                deleteFeedback();
+            }
+            Button("Cancel", role: .cancel) {}
         }
     }
 }

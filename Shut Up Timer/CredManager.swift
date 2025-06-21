@@ -128,6 +128,21 @@ class CredManager: ObservableObject {
         return false;
     }
     
+    func removeFeedback(feedbackID: UUID) async -> Bool {
+        print("Removing feedback \(feedbackID)...")
+        if loggedIn {
+            do {
+                try await supabaseClient.rpc("remove_feedback", params: ["feedback_id": feedbackID]).execute()
+                return true;
+            } catch {
+                print("Failed to remove feedback: \(error.localizedDescription)")
+                return false;
+            }
+        }
+        print("Remove Feedback not logged in")
+        return false;
+    }
+    
     func getUpvotedFeedback() async -> [FeedbackResponse] {
         if loggedIn {
             do {
@@ -181,5 +196,9 @@ class CredManager: ObservableObject {
         } catch {
             return nil;
         }
+    }
+    
+    func getUserId() -> UUID? {
+        return session?.user.id;
     }
 }

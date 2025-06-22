@@ -1,49 +1,13 @@
 import SwiftUI;
 
 struct TopBarView : View {
-    @EnvironmentObject var credManager: CredManager;
+    @Environment(CurUser.self) var curUser;
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var router: AppRouter;
-    
-    @State private var userPublicProfile: UserPublicProfileResponse? = nil;
-    
-    func updateUserProfile() {
-        userPublicProfile = nil;
-        Task {
-            do {
-                if let userId = credManager.session?.user.id {
-                    // Get public profile
-                    let publicProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
-                    
-                    await MainActor.run {
-                        if publicProfile.count > 0 {
-                            userPublicProfile = publicProfile[0]
-                        }
-                    }
-                }
-            } catch {
-                print("Error fetching user profiles: \(error)")
-            }
-        }
-    }
 
     var body: some View {
         HStack{
-            if let userPublicProfile = userPublicProfile {
-                AsyncImage(url: URL(string: userPublicProfile.profile_picture)) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 32, height: 32)
-                        .clipShape(Circle())
-                } placeholder: {
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 32))
-                }
-            } else {
-                Image(systemName: "star.fill")
-                    .font(.system(size: 32))
-            }
+            PFPDisplay(url: curUser.userPublicProfile?.profile_picture ?? "", width: 32, height: 32)
             
             Button(action: {
                 router.toFeedbackView();
@@ -68,7 +32,7 @@ struct TopBarView : View {
         .padding()
         .background(ColorTokens.red300)
         .onAppear {
-            updateUserProfile()
+            curUser.refresh(animated: true)
         }
     }
 }

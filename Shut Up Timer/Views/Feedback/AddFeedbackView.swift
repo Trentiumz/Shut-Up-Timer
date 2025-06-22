@@ -14,13 +14,7 @@ struct AddFeedbackView: View {
             FormattedImages.LinedImageBackground(width: 340)
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .center, spacing: 8) {
-                    AsyncImage(url: URL(string: curUser.profile_picture)) { image in
-                        image.resizable().scaledToFill()
-                    } placeholder: {
-                        Circle().fill(Color.gray)
-                    }
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
+                    PFPDisplay(url: curUser.profile_picture, width: 40, height: 40)
                     
                     HStack(spacing: 2) {
                         ForEach(1...5, id: \.self) { i in

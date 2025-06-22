@@ -78,17 +78,7 @@ struct LBRowView : View {
             Spacer()
                 .frame(maxWidth: 20)
             VStack(spacing: 0) {
-                AsyncImage(url: URL(string: entry.profilePicture)) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 40, height: 40)
-                        .clipShape(Circle())
-                } placeholder: {
-                    Circle()
-                        .fill(Color.gray)
-                        .frame(width: 40, height: 40)
-                }
+                PFPDisplay(url: entry.profilePicture, width: 40, height: 40)
                 Text(entry.name)
                     .font(FontTokens.architectsDaughter(size: 20))
                   .multilineTextAlignment(.center)

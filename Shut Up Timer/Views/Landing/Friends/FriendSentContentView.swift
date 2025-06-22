@@ -23,18 +23,7 @@ fileprivate struct SentRowView: View {
 
     var body: some View {
         HStack(spacing: 20) {
-            AsyncImage(url: URL(string: entry.pfp)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80, height: 80)
-
-                    .clipShape(Circle())
-            } placeholder: {
-                Circle()
-                    .fill(Color.gray)
-                    .frame(width: 80, height: 80)
-            }
+            PFPDisplay(url: entry.pfp, width: 80, height: 80)
             
             VStack(spacing: 0) {
                 HStack {

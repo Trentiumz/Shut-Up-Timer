@@ -1,36 +1,12 @@
 import SwiftUI;
+import _PhotosUI_SwiftUI
 
 struct AccountView : View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
-    @State private var userPublicProfile: UserPublicProfileResponse? = nil;
-    @State private var userProfile: UserProfileResponse? = nil;
+    @Environment(CurUser.self) var curUser;
     @State private var friends: [FriendProfileResponse] = [];
-    
-    func updateUserProfile() {
-        userPublicProfile = nil;
-        userProfile = nil;
-        Task {
-            do {
-                if let userId = credManager.session?.user.id {
-                    // Get public profile
-                    let publicProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
-                    // Get private profile
-                    let privateProfile: [UserProfileResponse] = try await credManager.supabaseClient.rpc("get_profile").execute().value
-                    
-                    await MainActor.run {
-                        if privateProfile.count > 0 && publicProfile.count > 0 {
-                            userPublicProfile = publicProfile[0]
-                            userProfile = privateProfile[0]	
-                        }
-                    }
-                }
-            } catch {
-                print("Error fetching user profiles: \(error)")
-            }
-        }
-    }
     
     func updateFriends() {
         Task {
@@ -69,7 +45,7 @@ struct AccountView : View {
                     
                     if credManager.loggedIn {
                         VStack(spacing: 20) {
-                            LocalUserInfoView(userPublicProfile: userPublicProfile)
+                            LocalUserInfoView()
                             HStack {
                                 SectionStripe("Friends >")
                                 Spacer()
@@ -83,20 +59,16 @@ struct AccountView : View {
                         Spacer()
                     }.padding(.horizontal, 20)
                     
-                    SettingsView(
-                        userPublicProfile: $userPublicProfile,
-                        userProfile: $userProfile,
-                        updateUserProfile: updateUserProfile
-                    )
+                    SettingsView()
                 }.padding(.horizontal)
             }
         }
         .onAppear {
-            updateUserProfile()
+            curUser.refresh()
             updateFriends()
         }
         .onChange(of: credManager.session) {
-            updateUserProfile()
+            curUser.refresh()
             updateFriends()
         }
     }
@@ -120,22 +92,151 @@ struct AccountView : View {
     }
 }
 
+/// A copy of User Info View with options for editing things
 struct LocalUserInfoView : View {
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var todoList: ToDoList
-    var userPublicProfile: UserPublicProfileResponse?;
+    @Environment(CurUser.self) var curUser;
     
-    var body : some View {
-        UserInfoView(iq: sessions.getIQ(), username: userPublicProfile?.username ?? "", profile_picture: userPublicProfile?.profile_picture ?? "", roasts: sessions.getLatestRoasts(), hours: "\(sessions.getTotalTimeLocked())", top_categories: sessions.getTopCategoryStrings(toDoList: todoList))
+    @State private var pickedImage: PhotosPickerItem?
+    @State var showFailAlert: Bool = false
+    
+    @State var uploading: Bool = false
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            if let pp = curUser.userPublicProfile {
+                // Profile Picture and Username
+                HStack(spacing: 30) {
+                    // Profile Picture
+                    PhotosPicker(
+                        selection: $pickedImage,
+                        matching: .images,
+                        photoLibrary: .shared()
+                    ) {
+                        PFPDisplay(url: pp.profile_picture, width: 80, height: 80)
+                            .opacity(uploading ? 0.5 : 1)
+                    }
+                    .onChange(of: pickedImage) { oldVal, newVal in
+                        Task {
+                            await MainActor.run {
+                                withAnimation {
+                                    uploading = true;
+                                }
+                            }
+                            if let data = try? await newVal?.loadTransferable(type: Data.self),
+                               let image = UIImage(data: data)
+                            {
+                                let success = await credManager.uploadPFP(image: image)
+                                if success {
+                                    curUser.refresh()
+                                } else {
+                                    showFailAlert = true
+                                }
+                            }
+                            await MainActor.run {
+                                withAnimation {
+                                    uploading = false;
+                                }
+                            }
+                        }
+                    }
+                    .alert("Oops!", isPresented: $showFailAlert) {
+                        Button("OK", role: .cancel) {}
+                    } message: {
+                        Text("We couldn't update your profile picture")
+                    }
+                    
+                    VStack {
+                        // Username
+                        Text(pp.username)
+                            .font(FontTokens.architectsDaughter(size: 30))
+                            .foregroundColor(ColorTokens.shade700)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity)
+                            .minimumScaleFactor(0.01)
+                        if let lastLogin = pp.last_login {
+                            Text("Last Login: \(lastLogin)")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    Spacer()
+                }
+                
+                // Stats
+                HStack(spacing: 20) {
+                    // Seconds
+                    VStack {
+                        Text("Hours")
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundColor(ColorTokens.shade600)
+                        Text("\(sessions.getTotalTimeLocked())")
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundColor(ColorTokens.shade700)
+                        Spacer()
+                    }
+                    .frame(height: 70)
+                    
+                    // Categories
+                    VStack {
+                        Text("Categories")
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundColor(ColorTokens.shade600)
+                        let categoryNames = sessions.getTopCategoryStrings(toDoList: todoList);
+                        Text(categoryNames.joined(separator: ", "))
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundColor(ColorTokens.shade700)
+                        Spacer()
+                    }
+                    .frame(height: 70)
+                    
+                    // IQ
+                    VStack {
+                        Text("IQ")
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundColor(ColorTokens.shade600)
+                        Text("\(sessions.getIQ())")
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundColor(ColorTokens.shade700)
+                        Spacer()
+                    }
+                    .frame(height: 70)
+                    
+                    Spacer()
+                }
+            } else {
+                Text("Log in to view your profile")
+            }
+        }
+        .padding(.leading, 20)
+        .cornerRadius(15)
+        .frame(width: 320, height: 190)
+        .background(
+            Rectangle()
+                .foregroundColor(.clear)
+                .frame(width: 340, height: 190, alignment: .trailing)
+                .background(
+                    ImageAssets.onboardingHello68
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 370, height: 220.0034637451172, alignment: .bottom)
+                        .clipped()
+                        .offset(x: -10, y: 20)
+                )
+                .rotationEffect(Angle(degrees: -178))
+        )
     }
 }
 
 #Preview {
+    let credManager = CredManager()
     AccountView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
         .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
         .environmentObject(ToDoLoader.getToDo(onUpdate: { _ in }))
-        .environmentObject(CredManager())
+        .environmentObject(credManager)
+        .environment(CurUser(credManager: credManager))
 }

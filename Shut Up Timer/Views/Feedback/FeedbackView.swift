@@ -6,8 +6,7 @@ struct FeedbackView: View {
     
     @State private var addFeedbackShowing: Bool = false
     @EnvironmentObject var credManager : CredManager
-    
-    @State private var curUser: UserPublicProfileResponse?
+    @Environment(CurUser.self) var curUser;
     
     enum FeedbackCategories : String, CaseIterable {
         case upvotes = "Upvotes"
@@ -19,12 +18,6 @@ struct FeedbackView: View {
         guard !feedbacks.isEmpty else { return 0 }
         let total = feedbacks.reduce(0) { $0 + $1.stars }
         return Double(total) / Double(feedbacks.count)
-    }
-    
-    func updateUser() {
-        Task {
-            curUser = await self.credManager.getMyProfile()
-        }
     }
     
     func updateFeedbacks() {
@@ -75,7 +68,7 @@ struct FeedbackView: View {
     var body: some View {
         ZStack(alignment: .top) {
             Background()
-            if let curUser = curUser {
+            if let curPP = curUser.userPublicProfile {
                 VStack(spacing: 0) {
                     // AVG Star Rating
                     VStack(spacing: 4) {
@@ -155,7 +148,7 @@ struct FeedbackView: View {
                     .padding(.bottom, 8)
                     
                     if addFeedbackShowing {
-                        AddFeedbackView(curUser: curUser, onAdded: {
+                        AddFeedbackView(curUser: curPP, onAdded: {
                             withAnimation {
                                 addFeedbackShowing = false
                             }
@@ -200,11 +193,11 @@ struct FeedbackView: View {
             }
         }
         .onAppear{
-            updateUser()
+            curUser.refresh()
             updateFeedbacks()
         }
         .onChange(of: credManager.loggedIn) {
-            updateUser()
+            curUser.refresh()
         }
     }
 }
@@ -224,13 +217,7 @@ struct FeedbackPaperView: View {
             FormattedImages.LinedImageBackground(width: 340)
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .center, spacing: 8) {
-                    AsyncImage(url: URL(string: feedback.pfp)) { image in
-                        image.resizable().scaledToFill()
-                    } placeholder: {
-                        Circle().fill(Color.gray)
-                    }
-                    .frame(width: 40, height: 40)
-                    .clipShape(Circle())
+                    PFPDisplay(url: feedback.pfp, width: 40, height: 40)
                     
                     HStack(spacing: 2) {
                         ForEach(1...5, id: \.self) { i in

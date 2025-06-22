@@ -25,6 +25,8 @@ struct Shut_Up_TimerApp: App {
     var credManager: CredManager = CredManager();
     // TODO: onReceive is called BEFORE the object is changed, so the updates aren't actually saved !
     
+    var curUser: CurUser
+    
     init() {
         let credManager = self.credManager;
         let todoList = self.todoList;
@@ -40,6 +42,7 @@ struct Shut_Up_TimerApp: App {
                 }
             }
         }
+        self.curUser = CurUser(credManager: CredManager())
     }
     
     var body: some Scene {
@@ -50,6 +53,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(sessions)	
                 .environmentObject(todoList)
                 .environmentObject(credManager)
+                .environment(curUser)
                 .preferredColorScheme(.light)
         }
     }

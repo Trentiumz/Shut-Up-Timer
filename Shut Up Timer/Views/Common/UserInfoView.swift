@@ -34,23 +34,7 @@ struct UserInfoView : View {
             // Profile Picture and Username
             HStack(spacing: 30) {
                 // Profile Picture
-                if !profile_picture.isEmpty {
-                    AsyncImage(url: URL(string: profile_picture)) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80, height: 80)
-                            .clipShape(Circle())
-                    } placeholder: {
-                        Circle()
-                            .fill(Color.gray)
-                            .frame(width: 80, height: 80)
-                    }
-                } else {
-                    Circle()
-                        .fill(Color.gray)
-                        .frame(width: 80, height: 80)
-                }
+                PFPDisplay(url: profile_picture, width: 80, height: 80)
                 
                 VStack {
                     // Username
@@ -128,5 +112,33 @@ struct UserInfoView : View {
               )
               .rotationEffect(Angle(degrees: -178))
         )
+    }
+}
+
+struct PFPDisplay : View {
+    var url: String;
+    var width: CGFloat;
+    var height: CGFloat;
+    
+    var body: some View {
+        Group {
+            if !url.isEmpty {
+                AsyncImage(url: URL(string: url)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: width, height: height)
+                        .clipShape(Circle())
+                } placeholder: {
+                    Circle()
+                        .fill(Color.gray)
+                        .frame(width: width, height: height)
+                }
+            } else {
+                Circle()
+                    .fill(Color.gray)
+                    .frame(width: width, height: height)
+            }
+        }
     }
 }

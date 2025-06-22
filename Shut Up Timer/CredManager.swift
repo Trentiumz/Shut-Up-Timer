@@ -210,15 +210,34 @@ class CredManager: ObservableObject {
     }
     
     // -------------------- User functions ---------------------------
-    func getMyProfile() async -> UserPublicProfileResponse? {
+    
+    func uploadPFP(image: UIImage) async -> Bool {
+        guard let data = image.jpegData(compressionQuality: 0.8),
+              let userID = session?.user.id else { return false; }
+        let lowerUUID = userID.uuidString.lowercased()
+        let filePath = "\(lowerUUID)/pfp_\(UUID().uuidString).jpg"
         do {
-            if let userId = session?.user.id {
-                let curUser: [UserPublicProfileResponse] = try await supabaseClient.rpc("get_user_public_profile", params: ["user_id": "\(userId)"]).execute().value
-                return curUser.first
-            }
-            return nil;
+            let pfpPaths = try await supabaseClient.storage.from("profile-picture").list(path: "\(lowerUUID)")
+            let deletedPFP = try await supabaseClient.storage.from("profile-picture").remove(paths: pfpPaths.map{ "\(lowerUUID)/\($0.name)"})
+            print("Deleted profile pictures: \(deletedPFP)")
+            
+            try await supabaseClient.storage.from("profile-picture").upload(
+                filePath,
+                data: data,
+                options: FileOptions(
+                    cacheControl: "3600",
+                    contentType: "image/jpeg"
+                )
+            )
+            let publicURL = try supabaseClient.storage.from("profile-picture").getPublicURL(path: filePath)
+            
+            try await supabaseClient.rpc("change_profile_picture", params: [
+                "new_profile_picture": publicURL
+            ]).execute()
+            return true;
         } catch {
-            return nil;
+            print("Failed to upload profile picture: \(error.localizedDescription), file path \(filePath)")
+            return false;
         }
     }
     

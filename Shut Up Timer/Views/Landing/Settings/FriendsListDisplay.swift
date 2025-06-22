@@ -80,17 +80,8 @@ struct FriendsListView : View {
         var body : some View {
             if let friend = friend {
                 VStack(spacing: 0) {
-                    AsyncImage(url: URL(string: friend.pfp)) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 50, height: 50)
-                            .clipShape(Circle())
-                    } placeholder: {
-                        Circle()
-                            .fill(Color.gray)
-                            .frame(width: 50, height: 50)
-                    }
+                    PFPDisplay(url: friend.pfp, width: 50, height: 50)
+
                     Text(friend.username)
                         .font(FontTokens.architectsDaughter(size: 30))
                         .minimumScaleFactor(0.4)

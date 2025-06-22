@@ -218,9 +218,15 @@ class CredManager: ObservableObject {
         let filePath = "\(lowerUUID)/pfp_\(UUID().uuidString).jpg"
         do {
             let pfpPaths = try await supabaseClient.storage.from("profile-picture").list(path: "\(lowerUUID)")
-            let deletedPFP = try await supabaseClient.storage.from("profile-picture").remove(paths: pfpPaths.map{ "\(lowerUUID)/\($0.name)"})
-            print("Deleted profile pictures: \(deletedPFP)")
+            if !pfpPaths.isEmpty {
+                let deletedPFP = try await supabaseClient.storage.from("profile-picture").remove(paths: pfpPaths.map{ "\(lowerUUID)/\($0.name)"})
+                print("Deleted profile pictures: \(deletedPFP)")
+            }
+        } catch {
+            print("Failed to delete pfp (for uploading): \(error.localizedDescription)")
+        }
             
+        do {
             try await supabaseClient.storage.from("profile-picture").upload(
                 filePath,
                 data: data,

@@ -10,9 +10,16 @@ struct TodoView : View {
     
     @Binding private var selectedTodo: UUID;
     
-    init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>) {
+    var namespace: Namespace.ID
+    var isSource: Bool
+    
+    static var mainAnimation = Animation.interactiveSpring(response: 0.4, dampingFraction: 0.6, blendDuration: 0.25);
+    
+    init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>, namespace: Namespace.ID, isSource: Bool) {
         _expanded = expanded;
         _selectedTodo = selectedTodo;
+        self.namespace = namespace;
+        self.isSource = isSource;
     }
     
     // adds a task and saves it
@@ -29,53 +36,62 @@ struct TodoView : View {
     
     var body : some View {
         ZStack(alignment: .top) {
-            Button(action: {
-                withAnimation {
-                    expanded = !expanded;
+            TodoPaper(width: expanded ? 350 : 150)
+                .matchedGeometryEffect(id: "todo-paper", in: namespace, isSource: isSource)
+                .onTapGesture {
+                    withAnimation {
+                        expanded = !expanded;
+                    }
                 }
-            }) {
-                TodoPaper(width: expanded ? 350 : 150)
-            }
             VStack {
                 Spacer()
                     .frame(height: expanded ? 80 : 25)
+                    .matchedGeometryEffect(id: "todo-top-spacer", in: namespace, isSource: isSource)
                 GeometryReader { _ in
                     VStack {
-                        List {
-                            // list of items
-                            ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && !todoList.lst[$0].completed}, id: \.self) { index in
-                                TodoEntryView(
-                                    entry: $todoList.lst[index],
-                                    selected: selectedTodo == todoList.lst[index].id,
-                                    onSelect: { selectedTodo=todoList.lst[index].id},
-                                    onUnselect: {
-                                        if selectedTodo == todoList.lst[index].id {
-                                            selectedTodo = UUID();
-                                        }
-                                    })
-                                    .listRowInsets(EdgeInsets())
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.leading, 0)
+                        VStack {
+                            List {
+                                // list of items
+                                ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && !todoList.lst[$0].completed}, id: \.self) { index in
+                                    TodoEntryView(
+                                        entry: $todoList.lst[index],
+                                        selected: selectedTodo == todoList.lst[index].id,
+                                        onSelect: { selectedTodo=todoList.lst[index].id},
+                                        onUnselect: {
+                                            if selectedTodo == todoList.lst[index].id {
+                                                selectedTodo = UUID();
+                                            }
+                                        })
+                                        .listRowInsets(EdgeInsets())
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.leading, 0)
+                                        .matchedGeometryEffect(id: "todo-item-\(index)", in: namespace, isSource: isSource)
+                                }
+                                ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && todoList.lst[$0].completed}, id: \.self) { index in
+                                    TodoEntryView(
+                                        entry: $todoList.lst[index],
+                                        selected: selectedTodo == todoList.lst[index].id,
+                                        onSelect: { selectedTodo=todoList.lst[index].id},
+                                        onUnselect: {
+                                            if selectedTodo == todoList.lst[index].id {
+                                                selectedTodo = UUID();
+                                            }
+                                        })
+                                        .listRowInsets(EdgeInsets())
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.leading, 0)
+                                        .matchedGeometryEffect(id: "todo-item-completed-\(index)", in: namespace, isSource: isSource)
+                                }
                             }
-                            ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && todoList.lst[$0].completed}, id: \.self) { index in
-                                TodoEntryView(
-                                    entry: $todoList.lst[index],
-                                    selected: selectedTodo == todoList.lst[index].id,
-                                    onSelect: { selectedTodo=todoList.lst[index].id},
-                                    onUnselect: {
-                                        if selectedTodo == todoList.lst[index].id {
-                                            selectedTodo = UUID();
-                                        }
-                                    })
-                                    .listRowInsets(EdgeInsets())
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.leading, 0)
-                            }
+                            .listStyle(.plain)
+                            .scrollContentBackground(.hidden)
+                            .background(Color.clear)
+                            .frame(maxHeight: .infinity)
+                            .matchedGeometryEffect(id: "todo-list", in: namespace, isSource: isSource)
                         }
-                        .listStyle(.plain)
-                        .scrollContentBackground(.hidden)
-                        .background(Color.clear)
-                        .frame(maxHeight: .infinity)
+                        
+                        Spacer()
+                            .matchedGeometryEffect(id: "todo-mid-spacer", in: namespace, isSource: isSource)
                         
                         // when expanded, allow adding tasks
                         HStack {
@@ -87,9 +103,11 @@ struct TodoView : View {
                                     Circle()
                                         .fill(Color.blue)
                                         .frame(width: 50, height: 50)
+                                        .matchedGeometryEffect(id: "todo-add-circle", in: namespace, isSource: isSource)
                                     Image(systemName: "plus")
                                         .foregroundColor(.white)
                                         .font(.system(size: 24, weight: .bold))
+                                        .matchedGeometryEffect(id: "todo-add-icon", in: namespace, isSource: isSource)
                                 }
                                 .transition(.opacity)
                             }.sheet(isPresented: $textInputModalShowed) {
@@ -99,18 +117,17 @@ struct TodoView : View {
                                 )
                                 .presentationDetents([.height(200)])
                             }
+                            .frame(width: expanded ? 50 : 0, height: expanded ? 50 : 0)
                         }
                         .opacity(expanded ? 1 : 0)
                         .transition(.opacity)
-                        
-                        Spacer()
-                    }.frame(maxHeight: .infinity)
+                    }
+                    .frame(maxHeight: .infinity)
                 }
-                .frame(width: expanded ? 240 : 120, height: expanded ? 370 : 160)
-                .offset(x: expanded ? 10 : 0)
             }
+            .frame(width: expanded ? 240 : 120, height: expanded ? 460 : 160)
         }
-        .frame(width: expanded ? 350 : 150, height: expanded ? 370 : 180)
+        .frame(width: expanded ? 350 : 150, height: expanded ? 500 : 180, alignment: .top)
     }
 }
 
@@ -221,9 +238,10 @@ struct TodoPreview : PreviewProvider {
     struct Wrapper : View {
         @State var selectedTodo: UUID = UUID()
         @State var expanded: Bool = true;
+        @Namespace var sampleNamespace
         
         var body : some View {
-            TodoView(expanded: $expanded, selectedTodo: $selectedTodo)
+            TodoView(expanded: $expanded, selectedTodo: $selectedTodo, namespace: sampleNamespace, isSource: true)
                 .environmentObject(ToDoList(lst: [ToDoEntry(todo: "Hello"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More")]))
         }
     }

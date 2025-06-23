@@ -5,7 +5,7 @@ struct HomeView: View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var sessions: Sessions;
     
-    @State private var expandedTodo = false;
+    @State private var expandedTodo = true
     @State private var selectedTodo = UUID();
     @Namespace private var todoNamespace
     
@@ -25,7 +25,7 @@ struct HomeView: View {
                     Spacer()
                     
                     // Collapsed TodoView (top right)
-                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !expandedTodo)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: !expandedTodo)
                         .opacity(expandedTodo ? 0 : 1)
                         .allowsHitTesting(!expandedTodo)
@@ -47,7 +47,7 @@ struct HomeView: View {
                     .frame(maxHeight: 10)
             }
             .safeAreaPadding(.all)
-            .animation(.easeInOut, value: expandedTodo)
+            .animation(TodoView.mainAnimation, value: expandedTodo)
             
             Button(action: {
                 if expandedTodo {
@@ -68,17 +68,17 @@ struct HomeView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: expandedTodo)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: expandedTodo)
                         .opacity(expandedTodo ? 1 : 0)
                         .allowsHitTesting(expandedTodo)
-                        .frame(width: 350, height: 370)
+                        .frame(width: 350, height: 500)
                     Spacer()
                 }
                 Spacer()
             }
             .safeAreaPadding(.all)
-            .animation(.easeInOut, value: expandedTodo)
+            .animation(TodoView.mainAnimation, value: expandedTodo)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)

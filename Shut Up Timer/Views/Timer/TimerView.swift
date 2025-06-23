@@ -19,6 +19,8 @@ struct TimerView: View {
 
     @EnvironmentObject var sessions: Sessions;
     
+    @Namespace private var todoNamespace
+    
     init(timerModel: TimerViewModel) {
         self.timerViewModel = timerModel;
         self.curSession = timerModel.curSession;
@@ -60,7 +62,7 @@ struct TimerView: View {
     func scheduleComeBackNotification() {
         let content = UNMutableNotificationContent()
         content.title = "HAIYAAAA"
-        content.body = "Your friend’s IQ just lapped you. Come back."
+        content.body = "Your friend's IQ just lapped you. Come back."
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
@@ -80,17 +82,15 @@ struct TimerView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             VStack {
                 Spacer()
-                if !todoExpanded {
-                    HStack {
-                        TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
-                        Spacer()
-                    }
-                } else {
-                    Rectangle()
-                        .fill(.clear)
+                HStack {
+                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !todoExpanded)
+                        .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: !todoExpanded)
+                        .opacity(todoExpanded ? 0 : 1)
+                        .allowsHitTesting(!todoExpanded)
                         .frame(width: 150, height: 180)
-                        .allowsHitTesting(false)
+                    Spacer()
                 }
+                .animation(TodoView.mainAnimation, value: todoExpanded)
                 
                 Text("\(Utils.formatTime(curSession.curParam.getTotTime()))")
                     .font(FontTokens.architectsDaughter(size: 60))
@@ -146,18 +146,16 @@ struct TimerView: View {
                 Spacer()
                 HStack {
                     Spacer();
-                    if todoExpanded {
-                        TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo)
-                    } else {
-                        Rectangle()
-                            .fill(.clear)
-                            .frame(width: 350, height: 400)
-                            .allowsHitTesting(false)
-                    }
+                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: todoExpanded)
+                        .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: todoExpanded)
+                        .opacity(todoExpanded ? 1 : 0)
+                        .allowsHitTesting(todoExpanded)
+                        .frame(width: 350, height: 500)
                     Spacer()
                 }
                 Spacer()
             }
+            .animation(TodoView.mainAnimation, value: todoExpanded)
         }
         .onAppear {
             // save starting state

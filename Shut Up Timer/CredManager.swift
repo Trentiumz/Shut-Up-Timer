@@ -1,4 +1,5 @@
 import SwiftUI
+import AuthenticationServices
 import Supabase
 import GoogleSignIn
 
@@ -72,6 +73,30 @@ class CredManager: ObservableObject {
         await MainActor.run {
             self.session = curSession;
             self.loggedIn = true;
+            self.sendTokenToBackend()
+        }
+    }
+    
+    /// Handles Apple login, to be used with SignInWithAppleButton (for the result)
+    func loginApple(result: Result<ASAuthorization, any Error>) async throws {
+        guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
+        else {
+            return
+        }
+        guard let idToken = credential.identityToken
+            .flatMap({ String(data: $0, encoding: .utf8) })
+        else {
+            return
+        }
+        let curSession = try await supabaseClient.auth.signInWithIdToken(
+            credentials: .init(
+                provider: .apple,
+                idToken: idToken
+            )
+        )
+        await MainActor.run {
+            self.session = curSession
+            self.loggedIn = true
             self.sendTokenToBackend()
         }
     }

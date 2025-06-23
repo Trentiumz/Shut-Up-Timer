@@ -1,5 +1,6 @@
 import SwiftUI
 import Supabase
+import AuthenticationServices
 
 struct LoginView : View {
     enum LoginScreen {
@@ -73,6 +74,17 @@ struct GeneralLogin : View {
         }
     }
     
+    private func handleAppleLogin(result: Result<ASAuthorization, any Error>) {
+        Task {
+            do {
+                try await credManager.loginApple(result: result)
+                onLoggedIn()
+            } catch {
+                errorMessage = "Error Signing in with Apple: \(error.localizedDescription)"
+            }
+        }
+    }
+    
     var body : some View {
         ZStack(alignment: .top) {
             FadedBackground()
@@ -98,9 +110,18 @@ struct GeneralLogin : View {
             
             VStack(spacing: 20) {
                 Spacer()
-                OnboardingNextButton(text: "Apple Login", onSelect: { })
-                OnboardingNextButton(text: "Google Login", onSelect: handleGoogleLogin)
-                OnboardingNextButton(text: "Email Login", onSelect: emailLoginPressed)
+                
+                SignInWithAppleButton { request in
+                  request.requestedScopes = [.email, .fullName]
+                } onCompletion: { result in
+                    handleAppleLogin(result: result)
+                }
+                .signInWithAppleButtonStyle(.white)
+                .frame(width: 328, height: 74)
+                .cornerRadius(30)
+                
+                OnboardingNextButton(text: "Sign In with Google", onSelect: handleGoogleLogin)
+                OnboardingNextButton(text: "Sign In with Email", onSelect: emailLoginPressed)
                 
                 // Error messages
                 if let error = errorMessage {

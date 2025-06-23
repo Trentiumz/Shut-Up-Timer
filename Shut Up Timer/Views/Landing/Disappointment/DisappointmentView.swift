@@ -196,7 +196,6 @@ fileprivate struct StatsSummaryView: View {
     init(sessions: Sessions) {
         self.sessions = sessions;
         self.weeks = getWeekInfo(sessions: sessions);
-        print(self.weeks)
     }
 
     // Helper: get color for hours

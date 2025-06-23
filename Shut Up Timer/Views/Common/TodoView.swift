@@ -110,6 +110,7 @@ struct TodoView : View {
                 .offset(x: expanded ? 10 : 0)
             }
         }
+        .frame(width: expanded ? 350 : 150, height: expanded ? 370 : 180)
     }
 }
 

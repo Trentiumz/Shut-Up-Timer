@@ -7,6 +7,7 @@ struct HomeView: View {
     
     @State private var expandedTodo = false;
     @State private var selectedTodo = UUID();
+    @Namespace private var todoNamespace
     
     init() {
     }
@@ -23,14 +24,12 @@ struct HomeView: View {
                         .foregroundColor(ColorTokens.shade700)
                     Spacer()
                     
-                    if !expandedTodo {
-                        TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
-                            .transition(.opacity)
-                    } else {
-                        Rectangle()
-                            .fill(.clear)
-                            .frame(width: 120, height: 160)
-                    }
+                    // Collapsed TodoView (top right)
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                        .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: !expandedTodo)
+                        .opacity(expandedTodo ? 0 : 1)
+                        .allowsHitTesting(!expandedTodo)
+                        .frame(width: 150, height: 180)
                 }.padding(.horizontal, 10)
                 
                 Spacer()
@@ -48,6 +47,7 @@ struct HomeView: View {
                     .frame(maxHeight: 10)
             }
             .safeAreaPadding(.all)
+            .animation(.easeInOut, value: expandedTodo)
             
             Button(action: {
                 if expandedTodo {
@@ -63,19 +63,22 @@ struct HomeView: View {
             .allowsHitTesting(expandedTodo)
             .edgesIgnoringSafeArea(.all)
             
+            // Expanded TodoView (bottom left)
             VStack {
                 Spacer()
                 HStack {
-                    if expandedTodo {
-                        TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
-                            .transition(.opacity)
-                    }
-                    
+                    Spacer()
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo)
+                        .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: expandedTodo)
+                        .opacity(expandedTodo ? 1 : 0)
+                        .allowsHitTesting(expandedTodo)
+                        .frame(width: 350, height: 370)
                     Spacer()
                 }
                 Spacer()
             }
             .safeAreaPadding(.all)
+            .animation(.easeInOut, value: expandedTodo)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)

@@ -50,7 +50,7 @@ struct LeaderboardView : View {
                             LBContentView(entries: worldLB)
                         }
                     } else {
-                        Text("Log in to see your friends' leaderboard")
+                        Text(selectedTab == .friends ? "Log in to see your friends' leaderboard" : "Log in to see the world leaderboard")
                     }
                 }
             }

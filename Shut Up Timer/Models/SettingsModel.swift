@@ -101,7 +101,8 @@ class Settings : Codable, Equatable, ObservableObject {
 }
 
 class SettingsLoader {
-    static var defaultSettings: Settings = Settings(firstTime: true,
+    // TODO: Change back to firstTime = true!
+    static var defaultSettings: Settings = Settings(firstTime: false,
                                                     difficulty: .easy,
                                                     roastLevel: .low,
                                                     timerParam: .countdown(seconds: 60 * 30));
@@ -110,6 +111,7 @@ class SettingsLoader {
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Settings.self, from: liveData) {
                 decoded.onUpdate = onUpdate;
+                decoded.firstTime = false;
                 return decoded;
             }
             print("Incorrect Data Type");

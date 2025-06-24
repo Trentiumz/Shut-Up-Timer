@@ -5,7 +5,7 @@ struct HomeView: View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var sessions: Sessions;
     
-    @State private var expandedTodo = true
+    @State private var expandedTodo = false
     @State private var selectedTodo = UUID();
     @Namespace private var todoNamespace
     

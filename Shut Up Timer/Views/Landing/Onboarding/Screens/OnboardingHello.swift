@@ -10,22 +10,24 @@ struct OnboardingHello: View {
         ZStack {
             Background()
             GeometryReader { geo in
-                VStack(spacing: 0) {
-                    if let onPrevious = self.onPrevious {
-                        BackButton(onPress: onPrevious);
-                    }
-                    Spacer()
-                    LinedPaper(text: infoText, iconAlignment: .topTrailing, imageHeight: 290)
-                    Spacer()
-                    
-                    VStack {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        if let onPrevious = self.onPrevious {
+                            BackButton(onPress: onPrevious);
+                        }
+                        Spacer()
+                        LinedPaper(text: infoText, iconAlignment: .topTrailing, imageHeight: 290)
+                        Spacer()
+                        
                         OnboardingNextButton(text: buttonText, onSelect: onPress)
                         Spacer()
+                            .frame(maxHeight: 100)
                     }
-                    .frame(height: geo.size.height / 4)
-                }.frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: geo.size.height)
+                }
+                .frame(minHeight: geo.size.height)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(ColorTokens.shade300)
     }

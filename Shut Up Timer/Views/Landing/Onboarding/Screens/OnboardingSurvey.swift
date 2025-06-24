@@ -21,46 +21,55 @@ struct SelectorList : View {
                         selectedText: selectedText,
                         isSelected: selectedOption == option,
                         onSelect: {
-                            selectedOption = option
+                            withAnimation {
+                                selectedOption = option
+                            }
                         })
                 }
                 Spacer()
-                OnboardingNextButton(text: nextText, onSelect: {
-                    if options.contains(where: { elem in
-                        elem.0 == selectedOption;
-                    }) {
-                        onSelect(selectedOption);
-                    }
-                })
-                Spacer()
-                    .frame(maxHeight: 40)
-            }
-            
-            VStack(spacing: 10) {
-                ForEach(options, id: \.0) { (option, text, selectedText) in
-                    OnboardingSelector(
-                        text: text,
-                        selectedText: selectedText,
-                        isSelected: selectedOption == option,
-                        onSelect: {
-                            selectedOption = option
-                        },
-                        isSmall: true)
-                }
-                Spacer()
-                OnboardingNextButton(
-                    text: nextText,
-                    onSelect: {
+                if selectedOption != "none" {
+                    OnboardingNextButton(text: nextText, onSelect: {
                         if options.contains(where: { elem in
                             elem.0 == selectedOption;
                         }) {
                             onSelect(selectedOption);
                         }
-                    },
-                    isSmall: true)
+                    })
+                }
                 Spacer()
                     .frame(maxHeight: 40)
             }
+            
+            // responsive design... but it's not very useful tbh
+//            VStack(spacing: 10) {
+//                ForEach(options, id: \.0) { (option, text, selectedText) in
+//                    OnboardingSelector(
+//                        text: text,
+//                        selectedText: selectedText,
+//                        isSelected: selectedOption == option,
+//                        onSelect: {
+//                            withAnimation {
+//                                selectedOption = option
+//                            }
+//                        },
+//                        isSmall: true)
+//                }
+//                Spacer()
+//                if selectedOption != "none" {
+//                    OnboardingNextButton(
+//                        text: nextText,
+//                        onSelect: {
+//                            if options.contains(where: { elem in
+//                                elem.0 == selectedOption;
+//                            }) {
+//                                onSelect(selectedOption);
+//                            }
+//                        },
+//                        isSmall: true)
+//                }
+//                Spacer()
+//                    .frame(maxHeight: 40)
+//            }
         }
     }
 }
@@ -74,25 +83,30 @@ struct OnboardingQ1: View {
         ("4-6 hours", "4-6 hours", "So mid."),
         ("7-9 hours", "7-9 hours", "Are you... proud of that?"),
         ("10+ hours", "10+ hours", "We're judging. So is your mom")]
-    private let doneText = "I'm done."
+    private let doneText = "I'm done. ->"
     
     var body: some View {
         ZStack {
             Background()
-            VStack {
-                BackButton(onPress: onPrevious);
-                Spacer()
-                ViewThatFits {
-                    LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 280)
-                        .offset(y: -10)
-                    LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 220)
-                        .offset(y: -10)
+            ScrollView {
+                VStack {
+                    BackButton(onPress: onPrevious);
+                    Spacer()
+                    ViewThatFits {
+                        LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 280)
+                            .offset(y: -10)
+                        LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 220)
+                            .offset(y: -10)
+                    }
+                    Rectangle().fill(.clear).frame(height: 40)
+                    Spacer()
+                    SelectorList(options: options, nextText: doneText, onSelect: onPress)
+                    Spacer()
                 }
-                Rectangle().fill(.clear).frame(height: 40)
-                Spacer()
-                SelectorList(options: options, nextText: doneText, onSelect: onPress)
-                Spacer()
+                .frame(minHeight: UIScreen.main.bounds.height)
             }
+            .safeAreaPadding(.top)
+            .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)
     }
@@ -107,25 +121,30 @@ struct OnboardingQ2: View {
         ("Social Media", "Social Media", "Social Media"),
         ("App Store", "App Store", "App Store"),
         ("Other", "Other", "Other")]
-    private let doneText = "Hurry, lah!"
+    private let doneText = "Hurry, lah! ->"
     
     var body: some View {
         ZStack {
             Background()
-            VStack {
-                BackButton(onPress: onPrevious);
-                Spacer()
-                ViewThatFits {
-                    LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 280)
-                        .offset(y: -10)
-                    LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 200)
-                        .offset(y: -10)
+            ScrollView {
+                VStack {
+                    BackButton(onPress: onPrevious);
+                    Spacer()
+                    ViewThatFits {
+                        LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 280)
+                            .offset(y: -10)
+                        LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 200)
+                            .offset(y: -10)
+                    }
+                    Rectangle().fill(.clear).frame(height: 40)
+                    Spacer()
+                    SelectorList(options: options, nextText: doneText, onSelect: onPress)
+                    Spacer()
                 }
-                Rectangle().fill(.clear).frame(height: 40)
-                Spacer()
-                SelectorList(options: options, nextText: doneText, onSelect: onPress)
-                Spacer()
+                .frame(minHeight: UIScreen.main.bounds.height)
             }
+            .safeAreaPadding(.top)
+            .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)
     }
@@ -136,24 +155,30 @@ struct OnboardingQ3: View {
     let onPrevious: () -> Void
     
     private let options = [
-        ("low", "Lightly Grilled Mode", "\"Oh, you’re trying your best. Congrats.\""),
+        ("low", "Lightly Grilled Mode", "\"Oh, you're trying your best. Congrats.\""),
         ("med", "Savage Mode", "\"So you opened TikTok again? Good luck explaining that to future-you.\""),
         ("high", "Asian Parent Mode", "\"You study like this and still expect results? Tsk.\"")
         ]
-    private let doneText = "Start moving!"
+    private let doneText = "Start moving! ->"
     
     var body: some View {
         ZStack {
             Background()
-            VStack {
-                BackButton(onPress: onPrevious);
-                Spacer()
-                LinedPaper(text: "You want motivation? Or humiliation?", iconAlignment: .bottomTrailing, imageHeight: 180)
-                    .offset(y: -10)
-                Spacer()
-                    .frame(maxHeight: 100)
-                SelectorList(options: options, nextText: doneText, onSelect: onPress)
+            ScrollView {
+                VStack {
+                    BackButton(onPress: onPrevious);
+                    Spacer()
+                    LinedPaper(text: "You want motivation? Or humiliation?", iconAlignment: .bottomTrailing, imageHeight: 180)
+                        .offset(y: -10)
+                    Spacer()
+                        .frame(maxHeight: 100)
+                    SelectorList(options: options, nextText: doneText, onSelect: onPress)
+                    Spacer()
+                }
+                .frame(minHeight: UIScreen.main.bounds.height)
             }
+            .safeAreaPadding(.top)
+            .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)
     }
@@ -168,29 +193,35 @@ struct OnboardingQ4: View {
         ("medium", "Unforgiving", "One swipe and you're done"),
         ("asian", "Asian Household", "Full lockdown. Pray.")
         ]
-    private let doneText = "Almost there..."
+    private let doneText = "Almost there... ->"
     
     var body: some View {
         ZStack {
             Background()
-            VStack {
-                BackButton(onPress: onPrevious);
-                Spacer();
-                ViewThatFits {
-                    LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 280)
-                        .offset(y: -10)
-                    LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 200)
-                        .offset(y: -10)
+            ScrollView {
+                VStack {
+                    BackButton(onPress: onPrevious);
+                    Spacer();
+                    ViewThatFits {
+                        LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 280)
+                            .offset(y: -10)
+                        LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 200)
+                            .offset(y: -10)
+                    }
+                    Rectangle().fill(.clear).frame(height: 40)
+                    Spacer()
+                    SelectorList(options: options, nextText: doneText, onSelect: onPress)
+                    Spacer()
                 }
-                Rectangle().fill(.clear).frame(height: 40)
-                Spacer()
-                SelectorList(options: options, nextText: doneText, onSelect: onPress)
+                .frame(minHeight: UIScreen.main.bounds.height)
             }
+            .safeAreaPadding(.top)
+            .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)
     }
 }
 
 #Preview {
-    OnboardingQ4(onPress: {val in print("Selected \(val)")}, onPrevious: {print("Going previous...")})
+    OnboardingQ3(onPress: {val in print("Selected \(val)")}, onPrevious: {print("Going previous...")})
 }

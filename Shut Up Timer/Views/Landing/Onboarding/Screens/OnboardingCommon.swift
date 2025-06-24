@@ -35,16 +35,19 @@ struct LinedPaper : View {
                             .frame(width: 400, height: 400, alignment: .top)
                             .clipped()
                             .aspectRatio(contentMode: .fill)
-                            .offset(x: -10, y: -90),
+                            .offset(x: -10, y: -90)
+                            .allowsHitTesting(false),
                         alignment: .top
                     )
                     .clipped()
+                    .allowsHitTesting(false)
                 ImageAssets.onboardingHello65
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 197, height: 197)
                     .clipped()
                     .offset(x: xOff, y: yOff)
+                    .allowsHitTesting(false)
             }
             Text(text)
                 .font(Font.custom("ArchitectsDaughter-Regular", size: 30))
@@ -67,8 +70,10 @@ struct Background : View {
                     .aspectRatio(contentMode: .fill)
                     .clipped()
                     .ignoresSafeArea()
+                    .allowsHitTesting(false)
             )
-            .ignoresSafeArea()
+            .ignoresSafeArea(edges: [.top, .bottom])
+            .allowsHitTesting(false)
     }
 }
 
@@ -89,6 +94,7 @@ struct BackButton : View {
             .frame(width: 80, height: 40)
             Spacer()
         }
+        .frame(height: 40)
     }
 }
 

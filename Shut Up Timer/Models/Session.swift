@@ -102,7 +102,7 @@ class Sessions : Codable, Equatable, ObservableObject {
         return sortedCategories
     }
 
-    func getTopCategoryStrings(toDoList: ToDoList) -> [String] {
+    func getTopCategoryStrings(toDoList: ToDoListV2) -> [String] {
         let topCategories = getTopCategories()
         var categoryStrings: [String] = []
         

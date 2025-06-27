@@ -83,10 +83,9 @@ struct TimerView: View {
             VStack {
                 Spacer()
                 HStack {
-                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !todoExpanded)
+                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !todoExpanded, isActive: !todoExpanded)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: !todoExpanded)
                         .opacity(todoExpanded ? 0 : 1)
-                        .allowsHitTesting(!todoExpanded)
                         .frame(width: 150, height: 180)
                     Spacer()
                 }
@@ -146,10 +145,9 @@ struct TimerView: View {
                 Spacer()
                 HStack {
                     Spacer();
-                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: todoExpanded)
+                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: todoExpanded, isActive: todoExpanded)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: todoExpanded)
                         .opacity(todoExpanded ? 1 : 0)
-                        .allowsHitTesting(todoExpanded)
                         .frame(width: 350, height: 500)
                     Spacer()
                 }

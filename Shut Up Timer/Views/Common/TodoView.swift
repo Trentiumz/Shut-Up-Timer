@@ -1,36 +1,39 @@
 import SwiftUI;
+import SwiftUIReorderableForEach;
 
 struct TodoView : View {
     // whether or not we're expanded
     @Binding var expanded: Bool;
     
     // tracking current list items & what to add
-    @EnvironmentObject var todoList: ToDoList;
+    @Environment(ToDoListV2.self) var todoList;
     @State private var textInputModalShowed: Bool = false;
     
     @Binding private var selectedTodo: UUID;
     
-    @State private var editingTodo: UUID = UUID();
-    @FocusState private var editingFocus: Bool;
+    @FocusState private var isFocused: Bool;
     
     var namespace: Namespace.ID
     var isSource: Bool
     var canSelect: Bool = true
     
+    var isActive: Bool;
+    
     static var mainAnimation = Animation.interactiveSpring(response: 0.4, dampingFraction: 0.6, blendDuration: 0.25);
     
-    init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>, namespace: Namespace.ID, isSource: Bool, canSelect: Bool = true) {
+    init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>, namespace: Namespace.ID, isSource: Bool, canSelect: Bool = true, isActive: Bool) {
         _expanded = expanded;
         _selectedTodo = selectedTodo;
         self.namespace = namespace;
         self.isSource = isSource;
         self.canSelect = canSelect;
+        self.isActive = isActive;
     }
     
     // adds a task and saves it
     func addTask(_ newTaskText: String) {
         DispatchQueue.main.async {
-            todoList.lst.append(ToDoEntry(todo: newTaskText))
+            todoList.activeLst.append(ToDoEntryV2(todo: newTaskText))
         }
     }
     
@@ -46,9 +49,10 @@ struct TodoView : View {
                 .onTapGesture {
                     withAnimation {
                         expanded = !expanded;
-                        editingFocus = false;
+                        isFocused = false;
                     }
                 }
+                .allowsHitTesting(isActive)
             VStack {
                 Spacer()
                     .frame(height: expanded ? 80 : 25)
@@ -58,33 +62,7 @@ struct TodoView : View {
                         VStack {
                             List {
                                 // list of items
-                                ForEach(todoList.lst.indices.filter {todoList.lst[$0].active}, id: \.self) { index in
-                                    TodoEntryView(
-                                        entry: $todoList.lst[index],
-                                        selected: selectedTodo == todoList.lst[index].id,
-                                        isEditing: editingTodo == todoList.lst[index].id,
-                                        onSelect: {
-                                            if self.canSelect {
-                                                selectedTodo=todoList.lst[index].id
-                                            }
-                                        },
-                                        onUnselect: {
-                                            if selectedTodo == todoList.lst[index].id {
-                                                selectedTodo = UUID();
-                                            }
-                                        },
-                                        startEditing: {
-                                            editingTodo = todoList.lst[index].id;
-                                        },
-                                        cancelEditing: {
-                                            editingTodo = UUID();
-                                        },
-                                        isFocused: $editingFocus)
-                                        .listRowInsets(EdgeInsets())
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.leading, 0)
-                                        .matchedGeometryEffect(id: "todo-item-\(index)", in: namespace, isSource: isSource)
-                                }
+                                TodoItemList(selectedTodo: _selectedTodo, isFocused: $isFocused, isSource: isSource, canSelect: canSelect, namespace: namespace)
                             }
                             .listStyle(.plain)
                             .scrollContentBackground(.hidden)
@@ -134,6 +112,58 @@ struct TodoView : View {
     }
 }
 
+struct TodoItemList : View {
+    @Environment(ToDoListV2.self) var todoList;
+    @Binding var selectedTodo: UUID;
+    
+    @State private var editingTodo: UUID = UUID();
+    @FocusState.Binding var isFocused: Bool;
+    
+    var isSource: Bool;
+    var canSelect: Bool = true;
+    var namespace: Namespace.ID;
+    
+    @State var allowReordering = true
+    
+    var body : some View {
+        ForEach(todoList.activeLst, id: \.id) { todoEntry in
+            TodoEntryView(
+                entry: todoEntry,
+                selected: selectedTodo == todoEntry.id,
+                isEditing: editingTodo == todoEntry.id,
+                onSelect: {
+                    if self.canSelect {
+                        selectedTodo=todoEntry.id
+                    }
+                },
+                onUnselect: {
+                    if selectedTodo == todoEntry.id {
+                        selectedTodo = UUID();
+                    }
+                },
+                startEditing: {
+                    editingTodo = todoEntry.id;
+                },
+                cancelEditing: {
+                    editingTodo = UUID();
+                },
+                removeItem: {
+                    todoList.removeTask(entry: todoEntry);
+                },
+                isFocused: _isFocused)
+                .listRowInsets(EdgeInsets())
+                .frame(maxWidth: .infinity)
+                .padding(.leading, 0)
+                .matchedGeometryEffect(id: "todo-item-\(todoEntry.id)", in: namespace, isSource: isSource)
+        }
+        .onMove(perform: move)
+    }
+    
+    func move(from source: IndexSet, to destination: Int) {
+        todoList.activeLst.move(fromOffsets: source, toOffset: destination)
+    }
+}
+
 struct TextInputModal: View {
     @State var inputText: String = ""
     var onSave: (String) -> Void
@@ -164,23 +194,25 @@ struct Checkbox: View {
 }
 
 struct TodoEntryView : View {
-    @Binding private var entry: ToDoEntry;
+    @State private var entry: ToDoEntryV2;
     var selected: Bool;
     var isEditing: Bool;
     var onSelect: () -> Void;
     var onUnselect: () -> Void;
+    var removeItem: () -> Void;
     var startEditing: () -> Void;
     var cancelEditing: () -> Void;
     
     @FocusState.Binding private var isFocused: Bool
     
-    init(entry: Binding<ToDoEntry>, selected: Bool, isEditing: Bool, onSelect: @escaping () -> Void, onUnselect: @escaping () -> Void, startEditing: @escaping () -> Void, cancelEditing: @escaping () -> Void, isFocused: FocusState<Bool>.Binding) {
-        self._entry = entry;
+    init(entry: ToDoEntryV2, selected: Bool, isEditing: Bool, onSelect: @escaping () -> Void, onUnselect: @escaping () -> Void, startEditing: @escaping () -> Void, cancelEditing: @escaping () -> Void, removeItem: @escaping () -> Void, isFocused: FocusState<Bool>.Binding) {
+        self.entry = entry;
         self.selected = selected;
         self.isEditing = isEditing;
         self.onSelect = onSelect;
         self.onUnselect = onUnselect;
         self.startEditing = startEditing;
+        self.removeItem = removeItem;
         self.cancelEditing = cancelEditing;
         self._isFocused = isFocused;
     }
@@ -242,7 +274,7 @@ struct TodoEntryView : View {
         }
         .swipeActions {
             Button(role: .destructive) {
-                entry.active = false
+                removeItem()
                 isFocused = false;
             } label: {
                 Label("Delete", systemImage: "trash")
@@ -289,8 +321,8 @@ struct TodoPreview : PreviewProvider {
         @Namespace var sampleNamespace
         
         var body : some View {
-            TodoView(expanded: $expanded, selectedTodo: $selectedTodo, namespace: sampleNamespace, isSource: true)
-                .environmentObject(ToDoList(lst: [ToDoEntry(todo: "Hello"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More"), ToDoEntry(todo: "No More")]))
+            TodoView(expanded: $expanded, selectedTodo: $selectedTodo, namespace: sampleNamespace, isSource: true, isActive: true)
+                .environment(ToDoListV2(activeLst: [ToDoEntryV2(todo: "Hello"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More")]))
         }
     }
     

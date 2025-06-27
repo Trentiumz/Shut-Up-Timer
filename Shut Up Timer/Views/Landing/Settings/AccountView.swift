@@ -96,7 +96,7 @@ struct AccountView : View {
 struct LocalUserInfoView : View {
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var credManager: CredManager;
-    @EnvironmentObject var todoList: ToDoList
+    @Environment(ToDoListV2.self) var todoList;
     @Environment(CurUser.self) var curUser;
     
     @State private var pickedImage: PhotosPickerItem?
@@ -236,7 +236,7 @@ struct LocalUserInfoView : View {
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
         .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
-        .environmentObject(ToDoLoader.getToDo(onUpdate: { _ in }))
+        .environment(ToDoLoader.getToDo())
         .environmentObject(credManager)
         .environment(CurUser(credManager: credManager))
 }

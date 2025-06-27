@@ -233,7 +233,7 @@ fileprivate struct StatsSummaryView: View {
                 HStack(spacing: 8) {
                     Text("")
                         .frame(width: 25, height: 25) // empty label
-                    ForEach(dayLabels, id: \.self) { label in
+                    ForEach(Array(dayLabels.enumerated()), id: \.offset) { idx, label in
                         Text(label)
                             .font(FontTokens.architectsDaughter(size: 14))
                             .foregroundColor(.gray)
@@ -249,7 +249,7 @@ fileprivate struct StatsSummaryView: View {
                             .font(FontTokens.architectsDaughter(size: 10))
                             .frame(width: 25, height: 25)
                         // Week date range
-                        ForEach(week.indices, id: \.self) { dayIdx in
+                        ForEach(Array(week.enumerated()), id: \.offset) { dayIdx, _ in
                             if let time = week[dayIdx] {
                                 RoundedRectangle(cornerRadius: 8)
                                     .fill(colorFor(time: time))

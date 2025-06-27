@@ -1,5 +1,5 @@
 {
-  "originHash" : "04674cc8e7545ec60e78f82f02b077e59853f701e6056e514b20d343a5f6f23d",
+  "originHash" : "f4452fa05161459cfd1424db11b2bce587c48734a2bce963b791210361cb5e05",
   "pins" : [
     {
       "identity" : "app-check",
@@ -116,6 +116,15 @@
       "state" : {
         "revision" : "a0a57e949a8903563aba4615869310c0ebf14c03",
         "version" : "1.4.0"
+      }
+    },
+    {
+      "identity" : "swiftui-reorderable-foreach",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/globulus/swiftui-reorderable-foreach",
+      "state" : {
+        "revision" : "47f6ca1ad906ef2ae1f872ed34a10cc615ad99ca",
+        "version" : "1.0.0"
       }
     },
     {

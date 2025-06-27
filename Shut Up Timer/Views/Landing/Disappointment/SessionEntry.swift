@@ -2,14 +2,14 @@ import SwiftUI;
 
 struct SessionEntryView : View {
     @State private var sessionEntry: SessionEntry;
-    @EnvironmentObject var todoList: ToDoList;
+    @Environment(ToDoListV2.self) var todoList;
     
     init(sessionEntry: SessionEntry) {
         self.sessionEntry = sessionEntry;
     }
 
     func getTaskName(todoID: UUID) -> String {
-        if let todo = todoList.lst.first(where: { $0.id == todoID}) {
+        if let todo = todoList.activeLst.first(where: { $0.id == todoID}) {
             return todo.todo;
         } else {
             return "unknown";

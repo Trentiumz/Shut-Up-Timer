@@ -19,9 +19,7 @@ struct Shut_Up_TimerApp: App {
                     SettingsLoader.saveSettings(newSettings);
     });
     var sessions: Sessions = SessionsLoader.loadSessions(onUpdate: {_ in });
-    var todoList: ToDoList = ToDoLoader.getToDo(onUpdate: { newTodo in
-        ToDoLoader.saveToDo(todo: newTodo)
-    });
+    var todoList: ToDoListV2 = ToDoLoader.getToDo();
     var credManager: CredManager = CredManager();
     // TODO: onReceive is called BEFORE the object is changed, so the updates aren't actually saved !
     
@@ -43,6 +41,22 @@ struct Shut_Up_TimerApp: App {
             }
         }
         self.curUser = CurUser(credManager: CredManager())
+        watchTodo();
+    }
+    
+    @MainActor
+    func watchTodo() {
+        withObservationTracking {
+            _ = todoList.activeLst
+            _ = todoList.inactiveLst
+        } onChange: {
+            Task {
+                await MainActor.run {
+                    ToDoLoader.saveToDo(todo: todoList)
+                }
+            }
+            Task { await watchTodo() }
+        }
     }
     
     var body: some Scene {
@@ -50,10 +64,10 @@ struct Shut_Up_TimerApp: App {
             ContentView()
                 .environmentObject(router)
                 .environmentObject(settings)
-                .environmentObject(sessions)	
-                .environmentObject(todoList)
+                .environmentObject(sessions)
                 .environmentObject(credManager)
                 .environment(curUser)
+                .environment(todoList)
                 .preferredColorScheme(.light)
         }
     }

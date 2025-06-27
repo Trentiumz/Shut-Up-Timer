@@ -25,11 +25,10 @@ struct HomeView: View {
                     Spacer()
                     
                     // Collapsed TodoView (top right)
-                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !expandedTodo, canSelect: false)
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !expandedTodo, canSelect: false, isActive: !expandedTodo)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: !expandedTodo)
                         .opacity(expandedTodo ? 0 : 1)
-                        .allowsHitTesting(!expandedTodo)
-                        .frame(width: 150, height: 180)
+                        .frame(width: 150, height: 180, alignment: .top)
                 }.padding(.horizontal, 10)
                 
                 Spacer()
@@ -68,10 +67,9 @@ struct HomeView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: expandedTodo, canSelect: false)
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: expandedTodo, canSelect: false, isActive: expandedTodo)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: expandedTodo)
                         .opacity(expandedTodo ? 1 : 0)
-                        .allowsHitTesting(expandedTodo)
                         .frame(width: 350, height: 500)
                     Spacer()
                 }
@@ -90,6 +88,6 @@ struct HomeView: View {
     HomeView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings())
-        .environmentObject(ToDoLoader.getToDo())
+        .environment(ToDoLoader.getToDo())
         .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
 }

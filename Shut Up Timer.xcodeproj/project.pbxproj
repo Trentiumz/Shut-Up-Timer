@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		736830832E0E4A96006BFDFD /* SwiftUIReorderableForEach in Frameworks */ = {isa = PBXBuildFile; productRef = 736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */; };
 		C9784C3A2DE50CED00BF0281 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C9784C392DE50CED00BF0281 /* GoogleSignIn */; };
 		C9784C3C2DE50CF200BF0281 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C9784C3B2DE50CF200BF0281 /* GoogleSignInSwift */; };
 		C9E74A992DC3B2FB0014B994 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = C9E74A982DC3B2FB0014B994 /* Auth */; };
@@ -69,6 +70,7 @@
 				C9784C3C2DE50CF200BF0281 /* GoogleSignInSwift in Frameworks */,
 				C9E74A992DC3B2FB0014B994 /* Auth in Frameworks */,
 				C9E74AA12DC3B2FB0014B994 /* Storage in Frameworks */,
+				736830832E0E4A96006BFDFD /* SwiftUIReorderableForEach in Frameworks */,
 				C9E74A9F2DC3B2FB0014B994 /* Realtime in Frameworks */,
 				C9784C3A2DE50CED00BF0281 /* GoogleSignIn in Frameworks */,
 			);
@@ -147,6 +149,7 @@
 				C9E74AA32DC3B3FD0014B994 /* Supabase */,
 				C9784C392DE50CED00BF0281 /* GoogleSignIn */,
 				C9784C3B2DE50CF200BF0281 /* GoogleSignInSwift */,
+				736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */,
 			);
 			productName = "Shut Up Timer";
 			productReference = C93EE98A2DB5133700E5080A /* Shut Up Timer.app */;
@@ -233,6 +236,7 @@
 			packageReferences = (
 				C9E74A972DC3B2FB0014B994 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				C9784C382DE50CDA00BF0281 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				736830812E0E4A96006BFDFD /* XCRemoteSwiftPackageReference "swiftui-reorderable-foreach" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C93EE98B2DB5133700E5080A /* Products */;
@@ -616,6 +620,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		736830812E0E4A96006BFDFD /* XCRemoteSwiftPackageReference "swiftui-reorderable-foreach" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/globulus/swiftui-reorderable-foreach";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		C9784C382DE50CDA00BF0281 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -635,6 +647,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 736830812E0E4A96006BFDFD /* XCRemoteSwiftPackageReference "swiftui-reorderable-foreach" */;
+			productName = SwiftUIReorderableForEach;
+		};
 		C9784C392DE50CED00BF0281 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C9784C382DE50CDA00BF0281 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;

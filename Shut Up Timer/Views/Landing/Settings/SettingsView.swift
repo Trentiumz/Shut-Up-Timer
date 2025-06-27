@@ -256,7 +256,7 @@ struct SettingsPreview : PreviewProvider {
             .environmentObject(AppRouter())
             .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
             .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
-            .environmentObject(ToDoLoader.getToDo(onUpdate: { _ in }))
+            .environment(ToDoLoader.getToDo())
             .environmentObject(credManager)
             .environment(CurUser(credManager: credManager))
         }

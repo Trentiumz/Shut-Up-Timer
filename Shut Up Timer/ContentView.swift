@@ -25,6 +25,7 @@ struct ContentView: View {
                     })
                 } else {
                     TopBarView(selectedScreen: $selectedScreen)
+                        .zIndex(5)
                     ZStack {
                         HomeView().tag(LandingScreen.home)
                             .opacity(selectedScreen == .home ? 1 : 0)
@@ -46,7 +47,8 @@ struct ContentView: View {
                             .opacity(selectedScreen == .account ? 1 : 0)
                             .allowsHitTesting(selectedScreen == .account)
                     }
-                    BottomBarView(selectedScreen: $selectedScreen);
+                    BottomBarView(selectedScreen: $selectedScreen)
+                        .zIndex(5);
                 }
             }
             .environmentObject(router)
@@ -134,7 +136,8 @@ struct ContentView: View {
     ContentView()
         .environmentObject(Settings(firstTime: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20)))
         .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
-        .environmentObject(ToDoLoader.getToDo(onUpdate: {_ in}))
+        .environment(ToDoLoader.getToDo())
+        .environment(CurUser(credManager: CredManager()))
         .environmentObject(CredManager())
         .environmentObject(AppRouter());
 }

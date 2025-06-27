@@ -19,7 +19,7 @@ struct HomeView: View {
             
             VStack(spacing: 0) {
                 HStack(alignment: .top) {
-                    Text(String(format: "%.1f IQ", sessions.getIQ()))
+                    Text(String(format: "%.2f IQ", sessions.getIQ()))
                         .font(Font.custom("Architects Daughter", size: 30))
                         .foregroundColor(ColorTokens.shade700)
                     Spacer()

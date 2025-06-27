@@ -20,7 +20,7 @@ struct TopBarView : View {
             Button(action: {
                 router.toFeedbackView();
             }) {
-                Image(systemName: "pencil.line")
+                Image(systemName: "bubble.left")
                     .resizable()
                     .foregroundStyle(ColorTokens.shade700)
                     .frame(width: 32, height: 32)

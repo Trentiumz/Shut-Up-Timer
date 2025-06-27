@@ -31,7 +31,7 @@ struct TopBarView : View {
                 router.toInviteFriends();
                 // Add your action here
             }) {
-                Image(systemName: "plus")
+                Image(systemName: "qrcode")
                     .font(.system(size: 32))
                     .foregroundStyle(ColorTokens.shade700)
             }

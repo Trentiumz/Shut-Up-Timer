@@ -24,15 +24,28 @@ struct ContentView: View {
                         settings.firstTime = false;
                     })
                 } else {
-                    TopBarView()
-                    TabView(selection: $selectedScreen) {
+                    TopBarView(selectedScreen: $selectedScreen)
+                    ZStack {
                         HomeView().tag(LandingScreen.home)
+                            .opacity(selectedScreen == .home ? 1 : 0)
+                            .allowsHitTesting(selectedScreen == .home)
+                    
                         SocialMediaView().tag(LandingScreen.socialMedia)
+                            .opacity(selectedScreen == .socialMedia ? 1 : 0)
+                            .allowsHitTesting(selectedScreen == .socialMedia)
+                    
                         LeaderboardView().tag(LandingScreen.leaderboard)
+                            .opacity(selectedScreen == .leaderboard ? 1 : 0)
+                            .allowsHitTesting(selectedScreen == .leaderboard)
+                    
                         DisappointmentView().tag(LandingScreen.disappointment)
+                            .opacity(selectedScreen == .disappointment ? 1 : 0)
+                            .allowsHitTesting(selectedScreen == .disappointment)
+                    
                         AccountView().tag(LandingScreen.account)
+                            .opacity(selectedScreen == .account ? 1 : 0)
+                            .allowsHitTesting(selectedScreen == .account)
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
                     BottomBarView(selectedScreen: $selectedScreen);
                 }
             }

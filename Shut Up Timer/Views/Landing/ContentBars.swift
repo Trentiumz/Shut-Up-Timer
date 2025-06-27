@@ -4,10 +4,18 @@ struct TopBarView : View {
     @Environment(CurUser.self) var curUser;
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var router: AppRouter;
+    
+    @Binding var selectedScreen: LandingScreen;
 
     var body: some View {
         HStack{
-            PFPDisplay(url: curUser.userPublicProfile?.profile_picture ?? "", width: 32, height: 32)
+            Button(action: {
+                withAnimation {
+                    selectedScreen = .account;
+                }
+            }) {
+                PFPDisplay(url: curUser.userPublicProfile?.profile_picture ?? "", width: 32, height: 32)
+            }
             
             Button(action: {
                 router.toFeedbackView();
@@ -72,31 +80,41 @@ struct BottomBarView : View {
     var body : some View {
         HStack {
             Button(action: {
-                selectedScreen = .home
+                withAnimation {
+                    selectedScreen = .home
+                }
             }){
                 IconImage("house.fill")
             }
             Spacer()
             Button(action: {
-                selectedScreen = .socialMedia
+                withAnimation {
+                    selectedScreen = .socialMedia
+                }
             }){
                 IconImage("person.2.fill")
             }
             Spacer()
             Button(action: {
-                selectedScreen = .leaderboard
+                withAnimation {
+                    selectedScreen = .leaderboard
+                }
             }){
                 IconImage("list.number")
             }
             Spacer()
             Button(action: {
-                selectedScreen = .disappointment
+                withAnimation {
+                    selectedScreen = .disappointment
+                }
             }){
                 IconImage("photo.fill")
             }
             Spacer()
             Button(action: {
-                selectedScreen = .account
+                withAnimation {
+                    selectedScreen = .account
+                }
             }){
                 IconImage("gearshape.fill")
             }

@@ -10,16 +10,21 @@ struct TodoView : View {
     
     @Binding private var selectedTodo: UUID;
     
+    @State private var editingTodo: UUID = UUID();
+    @FocusState private var editingFocus: Bool;
+    
     var namespace: Namespace.ID
     var isSource: Bool
+    var canSelect: Bool = true
     
     static var mainAnimation = Animation.interactiveSpring(response: 0.4, dampingFraction: 0.6, blendDuration: 0.25);
     
-    init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>, namespace: Namespace.ID, isSource: Bool) {
+    init(expanded: Binding<Bool>, selectedTodo: Binding<UUID>, namespace: Namespace.ID, isSource: Bool, canSelect: Bool = true) {
         _expanded = expanded;
         _selectedTodo = selectedTodo;
         self.namespace = namespace;
         self.isSource = isSource;
+        self.canSelect = canSelect;
     }
     
     // adds a task and saves it
@@ -41,6 +46,7 @@ struct TodoView : View {
                 .onTapGesture {
                     withAnimation {
                         expanded = !expanded;
+                        editingFocus = false;
                     }
                 }
             VStack {
@@ -52,35 +58,32 @@ struct TodoView : View {
                         VStack {
                             List {
                                 // list of items
-                                ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && !todoList.lst[$0].completed}, id: \.self) { index in
+                                ForEach(todoList.lst.indices.filter {todoList.lst[$0].active}, id: \.self) { index in
                                     TodoEntryView(
                                         entry: $todoList.lst[index],
                                         selected: selectedTodo == todoList.lst[index].id,
-                                        onSelect: { selectedTodo=todoList.lst[index].id},
+                                        isEditing: editingTodo == todoList.lst[index].id,
+                                        onSelect: {
+                                            if self.canSelect {
+                                                selectedTodo=todoList.lst[index].id
+                                            }
+                                        },
                                         onUnselect: {
                                             if selectedTodo == todoList.lst[index].id {
                                                 selectedTodo = UUID();
                                             }
-                                        })
+                                        },
+                                        startEditing: {
+                                            editingTodo = todoList.lst[index].id;
+                                        },
+                                        cancelEditing: {
+                                            editingTodo = UUID();
+                                        },
+                                        isFocused: $editingFocus)
                                         .listRowInsets(EdgeInsets())
                                         .frame(maxWidth: .infinity)
                                         .padding(.leading, 0)
                                         .matchedGeometryEffect(id: "todo-item-\(index)", in: namespace, isSource: isSource)
-                                }
-                                ForEach(todoList.lst.indices.filter {todoList.lst[$0].active && todoList.lst[$0].completed}, id: \.self) { index in
-                                    TodoEntryView(
-                                        entry: $todoList.lst[index],
-                                        selected: selectedTodo == todoList.lst[index].id,
-                                        onSelect: { selectedTodo=todoList.lst[index].id},
-                                        onUnselect: {
-                                            if selectedTodo == todoList.lst[index].id {
-                                                selectedTodo = UUID();
-                                            }
-                                        })
-                                        .listRowInsets(EdgeInsets())
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.leading, 0)
-                                        .matchedGeometryEffect(id: "todo-item-completed-\(index)", in: namespace, isSource: isSource)
                                 }
                             }
                             .listStyle(.plain)
@@ -163,14 +166,23 @@ struct Checkbox: View {
 struct TodoEntryView : View {
     @Binding private var entry: ToDoEntry;
     var selected: Bool;
+    var isEditing: Bool;
     var onSelect: () -> Void;
     var onUnselect: () -> Void;
+    var startEditing: () -> Void;
+    var cancelEditing: () -> Void;
     
-    init(entry: Binding<ToDoEntry>, selected: Bool, onSelect: @escaping () -> Void, onUnselect: @escaping () -> Void) {
+    @FocusState.Binding private var isFocused: Bool
+    
+    init(entry: Binding<ToDoEntry>, selected: Bool, isEditing: Bool, onSelect: @escaping () -> Void, onUnselect: @escaping () -> Void, startEditing: @escaping () -> Void, cancelEditing: @escaping () -> Void, isFocused: FocusState<Bool>.Binding) {
         self._entry = entry;
         self.selected = selected;
+        self.isEditing = isEditing;
         self.onSelect = onSelect;
         self.onUnselect = onUnselect;
+        self.startEditing = startEditing;
+        self.cancelEditing = cancelEditing;
+        self._isFocused = isFocused;
     }
     
     var body : some View {
@@ -178,35 +190,71 @@ struct TodoEntryView : View {
             if (selected) {
                 Checkbox(checked: selected)
             }
-            Text(entry.todo)
-              .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
-              .strikethrough(entry.completed)
-              .foregroundColor(ColorTokens.shade700)
-              .frame(height: 25, alignment: .leading)
-              .lineLimit(1)
-              .truncationMode(.tail)
-              .clipped()
+            if isEditing {
+                TextField("", text: $entry.todo)
+                    .onSubmit {
+                        cancelEditing()
+                        withAnimation {
+                            isFocused = false;
+                        }
+                    }
+                    .focused(_isFocused)
+                    .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
+                    .foregroundColor(ColorTokens.shade700)
+                    .strikethrough(entry.completed)
+                    .frame(height: 25, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .clipped()
+            } else {
+                Text(entry.todo)
+                    .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
+                    .strikethrough(entry.completed)
+                    .foregroundColor(ColorTokens.shade700)
+                    .frame(height: 25, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .clipped()
+            }
             Spacer()
         }
         .onTapGesture(count: 2) {
             withAnimation {
                 onUnselect();
                 entry.completed = !entry.completed;
+                isFocused = false;
             }
         }
         .onTapGesture(count: 1) {
             if !entry.completed {
-                withAnimation {
-                    onSelect()
+                if selected {
+                    withAnimation {
+                        onUnselect()
+                        isFocused = false;
+                    }
+                } else {
+                    withAnimation {
+                        onSelect()
+                        isFocused = false;
+                    }
                 }
             }
         }
         .swipeActions {
             Button(role: .destructive) {
                 entry.active = false
+                isFocused = false;
             } label: {
                 Label("Delete", systemImage: "trash")
             }
+            
+            Button {
+                startEditing()
+                isFocused = true
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            .tint(.blue)
         }
     }
 }

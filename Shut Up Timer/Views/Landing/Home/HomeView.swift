@@ -25,7 +25,7 @@ struct HomeView: View {
                     Spacer()
                     
                     // Collapsed TodoView (top right)
-                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !expandedTodo)
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !expandedTodo, canSelect: false)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: !expandedTodo)
                         .opacity(expandedTodo ? 0 : 1)
                         .allowsHitTesting(!expandedTodo)
@@ -68,7 +68,7 @@ struct HomeView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: expandedTodo)
+                    TodoView(expanded: $expandedTodo, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: expandedTodo, canSelect: false)
                         .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: expandedTodo)
                         .opacity(expandedTodo ? 1 : 0)
                         .allowsHitTesting(expandedTodo)

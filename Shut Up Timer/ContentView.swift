@@ -89,6 +89,9 @@ struct ContentView: View {
                     AlbumView(month: month, year: year)
                 case .feedbackView:
                     FeedbackView()
+                case .notifications:
+                    NotificationsView()
+                        .navigationBarBackButtonHidden(true)
                 default:
                     Text("Invalid")
                 }

@@ -36,6 +36,15 @@ struct TopBarView : View {
                     .foregroundStyle(ColorTokens.shade700)
             }
             .buttonStyle(PlainButtonStyle())
+            
+            Button(action: {
+                router.toNotifications();
+            }) {
+                Image(systemName: "bell")
+                    .font(.system(size: 32))
+                    .foregroundStyle(ColorTokens.shade700)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding()
         .background(ColorTokens.red300)

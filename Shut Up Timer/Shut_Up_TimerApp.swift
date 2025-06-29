@@ -13,6 +13,7 @@ import Supabase
 struct Shut_Up_TimerApp: App {
     // register app delegate for push notifications
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject var notificationManager = NotificationManager()
     
     var router: AppRouter = AppRouter();
     var settings: Settings = SettingsLoader.loadSettings(onUpdate: { newSettings in
@@ -66,6 +67,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(settings)
                 .environmentObject(sessions)
                 .environmentObject(credManager)
+                .environmentObject(notificationManager)
                 .environment(curUser)
                 .environment(todoList)
                 .preferredColorScheme(.light)

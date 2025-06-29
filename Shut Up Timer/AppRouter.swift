@@ -45,6 +45,16 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.feedbackView))
     }
     
+    func toNotifications() {
+        path.append(PathElement(route: AppRoute.notifications))
+    }
+    
+    func pop() {
+        if !path.isEmpty {
+            path.removeLast();
+        }
+    }
+    
     func toHome() {
         while !path.isEmpty {
             path.removeLast();

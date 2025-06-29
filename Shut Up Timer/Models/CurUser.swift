@@ -43,7 +43,7 @@ class CurUser {
     func refresh(animated: Bool = false) {
         Task {
             do {
-                let userId = try await credManager.supabaseClient.auth.user().id
+                let userId = credManager.supabaseClient.auth.currentUser!.id
                 // Get public profile
                 let publicProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
                 // Get private profile

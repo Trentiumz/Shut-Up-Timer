@@ -4,7 +4,7 @@ struct AddFeedbackView: View {
     var curUser: UserPublicProfileResponse
     @State var onAdded: () -> Void
     
-    @State var curStars: Int = 0
+    @State var curStars: Int? = nil
     @State var curResponse: String = ""
     
     @EnvironmentObject var credManager : CredManager
@@ -18,7 +18,7 @@ struct AddFeedbackView: View {
                     
                     HStack(spacing: 2) {
                         ForEach(1...5, id: \.self) { i in
-                            Image(systemName: curStars >= i ? "star.fill" : "star")
+                            Image(systemName: (curStars ?? 0) >= i ? "star.fill" : "star")
                                 .resizable()
                                 .frame(width: 18, height: 18)
                                 .foregroundColor(ColorTokens.red300)
@@ -55,7 +55,7 @@ struct AddFeedbackView: View {
                     Spacer()
                     Button(action:{
                         Task {
-                            let success = await credManager.addFeedback(stars: curStars, feedback: curResponse)
+                            let success = await credManager.fastAPI.addFeedback(FastAPIClient.AddFeedbackParams(stars: curStars, feedback: curResponse))
                             if success {
                                 await MainActor.run {
                                     withAnimation {

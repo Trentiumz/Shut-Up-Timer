@@ -10,13 +10,17 @@ class CredManager: ObservableObject {
     @Published var loggedIn: Bool = false
     
     @Published var supabaseClient: SupabaseClient
+    let fastAPI: FastAPIClient
     
     init() {
         // Initialize Supabase client with temporary keys
-        supabaseClient = SupabaseClient(
-                supabaseURL: URL(string: "https://oullomxexthybhywbgpr.supabase.co")!,
-                supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91bGxvbXhleHRoeWJoeXdiZ3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3NTYwMDYsImV4cCI6MjA2MTMzMjAwNn0.ox6uLdxPQ57WsBACWC2iVhn0akPUWBcQxTTAQ39kwdE"
-            )
+        let supabaseClient = SupabaseClient(
+            supabaseURL: URL(string: Config.supabaseURL)!,
+            supabaseKey: Config.supabaseANON
+        )
+        self.supabaseClient = supabaseClient;
+        
+        fastAPI = FastAPIClient(supabase: supabaseClient)
             
         // Try to get the current session
         Task {
@@ -138,21 +142,6 @@ class CredManager: ObservableObject {
         }
     }
     
-    func addFeedback(stars: Int, feedback: String) async -> Bool {
-        print("Adding feedback...")
-        if loggedIn {
-            do {
-                try await supabaseClient.rpc("add_feedback", params: ["stars": "\(stars)", "feedback": feedback]).execute()
-                return true;
-            } catch {
-                print("Failed to add feedback: \(error.localizedDescription)")
-                return false;
-            }
-        }
-        print("Add Feedback not logged in")
-        return false;
-    }
-    
     func removeFeedback(feedbackID: UUID) async -> Bool {
         print("Removing feedback \(feedbackID)...")
         if loggedIn {
@@ -174,6 +163,7 @@ class CredManager: ObservableObject {
                 let feedbacks: [FeedbackResponse] = try await supabaseClient.rpc("get_upvoted_feedback").execute().value
                 return feedbacks
             } catch {
+                print("Error getting feedback by upvotes: \(error)")
                 return []
             }
         }
@@ -186,6 +176,7 @@ class CredManager: ObservableObject {
                 let feedbacks: [FeedbackResponse] = try await supabaseClient.rpc("get_recent_feedback").execute().value
                 return feedbacks
             } catch {
+                print("Error getting feedback by recent: \(error)")
                 return []
             }
         }
@@ -198,6 +189,7 @@ class CredManager: ObservableObject {
                 let feedbacks: [FeedbackResponse] = try await supabaseClient.rpc("get_my_feedback").execute().value
                 return feedbacks
             } catch {
+                print("Error getting my feedback: \(error)")
                 return []
             }
         }

@@ -16,8 +16,9 @@ struct FeedbackView: View {
     
     var avgStars: Double {
         guard !feedbacks.isEmpty else { return 0 }
-        let total = feedbacks.reduce(0) { $0 + $1.stars }
-        return Double(total) / Double(feedbacks.count)
+        let feedbacksWithStars: [Int] = feedbacks.compactMap { $0.stars }
+        let total = feedbacksWithStars.reduce(0, +)
+        return feedbacksWithStars.isEmpty ? 0 : Double(total) / Double(feedbacksWithStars.count)
     }
     
     func updateFeedbacks() {
@@ -158,7 +159,7 @@ struct FeedbackView: View {
                     
                     // Feedback List
                     ScrollView {
-                        VStack(spacing: 2) {
+                        VStack(spacing: 32) {
                             Spacer()
                                 .frame(height: 36)
                             ForEach(feedbacks, id: \.id) { feedback in
@@ -213,83 +214,105 @@ struct FeedbackPaperView: View {
     var deleteFeedback: () -> Void
     
     var body: some View {
-        ZStack(alignment: .top) {
-            FormattedImages.LinedImageBackground(width: 340)
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .center, spacing: 8) {
-                    PFPDisplay(url: feedback.pfp, width: 40, height: 40)
-                    
-                    HStack(spacing: 2) {
-                        ForEach(1...5, id: \.self) { i in
-                            Image(systemName: feedback.stars >= i ? "star.fill" : "star")
-                                .resizable()
-                                .frame(width: 18, height: 18)
-                                .foregroundColor(ColorTokens.red300)
+        VStack(alignment: .trailing, spacing: 0) {
+            ZStack(alignment: .top) {
+                FormattedImages.LinedImageBackground(width: 340)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .center, spacing: 8) {
+                        PFPDisplay(url: feedback.pfp ?? "", width: 40, height: 40)
+                        
+                        if let stars = feedback.stars {
+                            HStack(spacing: 2) {
+                                ForEach(1...5, id: \.self) { i in
+                                    Image(systemName: stars >= i ? "star.fill" : "star")
+                                        .resizable()
+                                        .frame(width: 18, height: 18)
+                                        .foregroundColor(ColorTokens.red300)
+                                }
+                            }
+                        }
+                        
+                        Spacer()
+                        
+                        VStack(alignment: .trailing, spacing: 0) {
+                            Text(feedback.created_at, style: .date)
+                                .font(FontTokens.architectsDaughter(size: 14))
+                                .foregroundColor(ColorTokens.shade700)
+                            Text(feedback.created_at, style: .time)
+                                .font(FontTokens.architectsDaughter(size: 14))
+                                .foregroundColor(ColorTokens.shade700)
                         }
                     }
+                    .padding(.top, 8)
+                    
+                    Text(feedback.feedback ?? "")
+                        .font(FontTokens.architectsDaughter(size: 18))
+                        .foregroundColor(ColorTokens.shade700)
+                        .padding(.vertical, 4)
                     
                     Spacer()
                     
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Text(feedback.created_at, style: .date)
-                            .font(FontTokens.architectsDaughter(size: 14))
-                            .foregroundColor(ColorTokens.shade700)
-                        Text(feedback.created_at, style: .time)
-                            .font(FontTokens.architectsDaughter(size: 14))
-                            .foregroundColor(ColorTokens.shade700)
-                    }
-                }
-                .padding(.top, 8)
-                
-                Text(feedback.feedback)
-                    .font(FontTokens.architectsDaughter(size: 18))
-                    .foregroundColor(ColorTokens.shade700)
-                    .padding(.vertical, 4)
-                
-                Spacer()
-                
-                HStack(alignment: .bottom) {
-                    if feedback.user_id == credManager.getUserId() {
-                        Button(action: {
-                            showRemovalAlert = true
-                        }) {
-                            Image(systemName: "trash.circle")
-                                .resizable()
-                                .frame(width: 32, height: 32)
-                                .foregroundStyle(ColorTokens.red100)
-                        }
-                    }
-                    Spacer()
-                    ZStack {
-                        if feedback.user_upvoted {
+                    HStack(alignment: .bottom) {
+                        if feedback.user_id == credManager.getUserId() {
                             Button(action: {
-                                onRemoveUpvote()
+                                showRemovalAlert = true
                             }) {
-                                FormattedImages.FeedbackUpvoteButton(width: 50)
-                            }
-                        } else {
-                            Button (action: {
-                                onUpvote()
-                            }) {
-                                FormattedImages.FeedbackUpvoteButton(width: 50)
-                                    .opacity(0.5)
+                                Image(systemName: "trash.circle")
+                                    .resizable()
+                                    .frame(width: 32, height: 32)
+                                    .foregroundStyle(ColorTokens.red100)
                             }
                         }
-                        Text("\(feedback.upvotes)")
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(ColorTokens.shade100)
-                        // Optionally, add upvote button here
+                        Spacer()
+                        ZStack {
+                            if feedback.user_upvoted {
+                                Button(action: {
+                                    onRemoveUpvote()
+                                }) {
+                                    FormattedImages.FeedbackUpvoteButton(width: 50)
+                                }
+                            } else {
+                                Button (action: {
+                                    onUpvote()
+                                }) {
+                                    FormattedImages.FeedbackUpvoteButton(width: 50)
+                                        .opacity(0.5)
+                                }
+                            }
+                            Text("\(feedback.upvotes)")
+                                .font(FontTokens.architectsDaughter(size: 20))
+                                .foregroundColor(ColorTokens.shade100)
+                            // Optionally, add upvote button here
+                        }
+                        .offset(x: 0, y: 0)
                     }
-                    .offset(x: 0, y: 0)
                 }
+                .padding(.leading, 30)
+                .padding(.top, 10)
+                .frame(width: 300, height: 200)
             }
-            .padding(.leading, 30)
-            .padding(.top, 10)
-            .frame(width: 300, height: 200)
-        }
-        .overlay(alignment: .top) {
-            FormattedImages.LeaderboardBandage(width: 150)
-                .offset(y: -26)
+            .overlay(alignment: .top) {
+                FormattedImages.LeaderboardBandage(width: 150)
+                    .offset(y: -26)
+            }
+            if let developerResponse = feedback.developer_response {
+                ZStack(alignment: .trailing) {
+                    ZStack(alignment: .leading) {
+                        FormattedImages.DisappointmentStrip(width: 300);
+                        FormattedImages.LeaderboardBandage(width: 70)
+                            .rotationEffect(Angle(degrees: 90))
+                            .offset(x: -30)
+                    }
+                    Text("Developer Response: \(developerResponse)")
+                        .font(FontTokens.architectsDaughter(size: 20))
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                        .frame(width: 260, height: 50, alignment: .leading)
+                        .foregroundColor(ColorTokens.shade700)
+                }
+                .frame(height: 30, alignment: .bottom)
+            }
         }
         .alert("Delete this feedback?", isPresented: $showRemovalAlert) {
             Button("Delete", role: .destructive) {
@@ -301,6 +324,8 @@ struct FeedbackPaperView: View {
 }
 
 #Preview {
-    FeedbackView()
+    FeedbackPaperView(feedback: FeedbackResponse(id: UUID(), user_id: UUID(), feedback: "Hello there!", developer_response: "Hello back!", created_at: Date(), upvotes: 23, user_upvoted: false), onUpvote: {}, onRemoveUpvote: {}, deleteFeedback: {})
         .environmentObject(CredManager())
+//    FeedbackView()
+//        .environmentObject(CredManager())
 }

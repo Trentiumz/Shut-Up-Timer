@@ -1,17 +1,8 @@
 import Foundation
 
-enum ClientNotification: Codable, Equatable, Identifiable {
+enum ClientNotification: Codable, Equatable {
     case friendReq(id: String, sender_id: String, pfp: String, username: String, created_at: Date)
     case devResponse(response: String)
-    
-    var id: String {
-        switch self {
-        case .friendReq(let id, _, _, _, _):
-            return "friendReq-\(id)"
-        case .devResponse(let response):
-            return "devResponse-\(response.hashValue)"
-        }
-    }
     
     // MARK: - Codable
     enum CodingKeys: String, CodingKey {

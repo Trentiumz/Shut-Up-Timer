@@ -23,6 +23,7 @@ struct NotificationsView: View {
 struct NotificationsListView: View {
     let notifications: [ClientNotification]
     let onBack: () -> Void
+    @EnvironmentObject var router: AppRouter
     
     var body: some View {
         VStack(spacing: 0) {
@@ -33,10 +34,19 @@ struct NotificationsListView: View {
                         .font(FontTokens.architectsDaughter(size: 28))
                         .padding(.top, 24)
                         .padding(.leading, 16)
-                    ForEach(notifications) { notification in
-                        NotificationCardView(notification: notification)
-                            .padding(.horizontal, 12)
-                            .padding(.top, 16)
+                    ForEach(Array(notifications.enumerated()), id: \.offset) { _, notification in
+                        Button(action: {
+                            switch notification {
+                            case .devResponse:
+                                router.toFeedbackView()
+                            case .friendReq:
+                                router.toViewRequests()
+                            }
+                        }) {
+                            NotificationCardView(notification: notification)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 16)
                     }
                 }
             }

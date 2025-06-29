@@ -4,6 +4,7 @@ struct TopBarView : View {
     @Environment(CurUser.self) var curUser;
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var router: AppRouter;
+    @EnvironmentObject var notificationManager: NotificationManager;
     
     @Binding var selectedScreen: LandingScreen;
 
@@ -40,9 +41,21 @@ struct TopBarView : View {
             Button(action: {
                 router.toNotifications();
             }) {
-                Image(systemName: "bell")
-                    .font(.system(size: 32))
-                    .foregroundStyle(ColorTokens.shade700)
+                ZStack(alignment: .bottomTrailing) {
+                    Image(systemName: "bell")
+                        .font(.system(size: 32))
+                        .foregroundStyle(ColorTokens.shade700)
+                    if notificationManager.notifications.count > 0 {
+                        Text("\(notificationManager.notifications.count)")
+                            .font(.system(size: 14, weight: .bold))
+                            .minimumScaleFactor(0.7)
+                            .foregroundColor(ColorTokens.shade100)
+                            .frame(width: 16, height: 16)
+                            .background(Circle().fill(ColorTokens.red100))
+                            .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                            .offset(x: 4, y: 8)
+                    }
+                }
             }
             .buttonStyle(PlainButtonStyle())
         }

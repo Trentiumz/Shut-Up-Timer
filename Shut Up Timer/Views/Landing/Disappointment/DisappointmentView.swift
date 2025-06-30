@@ -44,9 +44,16 @@ struct DisappointmentView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     // --- Monthly Albums ---
                     SectionStripe("Monthly Albums >")
-                    HorizontalScroller(data: albums, itemWidth: 140, numItems: 2) { album in
-                        Button(action: { router.toAlbumView(month: album.1, year: album.2) }) {
-                            FormattedImages.DisappointmentBook(album.0, width: 140)
+                    ViewThatFits {
+                        HorizontalScroller(data: albums, itemWidth: 140, numItems: 2) { album in
+                            Button(action: { router.toAlbumView(month: album.1, year: album.2) }) {
+                                FormattedImages.DisappointmentBook(album.0, width: 140)
+                            }
+                        }
+                        HorizontalScroller(data: albums, itemWidth: 120, numItems: 2) { album in
+                            Button(action: { router.toAlbumView(month: album.1, year: album.2) }) {
+                                FormattedImages.DisappointmentBook(album.0, width: 120)
+                            }
                         }
                     }
                     .padding(.leading, 10)
@@ -61,11 +68,22 @@ struct DisappointmentView: View {
                             .rotationEffect(.degrees(-10))
                             .padding(.trailing, 12)
                     }
-                    HorizontalScroller(data: Utils.chunked(favouriteRoasts, size: 2), itemWidth: 300, numItems: 1) { roast in
-                        VStack(spacing: 20) {
-                            RoastPaper(roast[0])
-                            if roast.count > 1 {
-                                RoastPaper(roast[1])
+                    ViewThatFits {
+                        HorizontalScroller(data: Utils.chunked(favouriteRoasts, size: 2), itemWidth: 300, numItems: 1) { roast in
+                            VStack(spacing: 20) {
+                                RoastPaper(roast[0])
+                                if roast.count > 1 {
+                                    RoastPaper(roast[1])
+                                }
+                            }
+                        }
+                        
+                        HorizontalScroller(data: Utils.chunked(favouriteRoasts, size: 2), itemWidth: 270, numItems: 1) { roast in
+                            VStack(spacing: 20) {
+                                RoastPaper(roast[0], stripWidth: 270)
+                                if roast.count > 1 {
+                                    RoastPaper(roast[1], stripWidth: 270)
+                                }
                             }
                         }
                     }
@@ -112,14 +130,16 @@ struct SectionStripe: View {
 // --- Roast Paper ---
 fileprivate struct RoastPaper : View {
     var text: String;
+    var stripWidth: CGFloat = 300;
     
-    init(_ text: String) {
+    init(_ text: String, stripWidth: CGFloat = 300) {
         self.text = text;
+        self.stripWidth = stripWidth;
     }
     
     var body : some View {
         ZStack(alignment: .leading) {
-            FormattedImages.DisappointmentStrip(width: 300)
+            FormattedImages.DisappointmentStrip(width: stripWidth)
             FormattedImages.LeaderboardBandage(width: 80)
                 .rotationEffect(Angle(degrees: 90))
                 .offset(x: -35)
@@ -130,7 +150,7 @@ fileprivate struct RoastPaper : View {
                     .font(FontTokens.architectsDaughter(size: 20))
                     .minimumScaleFactor(0.4)
                     .foregroundColor(ColorTokens.shade700)
-                    .frame(width: 250, height: 45, alignment: .topLeading)
+                    .frame(width: stripWidth - 30, height: 45, alignment: .topLeading)
             }
         }
     }

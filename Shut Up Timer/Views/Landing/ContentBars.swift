@@ -155,9 +155,17 @@ struct BarViewPreviews : PreviewProvider {
         
         var body : some View {
             VStack {
-                Spacer();
-                BottomBarView(selectedScreen: $selectedScreen)
+                TopBarView(selectedScreen: $selectedScreen)
+                    .environment(CurUser(credManager: CredManager()))
+                    .environmentObject(SessionsLoader.loadSessions(onUpdate: { _ in }))
+                    .environmentObject(AppRouter())
+                    .environmentObject(NotificationManager())
+                Spacer()
             }
+//            VStack {
+//                Spacer();
+//                BottomBarView(selectedScreen: $selectedScreen)
+//            }
         }
     }
         

@@ -43,9 +43,15 @@ struct ContentView: View {
                             .opacity(selectedScreen == .disappointment ? 1 : 0)
                             .allowsHitTesting(selectedScreen == .disappointment)
                     
-                        AccountView().tag(LandingScreen.account)
-                            .opacity(selectedScreen == .account ? 1 : 0)
-                            .allowsHitTesting(selectedScreen == .account)
+                        ViewThatFits {
+                            AccountView().tag(LandingScreen.account)
+                                .opacity(selectedScreen == .account ? 1 : 0)
+                                .allowsHitTesting(selectedScreen == .account)
+                            AccountView().tag(LandingScreen.account)
+                                .opacity(selectedScreen == .account ? 1 : 0)
+                                .allowsHitTesting(selectedScreen == .account)
+                                .frame(width: 350)
+                        }
                     }
                     BottomBarView(selectedScreen: $selectedScreen)
                         .zIndex(5);

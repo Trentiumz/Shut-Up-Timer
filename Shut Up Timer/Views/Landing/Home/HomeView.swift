@@ -38,9 +38,14 @@ struct HomeView: View {
                 
                 Spacer()
                 
-                OnboardingNextButton(text: "Start Cooking", onSelect: {
-                    router.toTimerState(params: settings.timerParam, todoID: selectedTodo)
-                })
+                ViewThatFits {
+                    OnboardingNextButton(text: "Start Cooking", onSelect: {
+                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo)
+                    })
+                    OnboardingNextButton(text: "Start Cooking", onSelect: {
+                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo)
+                    }, isSmall: true)
+                }
                 
                 Spacer()
                     .frame(maxHeight: 10)
@@ -73,13 +78,13 @@ struct HomeView: View {
                         .frame(width: 350, height: 500)
                     Spacer()
                 }
+                .padding(0)
                 Spacer()
             }
-            .safeAreaPadding(.all)
+            .padding(0)
             .animation(TodoView.mainAnimation, value: expandedTodo)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .edgesIgnoringSafeArea(.all)
         .coordinateSpace(name: "todo-card")
     }
 }

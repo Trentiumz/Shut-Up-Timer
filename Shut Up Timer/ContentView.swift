@@ -108,12 +108,12 @@ struct ContentView: View {
                 if credManager.loggedIn {
                     Task {
                         do {
-                            try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": data]).execute()
+                            try await credManager.fastAPI.sendFriendRequest(FastAPIClient.SendFriendRequestParams(receiver_friend_code: data))
                             alertMessage = "Successfully sent friend invite to \(data)"
                             showAlert = true
                         } catch {
                             print("failed url friend invite, \(error.localizedDescription)")
-                            alertMessage = "Something went wrong"
+                            alertMessage = "\(error.localizedDescription)"
                             showAlert = true
                         }
                     }

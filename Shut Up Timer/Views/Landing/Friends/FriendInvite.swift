@@ -37,7 +37,7 @@ struct FriendInvite : View {
         
         Task {
             do {
-                try await credManager.supabaseClient.rpc("send_friend_request", params: ["receiver_friend_code": friendCode]).execute()
+                try await credManager.fastAPI.sendFriendRequest(FastAPIClient.SendFriendRequestParams(receiver_friend_code: friendCode))
                 await MainActor.run {
                     errorMessage = nil
                     // Trigger a refresh of the request list

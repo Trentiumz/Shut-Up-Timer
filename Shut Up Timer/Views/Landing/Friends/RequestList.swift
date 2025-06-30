@@ -77,6 +77,7 @@ struct RequestListView : View {
 fileprivate struct SentList : View {
     @EnvironmentObject var credManager: CredManager;
     @State private var requests: [SentRequestResponse] = [];
+    @EnvironmentObject var notificationManager: NotificationManager;
     
     /// Fetches the latest friend requests from the server
     func updateRequests() {
@@ -136,6 +137,9 @@ fileprivate struct SentList : View {
         .onChange(of: credManager.session) {
             updateRequests()
         }
+        .onChange(of: notificationManager.notifications) {
+            updateRequests()
+        }
     }
 }
 
@@ -143,6 +147,7 @@ fileprivate struct SentList : View {
 fileprivate struct RequestList : View {
     @EnvironmentObject var credManager: CredManager;
     @State private var requests: [FriendRequestResponse] = [];
+    @EnvironmentObject var notificationManager: NotificationManager;
     
     /// Fetches the latest friend requests from the server
     func updateRequests() {
@@ -214,6 +219,9 @@ fileprivate struct RequestList : View {
             updateRequests()
         }
         .onChange(of: credManager.session) {
+            updateRequests()
+        }
+        .onChange(of: notificationManager.notifications) {
             updateRequests()
         }
     }

@@ -21,12 +21,18 @@ class FastAPIClient {
         request.httpBody = try encoder.encode(params)
         
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse, 200...299 ~= httpResponse.statusCode else {
-            print("API Error: \(response)")
-            throw APIError.serverError
+        if let httpResponse = response as? HTTPURLResponse {
+            if 200...299 ~= httpResponse.statusCode {
+                return data
+            }
         }
-        
-        return data
+        print("API Error: \(response)")
+        do {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(description: errorResponse.error)
+            }
+        }
+        throw APIError.serverError(description: "Server Error")
     }
     
     struct AddFeedbackParams: Encodable {
@@ -42,12 +48,19 @@ class FastAPIClient {
             return false;
         }
     }
+    
+    struct SendFriendRequestParams: Encodable {
+        let receiver_friend_code: String
+    }
+    func sendFriendRequest(_ params: SendFriendRequestParams) async throws -> Void {
+        _ = try await sendAuthenticatedRequest(params: params, url: fastAPIURL.appendingPathComponent("send-friend-request"), method: "POST")
+    }
 }
 
 enum APIError: Error, LocalizedError {
     case networkError
     case decodingError
-    case serverError
+    case serverError(description: String)
     case invalidURL
     
     var errorDescription: String? {
@@ -56,10 +69,14 @@ enum APIError: Error, LocalizedError {
             return "Network connection failed"
         case .decodingError:
             return "Failed to decode response"
-        case .serverError:
-            return "Server error"
+        case .serverError(let description):
+            return "\(description)"
         case .invalidURL:
             return "Invalid URL"
         }
     }
+}
+
+struct ErrorResponse: Codable {
+    let error: String
 }

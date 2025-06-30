@@ -5,7 +5,6 @@ import UserNotifications
 
 class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     @Published var notifications: [ClientNotification] = []
-    
     private var cancellables = Set<AnyCancellable>()
     
     override init() {

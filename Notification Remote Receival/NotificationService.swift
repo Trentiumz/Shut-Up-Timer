@@ -17,10 +17,6 @@ class NotificationService: UNNotificationServiceExtension {
     
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
         print("I did receive!")
-        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: ClientNotificationLoader.suiteName) {
-            let plistPath = containerURL.appendingPathComponent("Library/Preferences/\(ClientNotificationLoader.suiteName)")
-            print("UserDefaults plist should be at: \(plistPath)")
-        }
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
@@ -45,6 +41,7 @@ class NotificationService: UNNotificationServiceExtension {
         // Create notification using direct constructors
         var notification: ClientNotification? = nil
         print("Notifcation's type is \(type)")
+        print("The notification is \(customData)")
         switch type {
         case "friend_request":
             if let id = customData["id"] as? String,

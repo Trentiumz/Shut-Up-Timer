@@ -34,6 +34,7 @@ enum ImageAssets {
 }
 
 struct FormattedImages {
+    
     struct LinedImageBackground : View {
         private var oWidth: CGFloat = 370;
         private var oHeight: CGFloat = 250;
@@ -182,6 +183,53 @@ struct FormattedImages {
                       .allowsHitTesting(false)
                   )
                   .clipped()
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
+    
+    struct PolaroidBG<InnerContent: View> : View {
+        private var oWidth: CGFloat = 300;
+        private var oHeight: CGFloat = 340;
+        var scaleFactor: CGFloat;
+        var innerContent: InnerContent;
+        
+        init(@ViewBuilder innerContent: () -> InnerContent, width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            self.innerContent = innerContent();
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if height == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+        
+        var body : some View {
+            Group {
+                ZStack {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 300, height: 340)
+                        .background(
+                            ImageAssets.friendQRBG
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 430.391357421875, height: 430.3922119140625)
+                                .clipped()
+                                .allowsHitTesting(false)
+                        )
+                        .clipped()
+                    innerContent
+                        .frame(width: 240, height: 215)
+                        .background(.white)
+                        .clipped()
+                        .rotationEffect(Angle(degrees: -0.8))
+                        .offset(y: -36)
+                }
             }
             .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
             .scaleEffect(scaleFactor)
@@ -456,8 +504,45 @@ struct FormattedImages {
             .scaleEffect(scaleFactor)
         }
     }
+    
+    struct UserInfoBackground: View {
+        private var oWidth: CGFloat = 340;
+        private var oHeight: CGFloat = 190;
+        var scaleFactor: CGFloat;
+        
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if width == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+        
+        var body: some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: oWidth, height: oHeight, alignment: .trailing)
+                  .background(
+                    ImageAssets.onboardingHello68
+                      .resizable()
+                      .aspectRatio(contentMode: .fill)
+                      .frame(width: 370, height: 220.0034637451172, alignment: .bottom)
+                      .clipped()
+                      .offset(x: -10, y: 20)
+                  )
+                  .rotationEffect(Angle(degrees: -178))
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
 }
 
 #Preview {
-    FormattedImages.FeedbackUpvoteButton(width: 300)
+    FormattedImages.UserInfoBackground(width: 300)
 }

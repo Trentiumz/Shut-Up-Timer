@@ -22,6 +22,7 @@ struct Shut_Up_TimerApp: App {
     var sessions: Sessions = SessionsLoader.loadSessions(onUpdate: {_ in });
     var todoList: ToDoListV2 = ToDoLoader.getToDo();
     var credManager: CredManager = CredManager();
+    var postLoader: PostLoader = PostLoader.loadPostLoader(); // this one automatically updates :)
     // TODO: onReceive is called BEFORE the object is changed, so the updates aren't actually saved !
     
     var curUser: CurUser
@@ -70,6 +71,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(notificationManager)
                 .environment(curUser)
                 .environment(todoList)
+                .environmentObject(postLoader)
                 .preferredColorScheme(.light)
         }
     }

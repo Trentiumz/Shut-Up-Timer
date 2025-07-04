@@ -49,6 +49,10 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.notifications))
     }
     
+    func toAddPost() {
+        path.append(PathElement(route: AppRoute.addPost))
+    }
+    
     func pop() {
         if !path.isEmpty {
             path.removeLast();

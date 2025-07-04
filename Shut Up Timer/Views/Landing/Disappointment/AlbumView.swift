@@ -101,7 +101,7 @@ struct AlbumView: View {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                         if item.0 == "image" {
                             if let image = ImageLoader.loadImage(name: item.1) {
-                                FailImageDisplay(image: image)
+                                PostImageDisplay(image: image)
                                     .contextMenu {
                                         Button(role: .destructive) {
                                             removeImage(item.2.id)

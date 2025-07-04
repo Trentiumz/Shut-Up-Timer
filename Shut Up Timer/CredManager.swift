@@ -229,7 +229,32 @@ class CredManager: ObservableObject {
     // -------------------- User functions ---------------------------
     
     func uploadPFP(image: UIImage) async -> Bool {
-        guard let data = image.jpegData(compressionQuality: 0.8),
+        // Resize and crop image to 256x256 (or so that the minimum dimension is at most 256, cropping the center)
+        let targetSize: CGFloat = 256
+        let originalSize = image.size
+        let minSide = min(originalSize.width, originalSize.height)
+        let scale = targetSize / minSide
+        let newWidth = originalSize.width * scale
+        let newHeight = originalSize.height * scale
+        
+        // Resize
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: newWidth, height: newHeight), false, 1.0)
+        image.draw(in: CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        // Crop center
+        let cropRect = CGRect(
+            x: (newWidth - targetSize) / 2,
+            y: (newHeight - targetSize) / 2,
+            width: targetSize,
+            height: targetSize
+        )
+        guard let resizedImage = resizedImage,
+              let cgImage = resizedImage.cgImage?.cropping(to: cropRect) else { return false }
+        let finalImage = UIImage(cgImage: cgImage)
+        
+        guard let data = finalImage.jpegData(compressionQuality: 0.8),
               let userID = session?.user.id else { return false; }
         let lowerUUID = userID.uuidString.lowercased()
         let filePath = "\(lowerUUID)/pfp_\(UUID().uuidString).jpg"

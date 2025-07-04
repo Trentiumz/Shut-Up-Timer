@@ -98,6 +98,9 @@ struct ContentView: View {
                 case .notifications:
                     NotificationsView()
                         .navigationBarBackButtonHidden(true)
+                case .addPost:
+                    AddPostView()
+                        .navigationBarBackButtonHidden(false)
                 default:
                     Text("Invalid")
                 }

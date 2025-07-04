@@ -58,6 +58,15 @@ struct TopBarView : View {
                 }
             }
             .buttonStyle(PlainButtonStyle())
+            
+            Button(action: {
+                router.toAddPost();
+            }) {
+                Image(systemName: "plus.square")
+                    .font(.system(size: 32))
+                    .foregroundStyle(ColorTokens.shade700)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding()
         .background(ColorTokens.red300)

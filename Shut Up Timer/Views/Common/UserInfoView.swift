@@ -99,18 +99,7 @@ struct UserInfoView : View {
         .cornerRadius(15)
         .frame(width: 320, height: 190)
         .background(
-            Rectangle()
-              .foregroundColor(.clear)
-              .frame(width: 340, height: 190, alignment: .trailing)
-              .background(
-                ImageAssets.onboardingHello68
-                  .resizable()
-                  .aspectRatio(contentMode: .fill)
-                  .frame(width: 370, height: 220.0034637451172, alignment: .bottom)
-                  .clipped()
-                  .offset(x: -10, y: 20)
-              )
-              .rotationEffect(Angle(degrees: -178))
+            FormattedImages.UserInfoBackground(width: 340)
         )
     }
 }

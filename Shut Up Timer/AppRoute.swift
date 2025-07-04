@@ -12,6 +12,7 @@ enum AppRoute {
     case albumView(month: Int, year: Int)
     case feedbackView
     case notifications
+    case addPost
 }
 
 struct PathElement : Hashable {

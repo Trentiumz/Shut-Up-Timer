@@ -14,27 +14,21 @@ struct PostListView: View {
     @Environment(ToDoListV2.self) var todoList
     
     var body: some View {
-        ZStack {
-            Background()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Spacer()
-                        .frame(maxWidth: 20)
-                    if posts.isEmpty {
-                        Text("No posts yet!")
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(posts.indices, id: \.self) { index in
-                            PostItemView(postInfo: posts[index])
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                    }
+        VStack(alignment: .leading, spacing: 16) {
+            Spacer()
+                .frame(maxWidth: 20)
+            if posts.isEmpty {
+                Text("No posts yet!")
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(posts.indices, id: \.self) { index in
+                    PostItemView(postInfo: posts[index])
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 5)
             }
         }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 5)
     }
 }
 

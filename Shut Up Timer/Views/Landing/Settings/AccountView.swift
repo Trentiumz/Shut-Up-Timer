@@ -5,8 +5,11 @@ struct AccountView : View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
+    @EnvironmentObject var sessions: Sessions;
     @Environment(CurUser.self) var curUser;
+    @Environment(ToDoListV2.self) var todoList;
     @State private var friends: [FriendProfileResponse] = [];
+    @EnvironmentObject var postLoader: PostLoader;
     
     func updateFriends() {
         Task {
@@ -34,6 +37,59 @@ struct AccountView : View {
         }
     }
     
+    /// posts albums: [(StringWriting, Month, Year)]
+    var postAlbums: [(String, Int, Int)] {
+        // Convert posts to PostInfo objects
+        let postInfos = postLoader.posts.map { post in
+            post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+        }
+        
+        // Get all posts with dates
+        let postsWithDates = postInfos.compactMap { postInfo in
+            postInfo.session_time
+        }
+        
+        // If no posts, return current month
+        if postsWithDates.isEmpty {
+            let now = Date()
+            return [getMonthRep(now)]
+        }
+        
+        // Get earliest date and corresponding month
+        let earliest = postsWithDates.min(by: <) ?? Date()
+        let calendar = Calendar.current
+        let now = Date()
+        var current = startOfMonth(earliest)
+        var dates: [Date] = []
+        
+        // add all months up to current
+        while current <= now {
+            dates.append(current)
+            current = calendar.date(byAdding: .month, value: 1, to: current)!
+        }
+        
+        // this is from earliest to current, now reverse it!
+        return dates.map { getMonthRep($0) }.reversed()
+    }
+    
+    func getMonthRep(_ date: Date) -> (String, Int, Int) {
+        let month = Calendar.current.component(.month, from: date)
+        let year = Calendar.current.component(.year, from: date)
+        let formatter = DateFormatter()
+        return ("\(formatter.monthSymbols[month - 1]) \(year)", month, year)
+    }
+    
+    func startOfMonth(_ date: Date) -> Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month], from: date)
+        if let date = calendar.date(from: components) {
+            return date
+        } else {
+            print("Failed to get start of month for \(date)")
+            return Date()
+        }
+    }
+    
     var body: some View {
         ZStack {
             Background()
@@ -46,6 +102,27 @@ struct AccountView : View {
                     if credManager.loggedIn {
                         VStack(spacing: 20) {
                             LocalUserInfoView()
+                            
+                            // Posts Section
+                            HStack {
+                                SectionStripe("Posts >")
+                                Spacer()
+                            }.padding(.horizontal, 20)
+                            
+                            ViewThatFits {
+                                HorizontalScroller(data: postAlbums, itemWidth: 140, numItems: 2) { album in
+                                    Button(action: { router.toPostView(month: album.1, year: album.2) }) {
+                                        FormattedImages.DisappointmentBook(album.0, width: 140)
+                                    }
+                                }
+                                HorizontalScroller(data: postAlbums, itemWidth: 120, numItems: 2) { album in
+                                    Button(action: { router.toPostView(month: album.1, year: album.2) }) {
+                                        FormattedImages.DisappointmentBook(album.0, width: 120)
+                                    }
+                                }
+                            }
+                            .edgesIgnoringSafeArea(.horizontal)
+                            
                             HStack {
                                 SectionStripe("Friends >")
                                 Spacer()

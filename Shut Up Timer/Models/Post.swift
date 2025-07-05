@@ -51,11 +51,12 @@ struct Post: Identifiable, Codable, Equatable {
             user_id: currentUser.credManager.getUserId() ?? UUID(),
             username: currentUser.userPublicProfile?.username ?? "Unknown",
             pfp: currentUser.userPublicProfile?.profile_picture,
-            session_time: sessionTime,
-            time: time,
+            time: sessionTime ?? Date(),
+            duration: time,
             topCategories: topCategories,
             iq_change: iqChange,
-            images: postImages
+            images: postImages,
+            text: self.text
         )
     }
 }

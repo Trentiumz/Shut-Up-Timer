@@ -46,7 +46,7 @@ struct AccountView : View {
         
         // Get all posts with dates
         let postsWithDates = postInfos.compactMap { postInfo in
-            postInfo.session_time
+            postInfo.time
         }
         
         // If no posts, return current month

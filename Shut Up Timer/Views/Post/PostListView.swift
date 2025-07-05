@@ -37,10 +37,16 @@ struct PostItemView: View {
     @EnvironmentObject var postLoader: PostLoader
     
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 0) {
             // User info section (similar to UserInfoView)
             PostUserInfoView(postInfo: postInfo)
                 .frame(maxWidth: .infinity, alignment: .center)
+            
+            // Post text section
+            if !postInfo.text.isEmpty {
+                PostTextView(text: postInfo.text)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
             
             // Post images section
             PostImagesView(postInfo: postInfo)
@@ -53,9 +59,8 @@ struct PostUserInfoView: View {
     let postInfo: PostInfo
     
     private var timeAgoString: String {
-        guard let sessionTime = postInfo.session_time else { return "Unknown time" }
         let now = Date()
-        let interval = now.timeIntervalSince(sessionTime)
+        let interval = now.timeIntervalSince(postInfo.time)
         
         if interval < 60 {
             return "Just now"
@@ -71,20 +76,23 @@ struct PostUserInfoView: View {
         }
     }
     
-    private var hoursString: String {
-        let hours = postInfo.time / 3600
+    private var hoursString: String? {
+        guard let duration = postInfo.duration else { return nil }
+        let hours = duration / 3600
         return String(format: "%.1fhrs", hours)
     }
     
-    private var studiesString: String {
-        return postInfo.topCategories.first ?? "Unknown"
+    private var studiesString: String? {
+        guard let topCategories = postInfo.topCategories else { return nil }
+        return topCategories.first ?? "Unknown"
     }
     
-    private var iqChangeString: String {
-        if postInfo.iq_change >= 0 {
-            return String(format: "+%.2f", postInfo.iq_change)
+    private var iqChangeString: String? {
+        guard let iqChange = postInfo.iq_change else { return nil }
+        if iqChange >= 0 {
+            return String(format: "+%.2f", iqChange)
         } else {
-            return String(format: "%.2f", postInfo.iq_change)
+            return String(format: "%.2f", iqChange)
         }
     }
     
@@ -110,7 +118,7 @@ struct PostUserInfoView: View {
                         HStack {
                             Image(systemName: "clock")
                                 .foregroundColor(ColorTokens.shade600)
-                            Text(timeAgoString + " • Home")
+                            Text(timeAgoString)
                                 .font(FontTokens.architectsDaughter(size: 16))
                                 .foregroundColor(ColorTokens.shade600)
                         }
@@ -120,43 +128,49 @@ struct PostUserInfoView: View {
                 
                 // Stats
                 HStack(spacing: 20) {
-                    // Hours
-                    VStack {
-                        Text("Hours")
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(ColorTokens.shade600)
-                        Text(hoursString)
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(ColorTokens.shade700)
-                        Spacer()
+                    // Hours (only show if duration is available)
+                    if let hours = hoursString {
+                        VStack {
+                            Text("Hours")
+                                .font(FontTokens.architectsDaughter(size: 20))
+                                .foregroundColor(ColorTokens.shade600)
+                            Text(hours)
+                                .font(FontTokens.architectsDaughter(size: 20))
+                                .foregroundColor(ColorTokens.shade700)
+                            Spacer()
+                        }
+                        .frame(height: 70)
                     }
-                    .frame(height: 70)
                     
-                    // Studies
-                    VStack {
-                        Text("Studies")
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(ColorTokens.shade600)
-                        Text(studiesString)
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(ColorTokens.shade700)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.5)
-                        Spacer()
+                    // Studies (only show if topCategories is available)
+                    if let studies = studiesString {
+                        VStack {
+                            Text("Studies")
+                                .font(FontTokens.architectsDaughter(size: 20))
+                                .foregroundColor(ColorTokens.shade600)
+                            Text(studies)
+                                .font(FontTokens.architectsDaughter(size: 20))
+                                .foregroundColor(ColorTokens.shade700)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
+                            Spacer()
+                        }
+                        .frame(height: 70)
                     }
-                    .frame(height: 70)
                     
-                    // IQ change
-                    VStack {
-                        Text("IQ+/-")
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(ColorTokens.shade600)
-                        Text(iqChangeString)
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(postInfo.iq_change >= 0 ? .green : .red)
-                        Spacer()
+                    // IQ change (only show if iq_change is available)
+                    if let iqChange = iqChangeString, let iqValue = postInfo.iq_change {
+                        VStack {
+                            Text("IQ+/-")
+                                .font(FontTokens.architectsDaughter(size: 20))
+                                .foregroundColor(ColorTokens.shade600)
+                            Text(iqChange)
+                                .font(FontTokens.architectsDaughter(size: 20))
+                                .foregroundColor(iqValue >= 0 ? .green : .red)
+                            Spacer()
+                        }
+                        .frame(height: 70)
                     }
-                    .frame(height: 70)
                     
                     Spacer()
                 }
@@ -235,6 +249,27 @@ struct PostImageViewForInfo: View {
     }
 }
 
+struct PostTextView: View {
+    let text: String
+    
+    var body: some View {
+        ZStack {
+            FormattedImages.BoundPage(width: 340)
+            // Text content
+            Text(text)
+                .font(FontTokens.architectsDaughter(size: 16))
+                .minimumScaleFactor(0.7)
+                .foregroundColor(ColorTokens.shade700)
+                .multilineTextAlignment(.leading)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 38)
+                .padding(.top, 18)
+        }
+        .frame(width: 340, height: 80)
+    }
+}
+
 #Preview {
     let dummyPosts = [
         PostInfo(
@@ -242,29 +277,42 @@ struct PostImageViewForInfo: View {
             user_id: UUID(),
             username: "Kailey Cheng",
             pfp: "",
-            session_time: Date().addingTimeInterval(-300), // 5 minutes ago
-            time: 8820, // 2.45 hours in seconds
+            time: Date().addingTimeInterval(-300), // 5 minutes ago
+            duration: 8820, // 2.45 hours in seconds
             topCategories: ["ECO101"],
             iq_change: 0.12,
             images: [
                 PostImageInfo(type: .local, path: "mock_image_1"),
                 PostImageInfo(type: .url, path: "https://via.placeholder.com/300x300/FFB6C1/000000?text=Study+Session")
-            ]
+            ],
+            text: "Just finished a great study session! Feeling productive 📚"
         ),
         PostInfo(
             id: UUID(),
             user_id: UUID(),
             username: "Daniel Ye",
             pfp: "",
-            session_time: Date().addingTimeInterval(-18000), // 5 hours ago
-            time: 18720, // 5.2 hours in seconds
-            topCategories: ["CSC148"],
+            time: Date().addingTimeInterval(-18000), // 5 hours ago
+            duration: nil, // No duration data
+            topCategories: nil, // No categories data
             iq_change: -0.053,
             images: [
                 PostImageInfo(type: .url, path: "https://via.placeholder.com/300x300/87CEEB/000000?text=Failed+Session"),
-                PostImageInfo(type: .local, path: "mock_image_2"),
-                PostImageInfo(type: .url, path: "https://via.placeholder.com/300x300/90EE90/000000?text=Roast+Image")
-            ]
+                PostImageInfo(type: .local, path: "mock_image_2")
+            ],
+            text: "Had a rough session today... but we keep trying! 💪"
+        ),
+        PostInfo(
+            id: UUID(),
+            user_id: UUID(),
+            username: "Test User",
+            pfp: "",
+            time: Date().addingTimeInterval(-7200), // 2 hours ago
+            duration: nil, // No duration
+            topCategories: nil, // No categories
+            iq_change: nil, // No IQ change
+            images: [],
+            text: "Quick check-in! How's everyone doing?"
         )
     ]
     

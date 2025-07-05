@@ -40,3 +40,26 @@ func toISO(_ duration: TimeInterval) -> String {
 
     return result
 }
+
+func parseISO8601Date(_ dateString: String) -> Date? {
+    let dateFormatter = ISO8601DateFormatter()
+    dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    
+    var date: Date?
+    date = dateFormatter.date(from: dateString)
+    
+    // Fallback to standard ISO8601 without fractional seconds
+    if date == nil {
+        dateFormatter.formatOptions = [.withInternetDateTime]
+        date = dateFormatter.date(from: dateString)
+    }
+    
+    // Fallback to basic format without timezone
+    if date == nil {
+        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        date = dateFormatter.date(from: dateString)
+    }
+    
+    return date
+}

@@ -75,6 +75,7 @@
 		736831F32E1180DD006BFDFD /* Exceptions for "Shut Up Timer" folder in "Notification Remote Receival" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"External Models/Utils.swift",
 				Models/ClientNotification.swift,
 			);
 			target = 736831E32E1178BB006BFDFD /* Notification Remote Receival */;

@@ -31,6 +31,7 @@ enum ImageAssets {
     static let disappointmentStrip = Image("leaderboard-strip-image 122")
     static let disappointmentChevron = Image("DisappointmentChevron-Polygon 1")
     static let feedbackUpvoteButton = Image("feedback-upvote-image 140")
+    static let postBoundPage = Image("post-boundpage-image 0 12")
 }
 
 struct FormattedImages {
@@ -541,8 +542,43 @@ struct FormattedImages {
             .scaleEffect(scaleFactor)
         }
     }
+    
+    struct BoundPage: View {
+        private var oWidth: CGFloat = 330;
+        private var oHeight: CGFloat = 85;
+        var scaleFactor: CGFloat;
+        
+        init(width: CGFloat = .infinity, height: CGFloat = .infinity) {
+            if width == .infinity && height == .infinity {
+                scaleFactor = 1;
+            } else if height == .infinity {
+                scaleFactor = width / oWidth;
+            } else if width == .infinity {
+                scaleFactor = height / oHeight;
+            } else {
+                scaleFactor = min(width / oWidth, height / oHeight)
+            }
+        }
+        
+        var body: some View {
+            Group {
+                Rectangle()
+                  .foregroundColor(.clear)
+                  .frame(width: oWidth, height: oHeight)
+                  .background(
+                    ImageAssets.postBoundPage
+                      .resizable()
+                      .aspectRatio(contentMode: .fill)
+                      .frame(width: 359, height: 102)
+                      .offset(x: -10, y: -100)
+                  )
+            }
+            .frame(width: oWidth * scaleFactor, height: oHeight * scaleFactor)
+            .scaleEffect(scaleFactor)
+        }
+    }
 }
 
 #Preview {
-    FormattedImages.UserInfoBackground(width: 300)
+    FormattedImages.BoundPage(width: 300)
 }

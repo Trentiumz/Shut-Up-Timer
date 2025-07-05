@@ -34,16 +34,14 @@ struct AccountPostView: View {
         
         // Filter for current month
         let monthPosts = allPostInfos.filter { postInfo in
-            guard let sessionTime = postInfo.session_time else { return false }
-            let postMonth = Calendar.current.component(.month, from: sessionTime)
-            let postYear = Calendar.current.component(.year, from: sessionTime)
+            let postMonth = Calendar.current.component(.month, from: postInfo.time)
+            let postYear = Calendar.current.component(.year, from: postInfo.time)
             return postMonth == month && postYear == year
         }
         
         // Sort by most recent first
         return monthPosts.sorted { 
-            guard let time1 = $0.session_time, let time2 = $1.session_time else { return false }
-            return time1 > time2
+            return $0.time > $1.time
         }
     }
 
@@ -55,9 +53,8 @@ struct AccountPostView: View {
         }
         
         // Sort by most recent first
-        return allPostInfos.sorted { 
-            guard let time1 = $0.session_time, let time2 = $1.session_time else { return false }
-            return time1 > time2
+        return allPostInfos.sorted {
+            return $0.time > $1.time
         }
     }
 

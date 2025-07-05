@@ -15,9 +15,10 @@ struct PostInfo : Codable {
     var user_id: UUID
     var username: String
     var pfp: String?
-    var session_time: Date?
-    var time: TimeInterval
-    var topCategories: [String]
-    var iq_change: Double
+    var time: Date
+    var duration: TimeInterval?
+    var topCategories: [String]?
+    var iq_change: Double?
     var images: [PostImageInfo]
+    var text: String
 }

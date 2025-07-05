@@ -49,7 +49,7 @@ class NotificationService: UNNotificationServiceExtension {
                let pfp = customData["pfp"] as? String,
                let username = customData["username"] as? String,
                let createdAtStr = customData["created_at"] as? String,
-               let createdAt = ISO8601DateFormatter().date(from: createdAtStr) {
+               let createdAt = parseISO8601Date(createdAtStr) {
                 notification = .friendReq(id: id, sender_id: senderId, pfp: pfp, username: username, created_at: createdAt)
                 content.title = "New Friend Request"
                 content.body = "\(username) wants to be your friend"
@@ -87,5 +87,7 @@ class NotificationService: UNNotificationServiceExtension {
             contentHandler(bestAttemptContent)
         }
     }
+    
+
     
 }

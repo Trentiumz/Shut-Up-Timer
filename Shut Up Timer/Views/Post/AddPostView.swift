@@ -19,6 +19,7 @@ struct AddPostRawView: View {
     var onClose: () -> Void
     var selectedSession: SessionEntry?
     var date: Date?
+    var isUploading: Bool = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -61,14 +62,28 @@ struct AddPostRawView: View {
                     }
                     Spacer()
                     Button(action: onPost) {
-                        Text("Post")
-                            .font(FontTokens.architectsDaughter(size: 22))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 8)
-                            .background(ColorTokens.red300)
-                            .cornerRadius(14)
+                        HStack {
+                            if isUploading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .scaleEffect(0.8)
+                                Text("Uploading...")
+                                    .font(FontTokens.architectsDaughter(size: 22))
+                                    .minimumScaleFactor(0.5)
+                                    .lineLimit(1)
+                                    .foregroundColor(.white)
+                            } else {
+                                Text("Post")
+                                    .font(FontTokens.architectsDaughter(size: 22))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 8)
+                        .background(isUploading ? ColorTokens.shade400 : ColorTokens.red300)
+                        .cornerRadius(14)
                     }
+                    .disabled(isUploading)
                 }
                 .padding(.top, 12)
                 .padding(.horizontal, 16)
@@ -146,6 +161,9 @@ struct AddPostView: View {
     @EnvironmentObject var sessions: Sessions
     @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var postLoader: PostLoader
+    @EnvironmentObject var credManager: CredManager
+    @Environment(CurUser.self) var curUser
+    @Environment(ToDoListV2.self) var todoList
     @State private var text: String = ""
     @State private var images: [UIImage] = []
     @State private var showSessionModal = false
@@ -154,6 +172,7 @@ struct AddPostView: View {
     @State private var selectedSession: SessionEntry? = nil
     @State private var showAlert = false
     @State private var alertMessage: String = ""
+    @State private var isUploading = false
 
     var body: some View {
         AddPostRawView(
@@ -166,7 +185,8 @@ struct AddPostView: View {
             onPost: handlePost,
             onClose: { appRouter.pop() },
             selectedSession: selectedSession,
-            date: selectedSession?.started
+            date: selectedSession?.started,
+            isUploading: isUploading
         )
         .sheet(isPresented: $showSessionModal) {
             SessionSelectionModal(sessions: sessions.sessions, onSelect: { session in
@@ -193,13 +213,31 @@ struct AddPostView: View {
     }
 
     func handlePost() {
-        _ = postLoader.insertPost(sessionID: selectedSession?.id, text: text, images: images)
-        showAlert = true;
-        alertMessage = "Post Created!"
+        // First save locally (always succeeds)
+        let post = postLoader.insertPost(sessionID: selectedSession?.id, text: text, images: images)
         
-        text = ""
-        images = []
-        selectedSession = nil
+        // Then attempt to upload to server
+        isUploading = true
+        Task {
+            let postInfo = post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+            let uploadSuccess = await credManager.fastAPI.createPost(postInfo)
+            
+            await MainActor.run {
+                isUploading = false
+                showAlert = true
+                
+                if uploadSuccess {
+                    alertMessage = "Post created and uploaded successfully!"
+                } else {
+                    alertMessage = "Post saved locally, but failed to upload to server. You can try again later."
+                }
+                
+                // Clear form (post is always saved locally)
+                text = ""
+                images = []
+                selectedSession = nil
+            }
+        }
     }
 }
 
@@ -263,7 +301,10 @@ extension DateFormatter {
     let mockSession = SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600, plannedTime: 3600, success: true, roast: "Sample roast", imageName: nil)
     let mockSessions = [mockSession]
     return AddPostView()
-        .environmentObject(Sessions(sessions: mockSessions))
+        .environmentObject(Sessions(sessions: mockSessions, onUpdate: { _ in }))
         .environmentObject(AppRouter())
+        .environmentObject(PostLoader.loadPostLoader())
+        .environment(CurUser(credManager: CredManager()))
+        .environment(ToDoLoader.getToDo())
 }
 

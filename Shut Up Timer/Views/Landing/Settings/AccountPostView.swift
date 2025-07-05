@@ -39,33 +39,19 @@ struct AccountPostView: View {
     func getMonthLocalPosts(posts: [Post]) -> [Post] {
         let monthPosts = posts.filter { post in
             // Find the session associated with this post
-            let session = sessions.sessions.first { $0.id == post.sessionID }
-            let sessionTime = session?.started ?? Date()
-            let postMonth = Calendar.current.component(.month, from: sessionTime)
-            let postYear = Calendar.current.component(.year, from: sessionTime)
+            let postMonth = Calendar.current.component(.month, from: post.createdAt)
+            let postYear = Calendar.current.component(.year, from: post.createdAt)
             return postMonth == month && postYear == year
         }
         
         // Sort by most recent first
-        return monthPosts.sorted { a, b in
-            let session1 = sessions.sessions.first { $0.id == a.sessionID }
-            let session2 = sessions.sessions.first { $0.id == b.sessionID }
-            let time1 = session1?.started ?? Date()
-            let time2 = session2?.started ?? Date()
-            return time1 > time2
-        }
+        return monthPosts.sorted { $0.createdAt > $1.createdAt;}
     }
     
     // Get all posts (keeping Post objects)
     func getAllLocalPosts(posts: [Post]) -> [Post] {
         // Sort by most recent first
-        return posts.sorted { a, b in
-            let session1 = sessions.sessions.first { $0.id == a.sessionID }
-            let session2 = sessions.sessions.first { $0.id == b.sessionID }
-            let time1 = session1?.started ?? Date()
-            let time2 = session2?.started ?? Date()
-            return time1 > time2
-        }
+        return posts.sorted { $0.createdAt > $1.createdAt; }
     }
     
     // Retry upload for a specific post

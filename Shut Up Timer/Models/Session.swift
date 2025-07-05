@@ -78,8 +78,8 @@ class Sessions : Codable, Equatable, ObservableObject {
         return cIq;
     }
 
-    func getTotalTimeLocked() -> Int {
-        let totTime: Int = sessions.reduce(0) { $0 + Int($1.timeLocked) };
+    func getTotalTimeLocked() -> TimeInterval {
+        let totTime: TimeInterval = sessions.reduce(0.0) { $0 + $1.timeLocked };
         return totTime;
     }
 

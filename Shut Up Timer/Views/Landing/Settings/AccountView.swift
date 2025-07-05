@@ -249,7 +249,7 @@ struct LocalUserInfoView : View {
                         Text("Hours")
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade600)
-                        Text("\(sessions.getTotalTimeLocked())")
+                        Text(String(format: "%.2f", sessions.getTotalTimeLocked() / 3600))
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade700)
                         Spacer()

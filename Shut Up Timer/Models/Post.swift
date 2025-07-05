@@ -17,10 +17,11 @@ struct PostImage: Identifiable, Codable, Equatable {
 // Represents a post tied to a session
 struct Post: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
-    var remoteId: UUID?
+    var remoteId: UUID? = nil
     var sessionID: UUID?
     var text: String
     var images: [PostImage]
+    var createdAt: Date
     
     func toLocalPostInfo(sessions: Sessions, currentUser: CurUser, todoList: ToDoListV2) -> PostInfo {
         // Find the session associated with this post
@@ -83,6 +84,7 @@ class PostLoader: ObservableObject {
             if let liveData = data {
                 if let decoded = try? JSONDecoder().decode([Post].self, from: liveData) {
                     let instance = PostLoader(posts: decoded);
+                    print(instance.posts)
                     postLoaderInstance = instance;
                     return instance;
                 } else {
@@ -113,7 +115,7 @@ class PostLoader: ObservableObject {
                 print("Failed to save image for post")
             }
         }
-        let post = Post(sessionID: sessionID, text: text, images: postImages)
+        let post = Post(sessionID: sessionID, text: text, images: postImages, createdAt: Date())
         posts.append(post)
         return post
     }

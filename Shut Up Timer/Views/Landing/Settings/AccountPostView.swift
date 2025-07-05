@@ -3,9 +3,13 @@ import SwiftUI
 struct AccountPostView: View {
     @EnvironmentObject var sessions: Sessions
     @EnvironmentObject var postLoader: PostLoader
+    @EnvironmentObject var credManager: CredManager
     @Environment(CurUser.self) var curUser
     @Environment(ToDoListV2.self) var todoList
     @State private var selectedTab: PostTab = .month
+    @State private var uploadingPosts: Set<UUID> = []
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
     let month: Int
     let year: Int
@@ -25,42 +29,64 @@ struct AccountPostView: View {
         var id: String { self.rawValue }
     }
 
-    // Get posts for current month
-    func getMonthPosts(posts: [Post]) -> [PostInfo] {
-        // Convert all posts to PostInfo objects
-        let allPostInfos = posts.map { post in
-            post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
-        }
-        
-        // Filter for current month
-        let monthPosts = allPostInfos.filter { postInfo in
-            let postMonth = Calendar.current.component(.month, from: postInfo.time)
-            let postYear = Calendar.current.component(.year, from: postInfo.time)
+    // Get filtered local posts (keeps Post objects for remoteId access)
+    func getFilteredLocalPosts(posts: [Post]) -> [Post] {
+        let filtered = selectedTab == .month ? getMonthLocalPosts(posts: posts) : getAllLocalPosts(posts: posts)
+        return filtered
+    }
+    
+    // Get posts for current month (keeping Post objects)
+    func getMonthLocalPosts(posts: [Post]) -> [Post] {
+        let monthPosts = posts.filter { post in
+            // Find the session associated with this post
+            let session = sessions.sessions.first { $0.id == post.sessionID }
+            let sessionTime = session?.started ?? Date()
+            let postMonth = Calendar.current.component(.month, from: sessionTime)
+            let postYear = Calendar.current.component(.year, from: sessionTime)
             return postMonth == month && postYear == year
         }
         
         // Sort by most recent first
-        return monthPosts.sorted { 
-            return $0.time > $1.time
+        return monthPosts.sorted { a, b in
+            let session1 = sessions.sessions.first { $0.id == a.sessionID }
+            let session2 = sessions.sessions.first { $0.id == b.sessionID }
+            let time1 = session1?.started ?? Date()
+            let time2 = session2?.started ?? Date()
+            return time1 > time2
         }
     }
-
-    // Get all posts
-    func getAllPosts(posts: [Post]) -> [PostInfo] {
-        // Convert all posts to PostInfo objects
-        let allPostInfos = posts.map { post in
-            post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
-        }
-        
+    
+    // Get all posts (keeping Post objects)
+    func getAllLocalPosts(posts: [Post]) -> [Post] {
         // Sort by most recent first
-        return allPostInfos.sorted {
-            return $0.time > $1.time
+        return posts.sorted { a, b in
+            let session1 = sessions.sessions.first { $0.id == a.sessionID }
+            let session2 = sessions.sessions.first { $0.id == b.sessionID }
+            let time1 = session1?.started ?? Date()
+            let time2 = session2?.started ?? Date()
+            return time1 > time2
         }
     }
-
-    // Get filtered posts based on selected tab
-    func getFilteredPosts(posts: [Post]) -> [PostInfo] {
-        return selectedTab == .month ? getMonthPosts(posts: posts) : getAllPosts(posts: posts)
+    
+    // Retry upload for a specific post
+    func retryUpload(for post: Post) {
+        guard !uploadingPosts.contains(post.id) else { return }
+        
+        uploadingPosts.insert(post.id)
+        Task {
+            let postInfo = post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+            let remoteId = await credManager.fastAPI.createPost(postInfo)
+            
+            await MainActor.run {
+                uploadingPosts.remove(post.id)
+                if let remoteId = remoteId {
+                    postLoader.updateRemoteId(post.id, remoteId: remoteId)
+                } else {
+                    alertMessage = "Failed to upload post. Please check your internet connection and try again."
+                    showAlert = true
+                }
+            }
+        }
     }
     
     var body: some View {
@@ -100,7 +126,11 @@ struct AccountPostView: View {
                     .padding(.bottom, 20)
                     
                     // --- Posts List ---
-                    PostListView(posts: getFilteredPosts(posts: postLoader.posts))
+                    LocalPostListView(
+                        posts: getFilteredLocalPosts(posts: postLoader.posts),
+                        onRetryUpload: retryUpload,
+                        uploadingPosts: uploadingPosts
+                    )
                     
                     Spacer()
                 }
@@ -110,14 +140,85 @@ struct AccountPostView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .alert(alertMessage, isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
+        }
     }
 }
+
+// Custom PostListView for AccountPostView that handles local posts and retry uploads
+struct LocalPostListView: View {
+    let posts: [Post]
+    let onRetryUpload: (Post) -> Void
+    let uploadingPosts: Set<UUID>
+    
+    @EnvironmentObject var sessions: Sessions
+    @Environment(CurUser.self) var curUser
+    @Environment(ToDoListV2.self) var todoList
+    @State private var animationToggle = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Spacer()
+                .frame(maxWidth: 20)
+            if posts.isEmpty {
+                Text("No posts yet!")
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(posts.indices, id: \.self) { index in
+                    let post = posts[index]
+                    let postInfo = post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+                    
+                    ZStack {
+                        // Original PostItemView
+                        PostItemView(postInfo: postInfo)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        
+                        // WiFi retry button overlay (positioned in top-right)
+                        if post.remoteId == nil {
+                            VStack {
+                                HStack {
+                                    Spacer()
+                                    Button(action: { onRetryUpload(post) }) {
+                                        if uploadingPosts.contains(post.id) {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle(tint: ColorTokens.shade600))
+                                                .scaleEffect(0.8)
+                                        } else {
+                                            Image(systemName: "wifi.slash")
+                                                .foregroundColor(ColorTokens.red300)
+                                                .font(.system(size: 20, weight: .bold))
+                                                .opacity(animationToggle ? 0.3 : 1.0)
+                                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: animationToggle)
+                                        }
+                                    }
+                                    .disabled(uploadingPosts.contains(post.id))
+                                    .padding(.trailing, 30)
+                                    .padding(.top, 20)
+                                }
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 5)
+        .onAppear {
+            animationToggle = true
+        }
+    }
+}
+
+
 
 #Preview {
     AccountPostView(month: Calendar.current.component(.month, from: Date()),
                    year: Calendar.current.component(.year, from: Date()))
         .environmentObject(Sessions(sessions: [], onUpdate: {_ in }))
         .environmentObject(PostLoader.loadPostLoader())
+        .environmentObject(CredManager())
         .environment(ToDoLoader.getToDo())
         .environment(CurUser(credManager: CredManager()))
 }

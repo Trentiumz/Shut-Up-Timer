@@ -17,6 +17,7 @@ struct PostImage: Identifiable, Codable, Equatable {
 // Represents a post tied to a session
 struct Post: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
+    var remoteId: UUID?
     var sessionID: UUID?
     var text: String
     var images: [PostImage]
@@ -125,6 +126,16 @@ class PostLoader: ObservableObject {
             _ = ImageLoader.deleteImage(name: postImage.imageName)
         }
         posts.remove(at: idx)
+    }
+    
+    // Updates the remoteId of a post by UUID
+    func updateRemoteId(_ postID: UUID, remoteId: UUID) {
+        for i in 0..<posts.count {
+            if posts[i].id == postID {
+                posts[i].remoteId = remoteId
+                break
+            }
+        }
     }
     
     // Private: Save posts to UserDefaults

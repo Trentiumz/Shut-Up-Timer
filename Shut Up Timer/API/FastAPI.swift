@@ -87,14 +87,18 @@ class FastAPIClient {
         let text: String
     }
     
-    func createPost(_ postInfo: PostInfo) async -> Bool {
+    struct CreatePostResponse: Codable {
+        let post_id: String
+    }
+    
+    func createPost(_ postInfo: PostInfo) async -> UUID? {
         var uploadedImageUrls: [String] = []
         var uploadedImageFilepaths: [String] = []
         
         do {
             guard let userID = supabase.auth.currentUser?.id else {
                 print("No authenticated user found")
-                return false
+                return nil
             }
             
             let lowerUUID = userID.uuidString.lowercased()
@@ -150,13 +154,23 @@ class FastAPIClient {
             )
             
             // Send post creation request with proper date formatting
-            _ = try await sendAuthenticatedRequest(
+            let data = try await sendAuthenticatedRequest(
                 params: createPostParams,
                 url: fastAPIURL.appendingPathComponent("create-post"),
                 method: "POST"
             )
             
-            return true
+            // Parse the response to get the post_id
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(CreatePostResponse.self, from: data)
+            
+            // Convert string UUID to UUID
+            guard let postId = UUID(uuidString: response.post_id) else {
+                print("Failed to parse post_id UUID: \(response.post_id)")
+                return nil
+            }
+            
+            return postId
             
         } catch {
             print("Error creating post: \(error)")
@@ -171,7 +185,7 @@ class FastAPIClient {
                 }
             }
             
-            return false
+            return nil
         }
     }
     
@@ -285,6 +299,27 @@ class FastAPIClient {
             print("Error getting posts: \(error)")
             return []
         }
+    }
+    
+    struct GetMyPostResponse : Codable{
+        var post_ids: [String]
+    }
+    func getMyPostIDs() async throws -> [UUID] {
+        // Send GET request
+        let data = try await sendAuthenticatedGetRequest(
+            url: fastAPIURL.appendingPathComponent("get-my-uploaded-post-ids")
+        )
+        
+        // Decode server response
+        let decoder = JSONDecoder()
+        let uploadedPosts = try decoder.decode(GetMyPostResponse.self, from: data)
+        
+        // Convert to PostInfo objects
+        let postUUIDs = uploadedPosts.post_ids.compactMap { postIdStr in
+            UUID(uuidString: postIdStr)
+        }
+        
+        return postUUIDs
     }
 
 }

@@ -220,13 +220,15 @@ struct AddPostView: View {
         isUploading = true
         Task {
             let postInfo = post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
-            let uploadSuccess = await credManager.fastAPI.createPost(postInfo)
+            let remoteId = await credManager.fastAPI.createPost(postInfo)
             
             await MainActor.run {
                 isUploading = false
                 showAlert = true
                 
-                if uploadSuccess {
+                if let remoteId = remoteId {
+                    // Update the post with the remote ID
+                    postLoader.updateRemoteId(post.id, remoteId: remoteId)
                     alertMessage = "Post created and uploaded successfully!"
                 } else {
                     alertMessage = "Post saved locally, but failed to upload to server. You can try again later."

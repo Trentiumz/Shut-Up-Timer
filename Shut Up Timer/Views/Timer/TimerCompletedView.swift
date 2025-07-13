@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TimerCompletedView: View {
     @EnvironmentObject var router: AppRouter;
-    @Environment(ToDoListV2.self) var todoList;
+    @EnvironmentObject var todoList: ToDoListV2
     private var session: SessionEntry;
     
     init(session: SessionEntry) {

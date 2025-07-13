@@ -5,7 +5,7 @@ struct SettingsView : View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
-    @Environment(CurUser.self) var curUser;
+    @EnvironmentObject var curUser: CurUser
     
     func updateUsername(newUsername: String) {
         guard (credManager.session?.user.id) != nil else { return }
@@ -254,11 +254,11 @@ struct SettingsPreview : PreviewProvider {
         var body : some View {
             SettingsView()
             .environmentObject(AppRouter())
-            .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
-            .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
-            .environment(ToDoLoader.getToDo())
+            .environmentObject(SettingsLoader.loadSettings())
+            .environmentObject(SessionsLoader.loadSessions())
+            .environmentObject(ToDoLoader.getToDo())
             .environmentObject(credManager)
-            .environment(CurUser(credManager: credManager))
+            .environmentObject(CurUser(credManager: credManager))
         }
     }
     

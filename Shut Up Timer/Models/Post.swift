@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 // Represents a single image associated with a post
 struct PostImage: Identifiable, Codable, Equatable {
@@ -66,9 +67,13 @@ struct Post: Identifiable, Codable, Equatable {
 // Loader for all posts. Only allows controlled insert/delete, never arbitrary save.
 class PostLoader: ObservableObject {
     @Published private(set) var posts: [Post] = [] {
-        didSet { savePosts() }
+        didSet {
+            savePosts()
+            didChange.send(self)
+        }
     }
-    private static var postLoaderInstance: PostLoader? = nil;
+    let didChange = PassthroughSubject<PostLoader, Never>()
+    private static var postLoaderInstance: PostLoader? = nil
     
     // MARK: - Codable
     private init(posts: [Post] = []) {
@@ -78,26 +83,26 @@ class PostLoader: ObservableObject {
     // Loads posts from UserDefaults
     static func loadPostLoader() -> PostLoader {
         if let loaderInstance = postLoaderInstance {
-            return loaderInstance;
+            return loaderInstance
         } else {
             let data = UserDefaults.standard.data(forKey: "user-posts")
             if let liveData = data {
                 if let decoded = try? JSONDecoder().decode([Post].self, from: liveData) {
-                    let instance = PostLoader(posts: decoded);
+                    let instance = PostLoader(posts: decoded)
                     print(instance.posts)
-                    postLoaderInstance = instance;
-                    return instance;
+                    postLoaderInstance = instance
+                    return instance
                 } else {
                     print("Incorrect Data Type for PostLoader")
-                    let instance = PostLoader();
-                    postLoaderInstance = instance;
-                    instance.savePosts();
-                    return instance;
+                    let instance = PostLoader()
+                    postLoaderInstance = instance
+                    instance.savePosts()
+                    return instance
                 }
             } else {
-                let instance = PostLoader();
-                instance.savePosts();
-                postLoaderInstance = instance;
+                let instance = PostLoader()
+                instance.savePosts()
+                postLoaderInstance = instance
                 return instance
             }
         }

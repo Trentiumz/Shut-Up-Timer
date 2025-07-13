@@ -171,10 +171,10 @@ struct TimerView: View {
             cancelNotifications()
             timerViewModel.destroy()
         }
-        .onChange(of: curSession.status) { oldVal, newVal in
+        .onChange(of: curSession.status) { newVal in
             handleStatus(newVal);
         }
-        .onChange(of: scenePhase) {
+        .onChange(of: scenePhase) { _ in
             if curSession.status == .inProgress {
                 print("In progress scene change -> \(scenePhase)")
                 if scenePhase == .background {

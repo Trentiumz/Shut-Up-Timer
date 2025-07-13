@@ -1,11 +1,20 @@
 import SwiftUI
+import Combine
 
-@Observable
-class CurUser {
-    var userProfile: UserProfileResponse? = nil
-    var userPublicProfile: UserPublicProfileResponse? = nil
+class CurUser: ObservableObject {
+    @Published var userProfile: UserProfileResponse? = nil {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    @Published var userPublicProfile: UserPublicProfileResponse? = nil {
+        didSet {
+            didChange.send(self)
+        }
+    }
     
     var credManager: CredManager
+    let didChange = PassthroughSubject<CurUser, Never>()
     
     init(credManager: CredManager) {
         self.credManager = credManager
@@ -53,14 +62,14 @@ class CurUser {
                     if privateProfile.count > 0 && publicProfile.count > 0 {
                         if animated {
                             withAnimation {
-                                userPublicProfile = nil;
-                                userProfile = nil;
+                                userPublicProfile = nil
+                                userProfile = nil
                                 userPublicProfile = publicProfile[0]
                                 userProfile = privateProfile[0]
                             }
                         } else {
-                            userPublicProfile = nil;
-                            userProfile = nil;
+                            userPublicProfile = nil
+                            userProfile = nil
                             userPublicProfile = publicProfile[0]
                             userProfile = privateProfile[0]
                         }
@@ -72,12 +81,12 @@ class CurUser {
                 await MainActor.run {
                     if animated {
                         withAnimation {
-                            userPublicProfile = nil;
-                            userProfile = nil;
+                            userPublicProfile = nil
+                            userProfile = nil
                         }
                     } else {
-                        userPublicProfile = nil;
-                        userProfile = nil;
+                        userPublicProfile = nil
+                        userProfile = nil
                     }
                     saveToMemory()
                 }

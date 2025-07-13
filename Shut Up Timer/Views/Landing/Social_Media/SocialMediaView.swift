@@ -4,7 +4,7 @@ struct SocialMediaView: View {
     @EnvironmentObject var credManager: CredManager
     @EnvironmentObject var postLoader: PostLoader
     @EnvironmentObject var sessions: Sessions
-    @Environment(ToDoListV2.self) var todoList
+    @EnvironmentObject var todoList: ToDoListV2
     
     @State private var posts: [PostInfo] = []
     @State private var isLoading = false
@@ -53,6 +53,6 @@ struct SocialMediaView: View {
     SocialMediaView()
         .environmentObject(CredManager())
         .environmentObject(PostLoader.loadPostLoader())
-        .environmentObject(SessionsLoader.loadSessions(onUpdate: { _ in }))
-        .environment(ToDoLoader.getToDo())
+        .environmentObject(SessionsLoader.loadSessions())
+        .environmentObject(ToDoLoader.getToDo())
 }

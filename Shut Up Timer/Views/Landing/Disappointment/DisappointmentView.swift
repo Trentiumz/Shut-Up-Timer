@@ -271,10 +271,14 @@ fileprivate struct StatsSummaryView: View {
                         // Week date range
                         ForEach(Array(week.enumerated()), id: \.offset) { dayIdx, _ in
                             if let time = week[dayIdx] {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(colorFor(time: time))
-                                    .stroke(.black, lineWidth: 2)
-                                    .frame(width: 25, height: 25)
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(colorFor(time: time))
+                                        .frame(width: 25, height: 25)
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(.black, lineWidth: 2)
+                                        .frame(width: 25, height: 25)
+                                }
                             } else {
                                 Rectangle()
                                     .fill(.clear)
@@ -298,6 +302,6 @@ fileprivate struct StatsSummaryView: View {
             SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
             SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
             SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
-        ], onUpdate: {_ in}))
+        ]))
     // RoastPaper("You’re one more '5-minute break' away from complete academic collapse.")
 }

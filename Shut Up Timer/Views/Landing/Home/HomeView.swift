@@ -50,7 +50,8 @@ struct HomeView: View {
                 Spacer()
                     .frame(maxHeight: 10)
             }
-            .safeAreaPadding(.all)
+            // TODO: test this and see if it works lol
+            .padding(.all)
             .animation(TodoView.mainAnimation, value: expandedTodo)
             
             Button(action: {
@@ -93,6 +94,6 @@ struct HomeView: View {
     HomeView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings())
-        .environment(ToDoLoader.getToDo())
-        .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
+        .environmentObject(ToDoLoader.getToDo())
+        .environmentObject(SessionsLoader.loadSessions())
 }

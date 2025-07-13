@@ -72,11 +72,11 @@ struct TimerSelector : View {
                     }
                 }
             }
-        }.onChange(of: timerParam) {
+        }.onChange(of: timerParam) { _ in
             syncParamToVars()
-        }.onChange(of: timerType) {
+        }.onChange(of: timerType) { _ in
             syncVarsToParam()
-        }.onChange(of: cdDuration) {
+        }.onChange(of: cdDuration) { _ in
             syncVarsToParam()
         }.onAppear() {
             syncParamToVars()
@@ -92,9 +92,9 @@ struct TimerSelectorPreview : PreviewProvider {
         var body : some View {
             TimerSelector(param: $timerParam)
             .environmentObject(AppRouter())
-            .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
-            .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
-            .environment(ToDoLoader.getToDo())
+            .environmentObject(SettingsLoader.loadSettings())
+            .environmentObject(SessionsLoader.loadSessions())
+            .environmentObject(ToDoLoader.getToDo())
             .environmentObject(CredManager())
         }
     }

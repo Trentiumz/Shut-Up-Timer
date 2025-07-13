@@ -134,10 +134,10 @@ fileprivate struct SentList : View {
         .onAppear {
             updateRequests()
         }
-        .onChange(of: credManager.session) {
+        .onChange(of: credManager.session) { _ in
             updateRequests()
         }
-        .onChange(of: notificationManager.notifications) {
+        .onChange(of: notificationManager.notifications) { _ in
             updateRequests()
         }
     }
@@ -218,10 +218,10 @@ fileprivate struct RequestList : View {
         .onAppear {
             updateRequests()
         }
-        .onChange(of: credManager.session) {
+        .onChange(of: credManager.session) { _ in
             updateRequests()
         }
-        .onChange(of: notificationManager.notifications) {
+        .onChange(of: notificationManager.notifications) { _ in
             updateRequests()
         }
     }

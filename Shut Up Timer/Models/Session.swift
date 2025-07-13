@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 struct TaskLog: Identifiable, Codable, Equatable{
     var id = UUID()
@@ -37,50 +38,49 @@ struct SessionEntry: Identifiable, Codable, Equatable {
     
 }
 
-class Sessions : Codable, Equatable, ObservableObject {
+class Sessions: ObservableObject, Codable, Equatable {
     @Published var sessions: [SessionEntry] = [] {
         didSet {
-            onUpdate(self);
+            didChange.send(self)
         }
     }
-    var onUpdate: (_: Sessions) -> Void = { _ in };
+    let didChange = PassthroughSubject<Sessions, Never>()
+    var cancellables = Set<AnyCancellable>()
 
-    init(sessions: [SessionEntry], onUpdate: @escaping (_: Sessions) -> Void = { _ in }) {
-        self.sessions = sessions;
-        self.onUpdate = onUpdate;
+    init(sessions: [SessionEntry]) {
+        self.sessions = sessions
     }
     
     static func == (l: Sessions, r: Sessions) -> Bool {
-        return l.sessions == r.sessions;
+        return l.sessions == r.sessions
     }
     
     // MARK: - Codable
     enum CodingKeys: String, CodingKey {
-        case sessions;
+        case sessions
     }
     
     required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self);
-        sessions = try container.decode([SessionEntry].self, forKey: .sessions);
-        onUpdate = {_ in }
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        sessions = try container.decode([SessionEntry].self, forKey: .sessions)
     }
     
     func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self);
-        try container.encode(sessions, forKey: .sessions);
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(sessions, forKey: .sessions)
     }
 
     func getIQ() -> Double {
-        var cIq: Double = 0;
+        var cIq: Double = 0
         for session in sessions {
-            cIq += session.iqChange;
+            cIq += session.iqChange
         }
-        return cIq;
+        return cIq
     }
 
     func getTotalTimeLocked() -> TimeInterval {
-        let totTime: TimeInterval = sessions.reduce(0.0) { $0 + $1.timeLocked };
-        return totTime;
+        let totTime: TimeInterval = sessions.reduce(0.0) { $0 + $1.timeLocked }
+        return totTime
     }
 
     func getTopCategories() -> [(todoID: UUID, seconds: Int)] {
@@ -126,31 +126,30 @@ class Sessions : Codable, Equatable, ObservableObject {
     /// gets roasts, sorted in reverse chronological order
     func getLatestRoasts() -> [String] {
         let roasts = sessions.sorted{ $0.started > $1.started }.compactMap{ $0.roast }
-        return roasts;
+        return roasts
     }
 }
 
 class SessionsLoader {
-    static var defaultSessions: Sessions = Sessions(sessions: []);
+    static var defaultSessions: Sessions = Sessions(sessions: [])
 
-    static func loadSessions(onUpdate: @escaping (_: Sessions) -> Void) -> Sessions {
-        let data = UserDefaults.standard.data(forKey: "user-sessions");
+    static func loadSessions() -> Sessions {
+        let data = UserDefaults.standard.data(forKey: "user-sessions")
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Sessions.self, from: liveData) {
-                decoded.onUpdate = onUpdate;
-                return decoded;
+                return decoded
             }
-            print("Incorrect Data Type");
-            return defaultSessions;
+            print("Incorrect Data Type")
+            return defaultSessions
         } else {
-            saveSessions(defaultSessions);
-            return defaultSessions;
+            saveSessions(defaultSessions)
+            return defaultSessions
         }
     }
     
     static func saveSessions(_ sessions: Sessions) {
         if let encoded = try? JSONEncoder().encode(sessions) {
-            UserDefaults.standard.set(encoded, forKey: "user-sessions");
+            UserDefaults.standard.set(encoded, forKey: "user-sessions")
         }
     }
 }

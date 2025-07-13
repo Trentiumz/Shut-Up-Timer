@@ -1,4 +1,5 @@
-import SwiftUI;
+import SwiftUI
+import Combine
 
 class ToDoLoader {
     
@@ -47,11 +48,24 @@ class ToDoLoader {
     }
 }
 
-@Observable
-class ToDoEntryV2: Codable, Equatable, Identifiable, Hashable {
-    var id: UUID
-    var todo: String
-    var completed: Bool
+class ToDoEntryV2: ObservableObject, Codable, Equatable, Identifiable, Hashable {
+    @Published var id: UUID {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    @Published var todo: String {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    @Published var completed: Bool {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    
+    let didChange = PassthroughSubject<ToDoEntryV2, Never>()
     
     init(id: UUID = UUID(), todo: String, completed: Bool = false) {
         self.id = id
@@ -86,14 +100,24 @@ class ToDoEntryV2: Codable, Equatable, Identifiable, Hashable {
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id);
+        hasher.combine(id)
     }
 }
 
-@Observable
-class ToDoListV2 : Codable, Equatable {
-    var activeLst: [ToDoEntryV2]
-    var inactiveLst: [ToDoEntryV2]
+class ToDoListV2: ObservableObject, Codable, Equatable {
+    @Published var activeLst: [ToDoEntryV2] {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    @Published var inactiveLst: [ToDoEntryV2] {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    
+    let didChange = PassthroughSubject<ToDoListV2, Never>()
+    var cancellables = Set<AnyCancellable>()
     
     init(activeLst: [ToDoEntryV2], inactiveLst: [ToDoEntryV2] = []) {
         self.activeLst = activeLst
@@ -160,37 +184,35 @@ struct ToDoEntryV1 : Codable, Equatable, Identifiable{
     var completed: Bool = false;
 }
 
-class ToDoListV1 : Codable, Equatable, ObservableObject {
+class ToDoListV1: ObservableObject, Codable, Equatable {
     @Published var lst: [ToDoEntryV1] {
         didSet {
-            self.onUpdate(self);
+            didChange.send(self)
         }
     }
-    var onUpdate: (_: ToDoListV1) -> Void = {val in };
+    let didChange = PassthroughSubject<ToDoListV1, Never>()
     
-    init(lst: [ToDoEntryV1], onUpdate: (@escaping (ToDoListV1) -> Void) = {val in }) {
-        self.lst = lst;
-        self.onUpdate = onUpdate;
+    init(lst: [ToDoEntryV1]) {
+        self.lst = lst
     }
     
     static func == (l: ToDoListV1, r: ToDoListV1) -> Bool {
-        return l.lst == r.lst;
+        return l.lst == r.lst
     }
     
     // MARK: - Codable
     enum CodingKeys: String, CodingKey {
-        case lst;
+        case lst
     }
     
     required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self);
-        lst = try container.decode([ToDoEntryV1].self, forKey: .lst);
-        onUpdate = {val in }
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        lst = try container.decode([ToDoEntryV1].self, forKey: .lst)
     }
     
     func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self);
-        try container.encode(lst, forKey: .lst);
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(lst, forKey: .lst)
     }
     
     func uuidToEntry(_ uuid: UUID) -> ToDoEntryV1? {

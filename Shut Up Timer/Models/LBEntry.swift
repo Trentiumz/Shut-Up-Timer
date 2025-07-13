@@ -1,10 +1,24 @@
-import SwiftUI;
+import SwiftUI
+import Combine
 
-class LBEntry : ObservableObject, Identifiable{
+class LBEntry: ObservableObject, Identifiable {
     let id = UUID()
-    @Published var name: String;
-    @Published var pts: Int;
-    @Published var profilePicture: String;
+    @Published var name: String {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    @Published var pts: Int {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    @Published var profilePicture: String {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    let didChange = PassthroughSubject<LBEntry, Never>()
     
     init(name: String, pfp: String, pts: Int) {
         self.name = name

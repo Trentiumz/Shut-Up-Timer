@@ -64,7 +64,7 @@ struct OnboardingInfo1 : View {
                 }
                 .frame(minHeight: UIScreen.main.bounds.height)
             }
-            .safeAreaPadding(.top)
+            .padding(.top)
             .frame(maxHeight: UIScreen.main.bounds.height)
         }
     }

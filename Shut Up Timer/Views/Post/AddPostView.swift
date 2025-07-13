@@ -43,7 +43,6 @@ struct AddPostRawView: View {
                                 .padding(.vertical, 8)
                                 .overlay(
                                     RoundedRectangle(cornerSize: CGSize(width: 14, height: 14))
-                                        .fill(.clear)
                                         .stroke(ColorTokens.shade700, lineWidth: 2)
                                 )
                         }
@@ -55,7 +54,6 @@ struct AddPostRawView: View {
                                 .padding(.vertical, 8)
                                 .overlay(
                                     RoundedRectangle(cornerSize: CGSize(width: 14, height: 14))
-                                        .fill(.clear)
                                         .stroke(ColorTokens.shade700, lineWidth: 2)
                                 )
                         }
@@ -162,8 +160,8 @@ struct AddPostView: View {
     @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var postLoader: PostLoader
     @EnvironmentObject var credManager: CredManager
-    @Environment(CurUser.self) var curUser
-    @Environment(ToDoListV2.self) var todoList
+    @EnvironmentObject var curUser: CurUser
+    @EnvironmentObject var todoList: ToDoListV2
     @State private var text: String = ""
     @State private var images: [UIImage] = []
     @State private var showSessionModal = false
@@ -199,7 +197,7 @@ struct AddPostView: View {
             }, onCancel: { showSessionModal = false })
         }
         .photosPicker(isPresented: $showPhotosPicker, selection: $pickedPhoto, matching: .images)
-        .onChange(of: pickedPhoto) { oldVal, newVal in
+        .onChange(of: pickedPhoto) { newVal in
             guard let newVal else { return }
             Task {
                 if let data = try? await newVal.loadTransferable(type: Data.self), let img = UIImage(data: data) {
@@ -303,10 +301,10 @@ extension DateFormatter {
     let mockSession = SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600, plannedTime: 3600, success: true, roast: "Sample roast", imageName: nil)
     let mockSessions = [mockSession]
     return AddPostView()
-        .environmentObject(Sessions(sessions: mockSessions, onUpdate: { _ in }))
+        .environmentObject(Sessions(sessions: mockSessions))
         .environmentObject(AppRouter())
         .environmentObject(PostLoader.loadPostLoader())
-        .environment(CurUser(credManager: CredManager()))
-        .environment(ToDoLoader.getToDo())
+        .environmentObject(CurUser(credManager: CredManager()))
+        .environmentObject(ToDoLoader.getToDo())
 }
 

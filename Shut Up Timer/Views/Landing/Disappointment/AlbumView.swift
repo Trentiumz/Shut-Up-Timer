@@ -231,5 +231,5 @@ struct AlbumView: View {
             SessionEntry(tasks: [], started: Date().addingTimeInterval(-86400), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "Your brain's in power-saving mode and it shows.", imageName: "onboarding-hello-image 67"),
             SessionEntry(tasks: [], started: Date().addingTimeInterval(-172800), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "At this point, your to-do list is fiction.", imageName: "onboarding-hello-image 68"),
             SessionEntry(tasks: [], started: Date().addingTimeInterval(-259200), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You have more breaks than work.", imageName: "onboarding-hello-image 70")
-        ], onUpdate: {_ in }))
+        ]))
 }

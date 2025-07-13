@@ -1,4 +1,5 @@
-import SwiftUI;
+import SwiftUI
+import Combine
 
 enum Difficulty : String, Codable, CaseIterable, Identifiable {
     case easy;
@@ -36,42 +37,42 @@ func timerParamToType(param: TimerParam) -> TimerType {
     }
 }
 
-class Settings : Codable, Equatable, ObservableObject {
-    @Published var firstTime: Bool{
+class Settings: ObservableObject, Codable, Equatable {
+    @Published var firstTime: Bool {
         didSet {
-            self.onUpdate(self);
+            didChange.send(self)
         }
     }
-    @Published var difficulty: Difficulty{
+    @Published var difficulty: Difficulty {
         didSet {
-            self.onUpdate(self);
+            didChange.send(self)
         }
     }
-    @Published var roastLevel : RoastLevel{
+    @Published var roastLevel: RoastLevel {
         didSet {
-            self.onUpdate(self);
+            didChange.send(self)
         }
     }
-    @Published var timerParam : TimerParam{
+    @Published var timerParam: TimerParam {
         didSet {
-            self.onUpdate(self);
+            didChange.send(self)
         }
     }
-    var onUpdate: (_: Settings) -> Void = { _ in };
+    let didChange = PassthroughSubject<Settings, Never>()
+    var cancellables = Set<AnyCancellable>()
     
-    init(firstTime: Bool, difficulty: Difficulty, roastLevel: RoastLevel, timerParam: TimerParam, onUpdate: @escaping (_: Settings) -> Void = { _ in }) {
-        self.firstTime = firstTime;
+    init(firstTime: Bool, difficulty: Difficulty, roastLevel: RoastLevel, timerParam: TimerParam) {
+        self.firstTime = firstTime
         self.difficulty = difficulty
         self.roastLevel = roastLevel
         self.timerParam = timerParam
-        self.onUpdate = onUpdate;
     }
     
     static func == (l: Settings, r: Settings) -> Bool {
         return l.firstTime == r.firstTime &&
         l.difficulty == r.difficulty &&
         l.roastLevel == r.roastLevel &&
-        l.timerParam == r.timerParam;
+        l.timerParam == r.timerParam
     }
     
     // MARK: - Codable
@@ -88,7 +89,6 @@ class Settings : Codable, Equatable, ObservableObject {
         difficulty = try container.decode(Difficulty.self, forKey: .difficulty)
         roastLevel = try container.decode(RoastLevel.self, forKey: .roastLevel)
         timerParam = try container.decode(TimerParam.self, forKey: .timerParam)
-        onUpdate = { _ in }
     }
     
     func encode(to encoder: Encoder) throws {
@@ -101,24 +101,22 @@ class Settings : Codable, Equatable, ObservableObject {
 }
 
 class SettingsLoader {
-    // TODO: Change back to firstTime = true!
-    static var defaultSettings: Settings = Settings(firstTime: false,
+    static var defaultSettings: Settings = Settings(firstTime: true,
                                                     difficulty: .easy,
                                                     roastLevel: .low,
-                                                    timerParam: .countdown(seconds: 60 * 30));
-    static func loadSettings(onUpdate: (@escaping (_: Settings) -> Void) = {_ in}) -> Settings {
-        let data = UserDefaults.standard.data(forKey: "user-settings");
+                                                    timerParam: .countdown(seconds: 60 * 30))
+    static func loadSettings() -> Settings {
+        let data = UserDefaults.standard.data(forKey: "user-settings")
         if let liveData = data {
             if let decoded = try? JSONDecoder().decode(Settings.self, from: liveData) {
-                decoded.onUpdate = onUpdate;
-                decoded.firstTime = false;
-                return decoded;
+                decoded.firstTime = false
+                return decoded
             }
-            print("Incorrect Data Type");
-            return defaultSettings;
+            print("Incorrect Data Type")
+            return defaultSettings
         } else {
-            saveSettings(defaultSettings);
-            return defaultSettings;
+            saveSettings(defaultSettings)
+            return defaultSettings
         }
     }
     

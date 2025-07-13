@@ -1,7 +1,7 @@
 import SwiftUI;
 
 struct TopBarView : View {
-    @Environment(CurUser.self) var curUser;
+    @EnvironmentObject var curUser: CurUser
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var notificationManager: NotificationManager;
@@ -165,10 +165,11 @@ struct BarViewPreviews : PreviewProvider {
         var body : some View {
             VStack {
                 TopBarView(selectedScreen: $selectedScreen)
-                    .environment(CurUser(credManager: CredManager()))
-                    .environmentObject(SessionsLoader.loadSessions(onUpdate: { _ in }))
+                    .environmentObject(CurUser(credManager: CredManager()))
+                    .environmentObject(SessionsLoader.loadSessions())
                     .environmentObject(AppRouter())
                     .environmentObject(NotificationManager())
+                    .environmentObject(ToDoLoader.getToDo())
                 Spacer()
             }
 //            VStack {

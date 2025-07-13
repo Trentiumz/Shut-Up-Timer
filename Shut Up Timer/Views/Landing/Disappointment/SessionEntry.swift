@@ -2,7 +2,7 @@ import SwiftUI;
 
 struct SessionEntryView : View {
     @State private var sessionEntry: SessionEntry;
-    @Environment(ToDoListV2.self) var todoList;
+    @EnvironmentObject var todoList: ToDoListV2
     
     init(sessionEntry: SessionEntry) {
         self.sessionEntry = sessionEntry;

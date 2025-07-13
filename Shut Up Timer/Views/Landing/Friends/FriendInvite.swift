@@ -103,7 +103,7 @@ struct FriendInvite : View {
         .onAppear {
             updateUserProfile()
         }
-        .onChange(of: credManager.session) {
+        .onChange(of: credManager.session) { _ in
             updateUserProfile()
         }
     }

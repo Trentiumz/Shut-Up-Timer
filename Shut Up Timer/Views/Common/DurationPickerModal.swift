@@ -60,6 +60,13 @@ struct DurationPickerModal: View {
 }
 
 #Preview {
-    @Previewable @State var thing = TimeInterval();
-    DurationPickerModal(duration: $thing)
+    struct PreviewWrapper: View {
+        @State private var duration = TimeInterval(3600)
+        
+        var body: some View {
+            DurationPickerModal(duration: $duration)
+        }
+    }
+    
+    return PreviewWrapper()
 }

@@ -6,7 +6,7 @@ struct FeedbackView: View {
     
     @State private var addFeedbackShowing: Bool = false
     @EnvironmentObject var credManager : CredManager
-    @Environment(CurUser.self) var curUser;
+    @EnvironmentObject var curUser: CurUser
     
     enum FeedbackCategories : String, CaseIterable {
         case upvotes = "Upvotes"
@@ -197,7 +197,7 @@ struct FeedbackView: View {
             curUser.refresh()
             updateFeedbacks()
         }
-        .onChange(of: credManager.loggedIn) {
+        .onChange(of: credManager.loggedIn) { _ in
             curUser.refresh()
         }
     }

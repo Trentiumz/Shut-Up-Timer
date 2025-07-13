@@ -26,7 +26,6 @@ struct SelectorList : View {
                             }
                         })
                 }
-                Spacer()
                 if selectedOption != "none" {
                     OnboardingNextButton(text: nextText, onSelect: {
                         if options.contains(where: { elem in
@@ -91,7 +90,6 @@ struct OnboardingQ1: View {
             ScrollView {
                 VStack {
                     BackButton(onPress: onPrevious);
-                    Spacer()
                     ViewThatFits {
                         LinedPaper(text: "Be honest with me... What's your daily screen time?", iconAlignment: .bottomTrailing, imageHeight: 280)
                             .offset(y: -10)
@@ -105,7 +103,7 @@ struct OnboardingQ1: View {
                 }
                 .frame(minHeight: UIScreen.main.bounds.height)
             }
-            .safeAreaPadding(.top)
+            .padding(.top)
             .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)
@@ -129,7 +127,6 @@ struct OnboardingQ2: View {
             ScrollView {
                 VStack {
                     BackButton(onPress: onPrevious);
-                    Spacer()
                     ViewThatFits {
                         LinedPaper(text: "How did you hear about this app?", iconAlignment: .bottomTrailing, imageHeight: 280)
                             .offset(y: -10)
@@ -143,7 +140,7 @@ struct OnboardingQ2: View {
                 }
                 .frame(minHeight: UIScreen.main.bounds.height)
             }
-            .safeAreaPadding(.top)
+            .padding(.top)
             .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)
@@ -167,7 +164,6 @@ struct OnboardingQ3: View {
             ScrollView {
                 VStack {
                     BackButton(onPress: onPrevious);
-                    Spacer()
                     LinedPaper(text: "You want motivation? Or humiliation?", iconAlignment: .bottomTrailing, imageHeight: 180)
                         .offset(y: -10)
                     Spacer()
@@ -177,7 +173,7 @@ struct OnboardingQ3: View {
                 }
                 .frame(minHeight: UIScreen.main.bounds.height)
             }
-            .safeAreaPadding(.top)
+            .padding(.top)
             .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)
@@ -201,7 +197,6 @@ struct OnboardingQ4: View {
             ScrollView {
                 VStack {
                     BackButton(onPress: onPrevious);
-                    Spacer();
                     ViewThatFits {
                         LinedPaper(text: "How hard do you want me to be?", iconAlignment: .bottomTrailing, imageHeight: 280)
                             .offset(y: -10)
@@ -215,7 +210,7 @@ struct OnboardingQ4: View {
                 }
                 .frame(minHeight: UIScreen.main.bounds.height)
             }
-            .safeAreaPadding(.top)
+            .padding(.top)
             .frame(maxHeight: UIScreen.main.bounds.height)
         }
         .background(ColorTokens.shade300)

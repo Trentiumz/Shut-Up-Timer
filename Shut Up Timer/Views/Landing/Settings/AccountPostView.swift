@@ -4,8 +4,8 @@ struct AccountPostView: View {
     @EnvironmentObject var sessions: Sessions
     @EnvironmentObject var postLoader: PostLoader
     @EnvironmentObject var credManager: CredManager
-    @Environment(CurUser.self) var curUser
-    @Environment(ToDoListV2.self) var todoList
+    @EnvironmentObject var curUser: CurUser
+    @EnvironmentObject var todoList: ToDoListV2
     @State private var selectedTab: PostTab = .month
     @State private var uploadingPosts: Set<UUID> = []
     @State private var showAlert = false
@@ -139,8 +139,8 @@ struct LocalPostListView: View {
     let uploadingPosts: Set<UUID>
     
     @EnvironmentObject var sessions: Sessions
-    @Environment(CurUser.self) var curUser
-    @Environment(ToDoListV2.self) var todoList
+    @EnvironmentObject var curUser: CurUser
+    @EnvironmentObject var todoList: ToDoListV2
     @State private var animationToggle = false
     
     var body: some View {
@@ -202,9 +202,9 @@ struct LocalPostListView: View {
 #Preview {
     AccountPostView(month: Calendar.current.component(.month, from: Date()),
                    year: Calendar.current.component(.year, from: Date()))
-        .environmentObject(Sessions(sessions: [], onUpdate: {_ in }))
+        .environmentObject(Sessions(sessions: []))
         .environmentObject(PostLoader.loadPostLoader())
         .environmentObject(CredManager())
-        .environment(ToDoLoader.getToDo())
-        .environment(CurUser(credManager: CredManager()))
+        .environmentObject(ToDoLoader.getToDo())
+        .environmentObject(CurUser(credManager: CredManager()))
 }

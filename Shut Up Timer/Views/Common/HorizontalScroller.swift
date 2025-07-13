@@ -44,7 +44,7 @@ struct HorizontalScroller<Data, Content: View>: View {
                     }
                 }
                 .frame(width: containerWidth)
-                .onChange(of: scrollIndex) { oldIdx, idx in
+                .onChange(of: scrollIndex) { idx in
                     withAnimation {
                         proxy.scrollTo(idx, anchor: .leading)
                     }

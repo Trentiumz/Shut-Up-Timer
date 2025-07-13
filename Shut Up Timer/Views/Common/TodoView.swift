@@ -6,7 +6,7 @@ struct TodoView : View {
     @Binding var expanded: Bool;
     
     // tracking current list items & what to add
-    @Environment(ToDoListV2.self) var todoList;
+    @EnvironmentObject var todoList: ToDoListV2
     @State private var textInputModalShowed: Bool = false;
     
     @Binding private var selectedTodo: UUID;
@@ -113,7 +113,7 @@ struct TodoView : View {
 }
 
 struct TodoItemList : View {
-    @Environment(ToDoListV2.self) var todoList;
+    @EnvironmentObject var todoList: ToDoListV2
     @Binding var selectedTodo: UUID;
     
     @State private var editingTodo: UUID = UUID();
@@ -322,7 +322,7 @@ struct TodoPreview : PreviewProvider {
         
         var body : some View {
             TodoView(expanded: $expanded, selectedTodo: $selectedTodo, namespace: sampleNamespace, isSource: true, isActive: true)
-                .environment(ToDoListV2(activeLst: [ToDoEntryV2(todo: "Hello"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More")]))
+                .environmentObject(ToDoListV2(activeLst: [ToDoEntryV2(todo: "Hello"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More")]))
         }
     }
     

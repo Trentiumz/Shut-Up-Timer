@@ -53,16 +53,16 @@ struct CountdownSelectorView : View{
                         }
                     }.sheet(isPresented: $showingPicker) {
                         DurationPickerModal(duration: $duration)
-                    }.onChange(of: duration) {
+                    }.onChange(of: duration) { _ in
                         syncParamsToVars()
                     }
                 }
             }
         }.onAppear(){
             syncVarsToParams()
-        }.onChange(of: timerParams) {
+        }.onChange(of: timerParams) { _ in
             syncVarsToParams()
-        }.onChange(of: timerType) {
+        }.onChange(of: timerType) { _ in
             syncParamsToVars()
         }
     }

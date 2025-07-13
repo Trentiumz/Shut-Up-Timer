@@ -150,9 +150,9 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(Settings(firstTime: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20)))
-        .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
-        .environment(ToDoLoader.getToDo())
-        .environment(CurUser(credManager: CredManager()))
+        .environmentObject(SessionsLoader.loadSessions())
+        .environmentObject(ToDoLoader.getToDo())
+        .environmentObject(CurUser(credManager: CredManager()))
         .environmentObject(CredManager())
         .environmentObject(AppRouter());
 }

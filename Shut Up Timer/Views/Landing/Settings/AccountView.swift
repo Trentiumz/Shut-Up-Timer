@@ -6,8 +6,8 @@ struct AccountView : View {
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var sessions: Sessions;
-    @Environment(CurUser.self) var curUser;
-    @Environment(ToDoListV2.self) var todoList;
+    @EnvironmentObject var curUser: CurUser
+    @EnvironmentObject var todoList: ToDoListV2
     @State private var friends: [FriendProfileResponse] = [];
     @EnvironmentObject var postLoader: PostLoader;
     
@@ -144,7 +144,7 @@ struct AccountView : View {
             curUser.refresh()
             updateFriends()
         }
-        .onChange(of: credManager.session) {
+        .onChange(of: credManager.session) { _ in
             curUser.refresh()
             updateFriends()
         }
@@ -173,8 +173,8 @@ struct AccountView : View {
 struct LocalUserInfoView : View {
     @EnvironmentObject var sessions: Sessions;
     @EnvironmentObject var credManager: CredManager;
-    @Environment(ToDoListV2.self) var todoList;
-    @Environment(CurUser.self) var curUser;
+    @EnvironmentObject var todoList: ToDoListV2
+    @EnvironmentObject var curUser: CurUser
     
     @State private var pickedImage: PhotosPickerItem?
     @State var showFailAlert: Bool = false
@@ -195,7 +195,7 @@ struct LocalUserInfoView : View {
                         PFPDisplay(url: pp.profile_picture, width: 80, height: 80)
                             .opacity(uploading ? 0.5 : 1)
                     }
-                    .onChange(of: pickedImage) { oldVal, newVal in
+                    .onChange(of: pickedImage) { newVal in
                         Task {
                             await MainActor.run {
                                 withAnimation {
@@ -300,9 +300,9 @@ struct LocalUserInfoView : View {
     let credManager = CredManager()
     AccountView()
         .environmentObject(AppRouter())
-        .environmentObject(SettingsLoader.loadSettings(onUpdate: {_ in }))
-        .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
-        .environment(ToDoLoader.getToDo())
+        .environmentObject(SettingsLoader.loadSettings())
+        .environmentObject(SessionsLoader.loadSessions())
+        .environmentObject(ToDoLoader.getToDo())
         .environmentObject(credManager)
-        .environment(CurUser(credManager: credManager))
+        .environmentObject(CurUser(credManager: credManager))
 }

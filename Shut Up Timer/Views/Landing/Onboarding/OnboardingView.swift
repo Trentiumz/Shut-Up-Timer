@@ -157,5 +157,5 @@ struct OnboardingView : View {
         .environmentObject(SettingsLoader.loadSettings())
         .environmentObject(CredManager())
         .environmentObject(AppRouter())
-        .environmentObject(SessionsLoader.loadSessions(onUpdate: {_ in }))
+        .environmentObject(SessionsLoader.loadSessions())
 }

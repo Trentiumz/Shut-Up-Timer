@@ -163,7 +163,9 @@ struct AccountView : View {
                 Text(text)
                     .font(FontTokens.architectsDaughter(size: 20))
                     .foregroundColor(ColorTokens.shade100)
-                    .frame(width: 96.88741, alignment: .topLeading)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .frame(width: 170, alignment: .topLeading)
             }
         }
     }

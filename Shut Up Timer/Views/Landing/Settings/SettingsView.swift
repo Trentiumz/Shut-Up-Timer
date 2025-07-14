@@ -1,4 +1,5 @@
 import SwiftUI;
+import FamilyControls
 
 struct SettingsView : View {
     // current settings
@@ -38,6 +39,8 @@ struct SettingsView : View {
     var body: some View {
         VStack {
             TimerSettings()
+            
+            AppBlockSettings()
             
             // User Profile Section
             if credManager.loggedIn, let publicProfile = curUser.userPublicProfile, let privateProfile = curUser.userProfile {
@@ -156,6 +159,70 @@ struct SettingsView : View {
                     .padding(.top, 5)
                     .padding(.bottom, 5)
                 }.frame(width: 350, height: 240)
+            }
+        }
+    }
+    
+    struct AppBlockSettings: View {
+        @EnvironmentObject var settings: Settings;
+        @State private var showAppPicker = false
+        
+        var body: some View {
+            VStack {
+                ZStack(alignment: .top) {
+                    FormattedImages.LinedImageBackground(width: 350)
+                    VStack {
+                        HStack {
+                            AccountView.SectionStripe("App Blocking >")
+                            Spacer()
+                        }
+                        
+                        // App blocking selector
+                        HStack {
+                            SettingLabel("Apps to Block")
+                            Spacer()
+                            Button(action: {
+                                showAppPicker = true
+                            }) {
+                                StylizedLabel("Select")
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.leading, 45)
+                    .padding(.trailing, 10)
+                    .padding(.top, 5)
+                    .padding(.bottom, 5)
+                }.frame(width: 350, height: 240)
+            }
+            .sheet(isPresented: $showAppPicker) {
+                AppBlockPickerModal(selection: $settings.defaultBlockedApps)
+            }
+        }
+    }
+    
+    struct AppBlockPickerModal: View {
+        @Binding var selection: FamilyActivitySelection
+        @Environment(\.dismiss) private var dismiss
+        
+        var body: some View {
+            NavigationView {
+                VStack {
+                    FamilyActivityPicker(selection: $selection)
+                        .padding()
+                }
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationBarBackButtonHidden(true)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") {
+                            dismiss()
+                        }
+                        .font(FontTokens.architectsDaughter(size: 18))
+                        .foregroundColor(ColorTokens.shade700)
+                    }
+                }
             }
         }
     }

@@ -17,6 +17,7 @@ protocol CurSessionManager: ObservableObject, Codable {
     func succeedTimer()
     func getSession(endTime: Date) -> SessionEntry
     func appReopen()
+    func destroy()
 }
 
 // MARK: - CurSessionManager Extensions

@@ -10,7 +10,7 @@ class AppRouter: ObservableObject {
             let manager = NoLeaveSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], lastActiveUpdate: Date(), curTodo: todoID, status: .paused)
             path.append(PathElement(route: AppRoute.noLeaveTimer(timerModel: TimerViewModel<NoLeaveSessionManager>(from: manager, startPhase: .active, appReopened: false))));
         case .appBlock:
-            let manager = AppBlockSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], curTodo: todoID, status: .paused)
+            let manager = AppBlockSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], lastUpdate: Date(), curTodo: todoID, status: .paused)
             path.append(PathElement(route: AppRoute.appBlockTimer(timerModel: TimerViewModel<AppBlockSessionManager>(from: manager, startPhase: .active, appReopened: false))));
         }
     }

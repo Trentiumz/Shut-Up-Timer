@@ -177,7 +177,7 @@ struct TimerView<Manager: CurSessionManager>: View {
         .onChange(of: scenePhase) { newVal in
             print("In progress scene change -> \(newVal), current status is \(curSession.status)")
             if curSession.status == .inProgress {
-                if newVal == .background {
+                if newVal == .background && curSession.managerType == .noLeave {
                     scheduleComeBackNotification();
                 }
             }

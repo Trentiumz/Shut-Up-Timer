@@ -1,4 +1,5 @@
 import SwiftUI
+import FamilyControls
 
 // Control for all pages
 struct ContentView: View {
@@ -154,7 +155,7 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(Settings(firstTime: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20)))
+        .environmentObject(Settings(firstTime: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20), defaultBlockedApps: FamilyActivitySelection()))
         .environmentObject(SessionsLoader.loadSessions())
         .environmentObject(ToDoLoader.getToDo())
         .environmentObject(CurUser(credManager: CredManager()))

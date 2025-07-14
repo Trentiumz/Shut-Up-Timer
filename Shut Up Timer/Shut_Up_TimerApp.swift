@@ -9,6 +9,7 @@ import SwiftUI
 import UIKit
 import Supabase
 import Combine
+import FamilyControls
 
 @main
 struct Shut_Up_TimerApp: App {
@@ -28,8 +29,20 @@ struct Shut_Up_TimerApp: App {
         // Create curUser with the same credManager instance
         self.curUser = CurUser(credManager: credManager)
         
+        requestFamilyPermissions()
         // Set up subscriptions
         setupSubscriptions(sessions: sessions, credManager: credManager, todoList: todoList, settings: settings)
+    }
+    
+    private func requestFamilyPermissions() {
+        // Request FamilyControls authorization
+        Task {
+            do {
+                try await FamilyControls.AuthorizationCenter.shared.requestAuthorization(for: .individual)
+            } catch {
+                print("Authorization failed for family controls: \(error)")
+            }
+        }
     }
     
     private func setupSubscriptions(sessions: Sessions, credManager: CredManager, todoList: ToDoListV2, settings: Settings) {

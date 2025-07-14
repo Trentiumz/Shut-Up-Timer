@@ -125,6 +125,10 @@ class NoLeaveSessionManager : CurSessionManager {
         // Currently does nothing
     }
     
+    func destroy() {
+        // Clean up resources - NoLeave manager doesn't need any cleanup
+    }
+    
     // ------------------ ON COMPLETION SESSION ------------------
     func getSession(endTime: Date) -> SessionEntry {
         assert(status == .failed || status == .succeeded);

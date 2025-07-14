@@ -48,6 +48,7 @@ class TimerViewModel<Manager: CurSessionManager>: ObservableObject, MVVM {
     // destroys the object before dereferencing
     func destroy() {
         curSession.pause();
+        curSession.destroy();
         timer?.invalidate()
         timer = nil
     }

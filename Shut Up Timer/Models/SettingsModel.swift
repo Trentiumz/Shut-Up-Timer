@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import FamilyControls
 
 enum TimerManagerType: String, Codable, CaseIterable, Identifiable {
     case noLeave
@@ -65,21 +66,29 @@ class Settings: ObservableObject, Codable, Equatable {
             didChange.send(self)
         }
     }
+    @Published var defaultBlockedApps: FamilyActivitySelection {
+        didSet {
+            didChange.send(self)
+        }
+    }
     let didChange = PassthroughSubject<Settings, Never>()
     var cancellables = Set<AnyCancellable>()
     
-    init(firstTime: Bool, difficulty: Difficulty, roastLevel: RoastLevel, timerParam: TimerParam) {
+    init(firstTime: Bool, difficulty: Difficulty, roastLevel: RoastLevel, timerParam: TimerParam, defaultBlockedApps: FamilyActivitySelection) {
         self.firstTime = firstTime
         self.difficulty = difficulty
         self.roastLevel = roastLevel
         self.timerParam = timerParam
+        self.defaultBlockedApps = defaultBlockedApps
     }
     
     static func == (l: Settings, r: Settings) -> Bool {
         return l.firstTime == r.firstTime &&
         l.difficulty == r.difficulty &&
         l.roastLevel == r.roastLevel &&
-        l.timerParam == r.timerParam
+        l.timerParam == r.timerParam &&
+        l.defaultBlockedApps.applicationTokens == r.defaultBlockedApps.applicationTokens &&
+        l.defaultBlockedApps.categoryTokens == r.defaultBlockedApps.categoryTokens
     }
     
     // MARK: - Codable
@@ -88,6 +97,7 @@ class Settings: ObservableObject, Codable, Equatable {
         case difficulty
         case roastLevel
         case timerParam
+        case defaultBlockedApps
     }
     
     required init(from decoder: Decoder) throws {
@@ -96,6 +106,7 @@ class Settings: ObservableObject, Codable, Equatable {
         difficulty = try container.decode(Difficulty.self, forKey: .difficulty)
         roastLevel = try container.decode(RoastLevel.self, forKey: .roastLevel)
         timerParam = try container.decode(TimerParam.self, forKey: .timerParam)
+        defaultBlockedApps = try container.decodeIfPresent(FamilyActivitySelection.self, forKey: .defaultBlockedApps) ?? FamilyActivitySelection()
     }
     
     func encode(to encoder: Encoder) throws {
@@ -104,6 +115,7 @@ class Settings: ObservableObject, Codable, Equatable {
         try container.encode(difficulty, forKey: .difficulty)
         try container.encode(roastLevel, forKey: .roastLevel)
         try container.encode(timerParam, forKey: .timerParam)
+        try container.encode(defaultBlockedApps, forKey: .defaultBlockedApps)
     }
 }
 
@@ -111,7 +123,8 @@ class SettingsLoader {
     static var defaultSettings: Settings = Settings(firstTime: true,
                                                     difficulty: .easy,
                                                     roastLevel: .low,
-                                                    timerParam: .countdown(seconds: 60 * 30))
+                                                    timerParam: .countdown(seconds: 60 * 30),
+                                                    defaultBlockedApps: FamilyActivitySelection())
     static func loadSettings() -> Settings {
         let data = UserDefaults.standard.data(forKey: "user-settings")
         if let liveData = data {

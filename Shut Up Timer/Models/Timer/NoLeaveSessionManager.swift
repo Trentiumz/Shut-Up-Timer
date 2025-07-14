@@ -21,7 +21,7 @@ enum SceneMiniPhase : Codable {
     }
 }
 
-class SessionInProgress : Codable, ObservableObject {
+class NoLeaveSessionManager : CurSessionManager {
     var initialParam: TimerParam;
     var startTime: Date;
     
@@ -32,6 +32,10 @@ class SessionInProgress : Codable, ObservableObject {
     
     @Published var curTodo: UUID;
     @Published var status: SessionStatus;
+    
+    var managerType: TimerManagerType {
+        return .noLeave
+    }
     
     /// initializes a Session in Progeress
     init(
@@ -95,28 +99,15 @@ class SessionInProgress : Codable, ObservableObject {
                 return;
             }
             
-            // update our task logs
+            // update our task logs using extension
             let timeSince = curTime.timeIntervalSince(lastActiveUpdate);
-            if tasks.isEmpty || tasks.last!.todoID != curTodo {
-                tasks.append(TaskLog(todoID: curTodo, timeIn: timeSince))
-            } else {
-                tasks[tasks.count - 1].timeIn += timeSince;
-            }
+            updateTaskLogs(timeSince: timeSince)
             
-            // update our current state
-            curParam = switch(curParam) {
-            case .countdown(let seconds):
-                    .countdown(seconds: seconds - timeSince);
-            }
+            // update our current state using extension
+            updateCurrentTimeParams(timeSince: timeSince)
             
-            // success condition - return if we do succeed
-            switch(curParam) {
-            case .countdown(let seconds):
-                if seconds <= 0 {
-                    succeedTimer();
-                    return;
-                }
-            }
+            // check success condition using extension
+            checkSuccessCondition()
         }
         
         // update our last active update variable
@@ -127,6 +118,11 @@ class SessionInProgress : Codable, ObservableObject {
     
     func updateCurTodo(curTodo: UUID) {
         self.curTodo = curTodo;
+    }
+    
+    func appReopen() {
+        // Method to handle updating session variables when app is closed and reopened
+        // Currently does nothing
     }
     
     // ------------------ ON COMPLETION SESSION ------------------

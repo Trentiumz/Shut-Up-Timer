@@ -1,10 +1,10 @@
 import SwiftUI
 import UserNotifications
 
-struct TimerView: View {
+struct TimerView<Manager: CurSessionManager>: View {
     // holds the model
-    @ObservedObject var timerViewModel: TimerViewModel;
-    @ObservedObject var curSession: SessionInProgress; // this is exactly timerViewModel.curSession
+    @ObservedObject var timerViewModel: TimerViewModel<Manager>;
+    @ObservedObject var curSession: Manager; // this is exactly timerViewModel.curSession
     
     // access for page transitions
     @EnvironmentObject var router: AppRouter;
@@ -21,7 +21,7 @@ struct TimerView: View {
     
     @Namespace private var todoNamespace
     
-    init(timerModel: TimerViewModel) {
+    init(timerModel: TimerViewModel<Manager>) {
         self.timerViewModel = timerModel;
         self.curSession = timerModel.curSession;
         self._selectedTodo = Binding(
@@ -174,14 +174,14 @@ struct TimerView: View {
         .onChange(of: curSession.status) { newVal in
             handleStatus(newVal);
         }
-        .onChange(of: scenePhase) { _ in
+        .onChange(of: scenePhase) { newVal in
+            print("In progress scene change -> \(newVal), current status is \(curSession.status)")
             if curSession.status == .inProgress {
-                print("In progress scene change -> \(scenePhase)")
-                if scenePhase == .background {
+                if newVal == .background {
                     scheduleComeBackNotification();
                 }
             }
-            timerViewModel.updateScenePhase(scenePhase);
+            timerViewModel.updateScenePhase(newVal);
         }
     }
 }

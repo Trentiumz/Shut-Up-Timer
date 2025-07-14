@@ -4,11 +4,23 @@ import SwiftUI;
 class AppRouter: ObservableObject {
     @Published var path = NavigationPath();
     
-    func toTimerState(params: TimerParam, todoID: UUID, startTime: Date = Date()) {
-        path.append(PathElement(route: AppRoute.timer(timerModel: TimerViewModel(startParams: params, startTodo: todoID, startPhase: .active))));
+    func toTimerState(params: TimerParam, todoID: UUID, managerType: TimerManagerType, startTime: Date = Date()) {
+        switch managerType {
+        case .noLeave:
+            let manager = NoLeaveSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], lastActiveUpdate: Date(), curTodo: todoID, status: .paused)
+            path.append(PathElement(route: AppRoute.noLeaveTimer(timerModel: TimerViewModel<NoLeaveSessionManager>(from: manager, startPhase: .active, appReopened: false))));
+        case .appBlock:
+            let manager = AppBlockSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], curTodo: todoID, status: .paused)
+            path.append(PathElement(route: AppRoute.appBlockTimer(timerModel: TimerViewModel<AppBlockSessionManager>(from: manager, startPhase: .active, appReopened: false))));
+        }
     }
-    func toTimerState(sessionInProgress: SessionInProgress) {
-        path.append(PathElement(route: AppRoute.timer(timerModel: TimerViewModel(from: sessionInProgress, startPhase: .active))))
+    func toTimerState(sessionInProgress: CurSessionManagerType, appReopened: Bool = true) {
+        switch sessionInProgress {
+        case .noLeaveSessionManager(let manager):
+            path.append(PathElement(route: AppRoute.noLeaveTimer(timerModel: TimerViewModel<NoLeaveSessionManager>(from: manager, startPhase: .active, appReopened: appReopened))))
+        case .appBlockSessionManager(let manager):
+            path.append(PathElement(route: AppRoute.appBlockTimer(timerModel: TimerViewModel<AppBlockSessionManager>(from: manager, startPhase: .active, appReopened: appReopened))))
+        }
     }
 
     func toLogin(onSuccess: @escaping () -> Void) {

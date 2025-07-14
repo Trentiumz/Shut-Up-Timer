@@ -1,6 +1,13 @@
 import SwiftUI
 import Combine
 
+enum TimerManagerType: String, Codable, CaseIterable, Identifiable {
+    case noLeave
+    case appBlock
+    
+    var id: String { self.rawValue }
+}
+
 enum Difficulty : String, Codable, CaseIterable, Identifiable {
     case easy;
     case medium;

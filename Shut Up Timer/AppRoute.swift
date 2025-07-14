@@ -2,7 +2,8 @@ import SwiftUI;
 
 enum AppRoute {
     case home
-    case timer(timerModel: TimerViewModel)
+    case noLeaveTimer(timerModel: TimerViewModel<NoLeaveSessionManager>)
+    case appBlockTimer(timerModel: TimerViewModel<AppBlockSessionManager>)
     case timerCompleted(session: SessionEntry)
     case timerFailed(session: SessionEntry)
     case timerFailedCamera(sessionID: UUID)

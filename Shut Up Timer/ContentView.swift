@@ -61,13 +61,18 @@ struct ContentView: View {
             .onAppear{
                 if let sessionInProgress = TempSessionLoader.getSession() {
                     // if there is an active session, navigate to the timer
-                    router.toTimerState(sessionInProgress: sessionInProgress)
+                    let sessionWrapper = CurSessionManagerType(from: sessionInProgress)
+                    router.toTimerState(sessionInProgress: sessionWrapper, appReopened: true)
                 }
             }
             .navigationDestination(for: PathElement.self) { elem in
                 switch elem.route {
-                case .timer(let timerModel):
+                case .noLeaveTimer(let timerModel):
                     // timer started
+                    TimerView(timerModel: timerModel).environmentObject(router)
+                        .navigationBarBackButtonHidden(true)
+                case .appBlockTimer(let timerModel):
+                    // app block timer started
                     TimerView(timerModel: timerModel).environmentObject(router)
                         .navigationBarBackButtonHidden(true)
                 case .timerCompleted(let session):

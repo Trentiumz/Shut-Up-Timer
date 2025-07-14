@@ -1,8 +1,8 @@
 import SwiftUI
 
 // Countdown timer that changes per second. Either manually stop it, or it will stop itself & call onFinish
-class TimerViewModel: ObservableObject, MVVM {
-    @Published var curSession: SessionInProgress;
+class TimerViewModel<Manager: CurSessionManager>: ObservableObject, MVVM {
+    @Published var curSession: Manager;
     var selectedTodo: UUID {
         didSet {
             curSession.updateCurTodo(curTodo: selectedTodo)
@@ -13,15 +13,14 @@ class TimerViewModel: ObservableObject, MVVM {
     private var timer: Timer? = nil;
     private var curScenePhase: SceneMiniPhase;
     
-    init(startParams: TimerParam, startTodo: UUID, startPhase: ScenePhase) {
-        self.curSession = SessionInProgress(initialParam: startParams, startTime: Date(), curParam: startParams, tasks: [], lastActiveUpdate: Date(), curTodo: startTodo, status: .paused);
-        self.selectedTodo = startTodo;
-        curScenePhase = SceneMiniPhase.from(startPhase);
-    }
-    init(from: SessionInProgress, startPhase: ScenePhase) {
+    init(from: Manager, startPhase: ScenePhase, appReopened: Bool = true) {
         curSession = from;
         curScenePhase = SceneMiniPhase.from(startPhase);
         selectedTodo = from.curTodo;
+        
+        if appReopened {
+            curSession.appReopen();
+        }
     }
     
     func updateScenePhase(_ scenePhase: ScenePhase) {
@@ -34,6 +33,7 @@ class TimerViewModel: ObservableObject, MVVM {
             curSession.resume();
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                 self.curSession.tick(phase: self.curScenePhase)
+                self.saveTempSession();
             }
         }
     }

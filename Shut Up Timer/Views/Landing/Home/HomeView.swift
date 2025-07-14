@@ -40,10 +40,10 @@ struct HomeView: View {
                 
                 ViewThatFits {
                     OnboardingNextButton(text: "Start Cooking", onSelect: {
-                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo)
+                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo, managerType: .noLeave)
                     })
                     OnboardingNextButton(text: "Start Cooking", onSelect: {
-                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo)
+                        router.toTimerState(params: settings.timerParam, todoID: selectedTodo, managerType: .noLeave)
                     }, isSmall: true)
                 }
                 

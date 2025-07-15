@@ -1,4 +1,6 @@
-import SwiftUI;
+import SwiftUI
+import FamilyControls
+import ManagedSettings
 
 enum SessionStatus : Codable {
     case inProgress;
@@ -33,6 +35,9 @@ class NoLeaveSessionManager : CurSessionManager {
     @Published var curTodo: UUID;
     @Published var status: SessionStatus;
     
+    // App blocker instance for managing app blocking functionality
+    private var appBlocker: AppBlocker?
+    
     var managerType: TimerManagerType {
         return .noLeave
     }
@@ -54,6 +59,21 @@ class NoLeaveSessionManager : CurSessionManager {
         self.lastActiveUpdate = lastActiveUpdate
         self.curTodo = curTodo
         self.status = status
+        
+        // Initialize the app blocker with failTimer closure
+        self.appBlocker = AppBlocker(failTimer: { [weak self] in
+            self?.failTimer()
+        })
+        
+        // If we're already in progress (e.g., restoring from saved session), start blocking immediately
+        if status == .inProgress {
+            appBlocker?.startBlocking()
+        }
+    }
+    
+    deinit {
+        // Clean up resources when session manager is destroyed
+        appBlocker?.destroy()
     }
     
     // ------------------ STATE UPDATE FUNCTIONS ------------------
@@ -63,6 +83,7 @@ class NoLeaveSessionManager : CurSessionManager {
         if status == .inProgress {
             tick(phase: .active) // "finish" the preview window
             status = .paused;
+            appBlocker?.stopBlocking()
         }
     }
     
@@ -71,14 +92,17 @@ class NoLeaveSessionManager : CurSessionManager {
         if status == .paused {
             tick(phase: .active); // "finish" the preview window
             status = .inProgress;
+            appBlocker?.startBlocking()
         }
     }
     
     func failTimer() {
         status = .failed;
+        appBlocker?.stopBlocking()
     }
     func succeedTimer() {
         status = .succeeded;
+        appBlocker?.stopBlocking()
     }
     
     /// updates the scene phase given an update of the timer
@@ -126,7 +150,8 @@ class NoLeaveSessionManager : CurSessionManager {
     }
     
     func destroy() {
-        // Clean up resources - NoLeave manager doesn't need any cleanup
+        // Clean up resources when session is being destroyed
+        appBlocker?.destroy()
     }
     
     // ------------------ ON COMPLETION SESSION ------------------
@@ -151,6 +176,11 @@ class NoLeaveSessionManager : CurSessionManager {
         lastActiveUpdate = try container.decode(Date.self, forKey: .lastActiveUpdate)
         curTodo = try container.decode(UUID.self, forKey: .curTodo)
         status = try container.decode(SessionStatus.self, forKey: .status)
+        
+        // Initialize the app blocker with failTimer closure
+        self.appBlocker = AppBlocker(failTimer: { [weak self] in
+            self?.failTimer()
+        })
     }
 
     func encode(to encoder: Encoder) throws {

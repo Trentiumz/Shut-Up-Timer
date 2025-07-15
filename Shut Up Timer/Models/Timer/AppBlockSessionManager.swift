@@ -14,11 +14,8 @@ class AppBlockSessionManager : CurSessionManager {
     @Published var curTodo: UUID
     @Published var status: SessionStatus
     
-    // ManagedSettings store for app blocking
-    private let store = ManagedSettingsStore()
-    
-    // Timer for checking permissions
-    private var permissionTimer: Timer?
+    // App blocker instance for managing app blocking functionality
+    private var appBlocker: AppBlocker?
     
     var managerType: TimerManagerType {
         return .appBlock
@@ -42,69 +39,22 @@ class AppBlockSessionManager : CurSessionManager {
         self.curTodo = curTodo
         self.status = status
         
+        // Initialize the app blocker with failTimer closure
+        self.appBlocker = AppBlocker(failTimer: { [weak self] in
+            self?.failTimer()
+        })
+        
         // If we're already in progress (e.g., restoring from saved session), start blocking immediately
         if status == .inProgress {
-            // Check permissions first
-            if checkPermissions() {
-                startBlocking()
-                startPermissionTimer()
-            } else {
-                // Can't start blocking without permissions, fail immediately
-                self.status = .failed
-            }
+            appBlocker?.startBlocking()
         }
     }
     
     deinit {
         // Clean up resources when session manager is destroyed
-        stopBlocking()
-        stopPermissionTimer()
+        appBlocker?.destroy()
     }
-    
-    // MARK: - App Blocking Functions
-    
-    /// Starts blocking apps using the settings
-    private func startBlocking() {
-        // Get the current settings
-        let settings = SettingsLoader.loadSettings()
-        
-        // Block the selected apps
-        store.shield.applications = settings.defaultBlockedApps.applicationTokens
-        store.shield.applicationCategories = .specific(settings.defaultBlockedApps.categoryTokens)
-        
-        print("Started blocking apps: \(settings.defaultBlockedApps.applicationTokens.count) apps, \(settings.defaultBlockedApps.categoryTokens.count) categories")
-    }
-    
-    /// Stops blocking apps
-    private func stopBlocking() {
-        store.shield.applications = nil
-        store.shield.applicationCategories = nil
-        
-        print("Stopped blocking apps")
-    }
-    
-    /// Checks if FamilyControls permissions are still granted
-    private func checkPermissions() -> Bool {
-        let authStatus = FamilyControls.AuthorizationCenter.shared.authorizationStatus
-        return authStatus == .approved
-    }
-    
-    /// Starts the permission checking timer
-    private func startPermissionTimer() {
-        permissionTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-            if !self.checkPermissions() {
-                print("FamilyControls permissions revoked, failing timer")
-                self.failTimer()
-            }
-        }
-    }
-    
-    /// Stops the permission checking timer
-    private func stopPermissionTimer() {
-        permissionTimer?.invalidate()
-        permissionTimer = nil
-    }
-    
+
     // ------------------ STATE UPDATE FUNCTIONS ------------------
     
     /// set paused (if we aren't done)
@@ -112,8 +62,7 @@ class AppBlockSessionManager : CurSessionManager {
         if status == .inProgress {
             tick(phase: .active) // "finish" the preview window
             status = .paused
-            stopBlocking()
-            stopPermissionTimer()
+            appBlocker?.stopBlocking()
         }
     }
     
@@ -122,28 +71,18 @@ class AppBlockSessionManager : CurSessionManager {
         if status == .paused {
             tick(phase: .active) // "finish" the preview window
             status = .inProgress
-            
-            // Check permissions before starting
-            if !checkPermissions() {
-                failTimer()
-                return
-            }
-            
-            startBlocking()
-            startPermissionTimer()
+            appBlocker?.startBlocking()
         }
     }
     
     func failTimer() {
         status = .failed
-        stopBlocking()
-        stopPermissionTimer()
+        appBlocker?.stopBlocking()
     }
     
     func succeedTimer() {
         status = .succeeded
-        stopBlocking()
-        stopPermissionTimer()
+        appBlocker?.stopBlocking()
     }
     
     /// updates the timer state - uses lastActiveUpdate to track time like NoLeaveSessionManager
@@ -181,8 +120,7 @@ class AppBlockSessionManager : CurSessionManager {
     
     func destroy() {
         // Clean up resources when session is being destroyed
-        stopBlocking()
-        stopPermissionTimer()
+        appBlocker?.destroy()
     }
     
     // ------------------ ON COMPLETION SESSION ------------------
@@ -207,6 +145,11 @@ class AppBlockSessionManager : CurSessionManager {
         lastUpdate = try container.decode(Date.self, forKey: .lastActiveUpdate)
         curTodo = try container.decode(UUID.self, forKey: .curTodo)
         status = try container.decode(SessionStatus.self, forKey: .status)
+        
+        // Initialize the app blocker with failTimer closure
+        self.appBlocker = AppBlocker(failTimer: { [weak self] in
+            self?.failTimer()
+        })
     }
 
     func encode(to encoder: Encoder) throws {

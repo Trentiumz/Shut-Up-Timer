@@ -56,57 +56,120 @@ class CredManager: ObservableObject {
 
     // Handles email login 
     func loginEmail(email: String, password: String) async throws {
-        try await supabaseClient.auth.signIn(email: email, password: password)
-        let curSession = try await supabaseClient.auth.session;
+        AnalyticsManager.shared.trackLoginAttempt(method: "email")
+        
+        do {
+            try await supabaseClient.auth.signIn(email: email, password: password)
+            let curSession = try await supabaseClient.auth.session;
 
-        await MainActor.run {
-            self.session = curSession;
-            self.loggedIn = true;
-            self.sendTokenToBackend()
+            await MainActor.run {
+                self.session = curSession;
+                self.loggedIn = true;
+                self.sendTokenToBackend()
+            }
+            
+            AnalyticsManager.shared.trackLoginSuccess(method: "email")
+            
+            // Set user ID for analytics
+            if let userID = curSession.user.id.uuidString as String? {
+                AnalyticsManager.shared.setUserId(userID)
+                
+                // Set user properties for analytics
+                if let email = curSession.user.email {
+                    AnalyticsManager.shared.setUserProperty(email, forName: "email")
+                }
+                AnalyticsManager.shared.setUserProperty("email", forName: "login_method")
+            }
+        } catch {
+            AnalyticsManager.shared.trackLoginFailure(method: "email", error: error.localizedDescription)
+            throw error
         }
     }
 
     /// Handles Google OAuth login
     func loginGoogle() async throws {
-        try await supabaseClient.auth.signInWithOAuth(
-            provider: .google,
-            redirectTo: URL(string: "shut-up-timer://login-callback")
-        )
+        AnalyticsManager.shared.trackLoginAttempt(method: "google")
+        
+        do {
+            try await supabaseClient.auth.signInWithOAuth(
+                provider: .google,
+                redirectTo: URL(string: "shut-up-timer://login-callback")
+            )
 
-        let curSession = try await supabaseClient.auth.session;
-        await MainActor.run {
-            self.session = curSession;
-            self.loggedIn = true;
-            self.sendTokenToBackend()
+            let curSession = try await supabaseClient.auth.session;
+            await MainActor.run {
+                self.session = curSession;
+                self.loggedIn = true;
+                self.sendTokenToBackend()
+            }
+            
+            AnalyticsManager.shared.trackLoginSuccess(method: "google")
+            
+            // Set user ID for analytics
+            if let userID = curSession.user.id.uuidString as String? {
+                AnalyticsManager.shared.setUserId(userID)
+                
+                // Set user properties for analytics
+                if let email = curSession.user.email {
+                    AnalyticsManager.shared.setUserProperty(email, forName: "email")
+                }
+                AnalyticsManager.shared.setUserProperty("google", forName: "login_method")
+            }
+        } catch {
+            AnalyticsManager.shared.trackLoginFailure(method: "google", error: error.localizedDescription)
+            throw error
         }
     }
     
     /// Handles Apple login, to be used with SignInWithAppleButton (for the result)
     func loginApple(result: Result<ASAuthorization, any Error>) async throws {
-        guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
-        else {
-            return
-        }
-        guard let idToken = credential.identityToken
-            .flatMap({ String(data: $0, encoding: .utf8) })
-        else {
-            return
-        }
-        let curSession = try await supabaseClient.auth.signInWithIdToken(
-            credentials: .init(
-                provider: .apple,
-                idToken: idToken
+        AnalyticsManager.shared.trackLoginAttempt(method: "apple")
+        
+        do {
+            guard let credential = try result.get().credential as? ASAuthorizationAppleIDCredential
+            else {
+                AnalyticsManager.shared.trackLoginFailure(method: "apple", error: "Invalid credential")
+                return
+            }
+            guard let idToken = credential.identityToken
+                .flatMap({ String(data: $0, encoding: .utf8) })
+            else {
+                AnalyticsManager.shared.trackLoginFailure(method: "apple", error: "Invalid ID token")
+                return
+            }
+            let curSession = try await supabaseClient.auth.signInWithIdToken(
+                credentials: .init(
+                    provider: .apple,
+                    idToken: idToken
+                )
             )
-        )
-        await MainActor.run {
-            self.session = curSession
-            self.loggedIn = true
-            self.sendTokenToBackend()
+            await MainActor.run {
+                self.session = curSession
+                self.loggedIn = true
+                self.sendTokenToBackend()
+            }
+            
+            AnalyticsManager.shared.trackLoginSuccess(method: "apple")
+            
+            // Set user ID for analytics
+            if let userID = curSession.user.id.uuidString as String? {
+                AnalyticsManager.shared.setUserId(userID)
+                
+                // Set user properties for analytics
+                if let email = curSession.user.email {
+                    AnalyticsManager.shared.setUserProperty(email, forName: "email")
+                }
+                AnalyticsManager.shared.setUserProperty("apple", forName: "login_method")
+            }
+        } catch {
+            AnalyticsManager.shared.trackLoginFailure(method: "apple", error: error.localizedDescription)
+            throw error
         }
     }
 
     // Handles logging out
     func logOut() async throws {
+        AnalyticsManager.shared.trackLogout()
         try await supabaseClient.auth.signOut()
         await MainActor.run {
             self.session = nil

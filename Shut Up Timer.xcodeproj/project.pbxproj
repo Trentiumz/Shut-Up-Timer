@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		734C17B82E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */; };
+		734C17B92E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */; };
+		734C17BA2E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */; };
+		734C17BB2E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */; };
+		734C17BE2E26D31E00C6B5A7 /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = 734C17BD2E26D31E00C6B5A7 /* FirebaseAI */; };
+		734C17C02E26D31E00C6B5A7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 734C17BF2E26D31E00C6B5A7 /* FirebaseAnalytics */; };
+		734C17C22E26D31E00C6B5A7 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 734C17C12E26D31E00C6B5A7 /* FirebaseAnalyticsCore */; };
+		734C17C42E26D31E00C6B5A7 /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 734C17C32E26D31E00C6B5A7 /* FirebaseAnalyticsIdentitySupport */; };
+		734C17C62E26D31E00C6B5A7 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 734C17C52E26D31E00C6B5A7 /* FirebaseAppCheck */; };
 		736830832E0E4A96006BFDFD /* SwiftUIReorderableForEach in Frameworks */ = {isa = PBXBuildFile; productRef = 736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */; };
 		736831EB2E1178BB006BFDFD /* Notification Remote Receival.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C9784C3A2DE50CED00BF0281 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C9784C392DE50CED00BF0281 /* GoogleSignIn */; };
@@ -58,6 +67,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Notification Remote Receival.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C93EE98A2DB5133700E5080A /* Shut Up Timer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Shut Up Timer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C93EE99A2DB5133A00E5080A /* Shut Up TimerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Shut Up TimerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,10 +134,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				C9E74A9D2DC3B2FB0014B994 /* PostgREST in Frameworks */,
+				734C17C42E26D31E00C6B5A7 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
 				C9E74A9B2DC3B2FB0014B994 /* Functions in Frameworks */,
 				C9E74AA42DC3B3FD0014B994 /* Supabase in Frameworks */,
+				734C17C62E26D31E00C6B5A7 /* FirebaseAppCheck in Frameworks */,
 				C9784C3C2DE50CF200BF0281 /* GoogleSignInSwift in Frameworks */,
 				C9E74A992DC3B2FB0014B994 /* Auth in Frameworks */,
+				734C17BE2E26D31E00C6B5A7 /* FirebaseAI in Frameworks */,
+				734C17C02E26D31E00C6B5A7 /* FirebaseAnalytics in Frameworks */,
+				734C17C22E26D31E00C6B5A7 /* FirebaseAnalyticsCore in Frameworks */,
 				C9E74AA12DC3B2FB0014B994 /* Storage in Frameworks */,
 				736830832E0E4A96006BFDFD /* SwiftUIReorderableForEach in Frameworks */,
 				C9E74A9F2DC3B2FB0014B994 /* Realtime in Frameworks */,
@@ -161,6 +176,7 @@
 				736831E52E1178BB006BFDFD /* Notification Remote Receival */,
 				C9E74AA22DC3B3F40014B994 /* Frameworks */,
 				C93EE98B2DB5133700E5080A /* Products */,
+				734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -235,6 +251,11 @@
 				C9784C392DE50CED00BF0281 /* GoogleSignIn */,
 				C9784C3B2DE50CF200BF0281 /* GoogleSignInSwift */,
 				736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */,
+				734C17BD2E26D31E00C6B5A7 /* FirebaseAI */,
+				734C17BF2E26D31E00C6B5A7 /* FirebaseAnalytics */,
+				734C17C12E26D31E00C6B5A7 /* FirebaseAnalyticsCore */,
+				734C17C32E26D31E00C6B5A7 /* FirebaseAnalyticsIdentitySupport */,
+				734C17C52E26D31E00C6B5A7 /* FirebaseAppCheck */,
 			);
 			productName = "Shut Up Timer";
 			productReference = C93EE98A2DB5133700E5080A /* Shut Up Timer.app */;
@@ -325,6 +346,7 @@
 				C9E74A972DC3B2FB0014B994 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				C9784C382DE50CDA00BF0281 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				736830812E0E4A96006BFDFD /* XCRemoteSwiftPackageReference "swiftui-reorderable-foreach" */,
+				734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C93EE98B2DB5133700E5080A /* Products */;
@@ -344,6 +366,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				734C17BB2E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,6 +374,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				734C17BA2E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -358,6 +382,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				734C17B92E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,6 +390,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				734C17B82E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -793,6 +819,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
 		736830812E0E4A96006BFDFD /* XCRemoteSwiftPackageReference "swiftui-reorderable-foreach" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/globulus/swiftui-reorderable-foreach";
@@ -820,6 +854,31 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		734C17BD2E26D31E00C6B5A7 /* FirebaseAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAI;
+		};
+		734C17BF2E26D31E00C6B5A7 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		734C17C12E26D31E00C6B5A7 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		734C17C32E26D31E00C6B5A7 /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		734C17C52E26D31E00C6B5A7 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
 		736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 736830812E0E4A96006BFDFD /* XCRemoteSwiftPackageReference "swiftui-reorderable-foreach" */;

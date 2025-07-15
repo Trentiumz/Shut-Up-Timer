@@ -131,7 +131,11 @@ struct SettingsView : View {
                             Spacer()
                             Menu {
                                 ForEach(Difficulty.allCases) { difficulty in
-                                    StylizedOption(onClick: { settings.difficulty = difficulty}, text: difficulty.rawValue.capitalized)
+                                    StylizedOption(onClick: { 
+                                        let oldValue = settings.difficulty.rawValue
+                                        settings.difficulty = difficulty
+                                        AnalyticsManager.shared.trackDifficultyChanged(from: oldValue, to: difficulty.rawValue)
+                                    }, text: difficulty.rawValue.capitalized)
                                         .tag(difficulty)
                                 }
                             } label: {
@@ -144,7 +148,11 @@ struct SettingsView : View {
                             Spacer()
                             Menu {
                                 ForEach(RoastLevel.allCases) { level in
-                                    StylizedOption(onClick: { settings.roastLevel = level}, text: level.rawValue.capitalized)
+                                    StylizedOption(onClick: { 
+                                        let oldValue = settings.roastLevel.rawValue
+                                        settings.roastLevel = level
+                                        AnalyticsManager.shared.trackRoastLevelChanged(from: oldValue, to: level.rawValue)
+                                    }, text: level.rawValue.capitalized)
                                         .tag(level)
                                 }
                             } label: {

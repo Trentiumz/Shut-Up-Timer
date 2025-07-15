@@ -38,6 +38,7 @@ struct FriendInvite : View {
         Task {
             do {
                 try await credManager.fastAPI.sendFriendRequest(FastAPIClient.SendFriendRequestParams(receiver_friend_code: friendCode))
+                AnalyticsManager.shared.trackFriendRequestSent()
                 await MainActor.run {
                     errorMessage = nil
                     // Trigger a refresh of the request list

@@ -38,6 +38,7 @@ struct LeaderboardView : View {
                                 withAnimation {
                                     selectedTab = tab;
                                 }
+                                AnalyticsManager.shared.trackLeaderboardViewed(type: tab.rawValue.lowercased())
                             }
                         }
                     }

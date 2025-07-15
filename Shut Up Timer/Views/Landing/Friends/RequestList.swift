@@ -171,6 +171,7 @@ fileprivate struct RequestList : View {
         Task {
             do {
                 try await credManager.acceptFriendRequest(requestId);
+                AnalyticsManager.shared.trackFriendRequestAccepted()
                 updateRequests();
             } catch {
                 print("Error responding to friend request: \(error)");

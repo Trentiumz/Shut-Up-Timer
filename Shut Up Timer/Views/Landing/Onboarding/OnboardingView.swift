@@ -36,14 +36,34 @@ struct OnboardingView : View {
     }
     private func transitionRightTo(_ to: OnboardingStage) {
         transitionRight = true;
+        trackOnboardingStepAnalytics(to)
         withAnimation {
             curStage = to;
         }
     }
     private func transitionLeftTo(_ to: OnboardingStage) {
         transitionRight = false;
+        trackOnboardingStepAnalytics(to)
         withAnimation {
             curStage = to;
+        }
+    }
+    
+    private func trackOnboardingStepAnalytics(_ stage: OnboardingStage) {
+        let stepInfo = getStepInfo(stage)
+        AnalyticsManager.shared.trackOnboardingStep(stepInfo.name, stepNumber: stepInfo.number)
+    }
+    
+    private func getStepInfo(_ stage: OnboardingStage) -> (name: String, number: Int) {
+        switch stage {
+        case .hello: return ("welcome", 1)
+        case .answerForMe: return ("intro_questions", 2)
+        case .hours: return ("study_hours", 3)
+        case .network: return ("social_network", 4)
+        case .roastLevel: return ("roast_level", 5)
+        case .difficulty: return ("difficulty", 6)
+        case .qInfo1: return ("info_screen", 7)
+        case .loginQuery: return ("login_choice", 8)
         }
     }
     
@@ -148,7 +168,16 @@ struct OnboardingView : View {
                 .transition(getCurTransition())
             }
         }
-        .animation(.easeInOut, value: curStage);
+        .animation(.easeInOut, value: curStage)
+        .onAppear {
+            AnalyticsManager.shared.trackOnboardingStart()
+            trackOnboardingStepAnalytics(.hello)
+        }
+        .onDisappear {
+            // Track abandonment if user leaves before completing
+            let stepInfo = getStepInfo(curStage)
+            AnalyticsManager.shared.trackOnboardingAbandoned(atStep: stepInfo.name, stepNumber: stepInfo.number)
+        }
     }
 }
 

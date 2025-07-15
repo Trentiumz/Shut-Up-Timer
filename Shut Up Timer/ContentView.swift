@@ -11,6 +11,7 @@ struct ContentView: View {
     @State var selectedScreen: LandingScreen = .home;
     @State var showAlert: Bool = false;
     @State var alertMessage: String = "";
+    @Environment(\.scenePhase) private var scenePhase
     
     init() {
         
@@ -22,6 +23,7 @@ struct ContentView: View {
                 if(settings.firstTime) {
                     // onboarding
                     OnboardingView(onDone: {
+                        AnalyticsManager.shared.trackOnboardingComplete()
                         settings.firstTime = false;
                     })
                 } else {
@@ -118,7 +120,20 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             requestNotificationPermission()
-        }.onOpenURL(perform: { url in
+        }
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .background:
+                AnalyticsManager.shared.trackAppBackground()
+            case .active:
+                AnalyticsManager.shared.trackAppForeground()
+            case .inactive:
+                break // Don't track inactive state
+            @unknown default:
+                break
+            }
+        }
+        .onOpenURL(perform: { url in
             if url.scheme == "shutuptimer",
                url.host == "friend-invite",
                 let components = URLComponents(url: url, resolvingAgainstBaseURL: false),

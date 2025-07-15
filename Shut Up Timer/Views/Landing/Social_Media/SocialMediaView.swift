@@ -28,6 +28,7 @@ struct SocialMediaView: View {
             }
         }
         .onAppear {
+            AnalyticsManager.shared.trackScreenView("social_media")
             Task {
                 await fetchPosts()
             }

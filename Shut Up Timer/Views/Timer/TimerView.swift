@@ -37,6 +37,18 @@ struct TimerView<Manager: CurSessionManager>: View {
         
         var sessionResult = curSession.getSession(endTime: Date());
         sessionResult.roast = chosenRoast;
+        
+        // Track timer failure analytics
+        let timerType = curSession.managerType == .noLeave ? "no_leave" : "app_block"
+        let plannedDuration = sessionResult.plannedTime
+        let actualDuration = sessionResult.timeLocked
+        AnalyticsManager.shared.trackTimerFailed(
+            type: timerType,
+            duration: plannedDuration,
+            failedAfter: actualDuration,
+            reason: "user_quit"
+        )
+        
         router.toTimerFailed(session: sessionResult);
         sessions.sessions.append(sessionResult);
     }
@@ -46,6 +58,17 @@ struct TimerView<Manager: CurSessionManager>: View {
         timerViewModel.stopSession();
         
         let sessionResult = curSession.getSession(endTime: Date())
+        
+        // Track timer completion analytics
+        let timerType = curSession.managerType == .noLeave ? "no_leave" : "app_block"
+        let plannedDuration = sessionResult.plannedTime
+        let actualDuration = sessionResult.timeLocked
+        AnalyticsManager.shared.trackTimerComplete(
+            type: timerType,
+            duration: plannedDuration,
+            actualDuration: actualDuration
+        )
+        
         router.toTimerCompleted(curSession: sessionResult);
         sessions.sessions.append(curSession.getSession(endTime: Date()));
     }
@@ -159,6 +182,17 @@ struct TimerView<Manager: CurSessionManager>: View {
             // save starting state
             self.timerViewModel.saveTempSession();
             UIApplication.shared.isIdleTimerDisabled = true
+            
+            // Track timer start analytics
+            let timerType = curSession.managerType == .noLeave ? "no_leave" : "app_block"
+            let duration = curSession.curParam.getTotTime()
+            let sessionType = curSession.managerType.rawValue
+            AnalyticsManager.shared.trackTimerStart(
+                type: timerType,
+                duration: duration,
+                sessionType: sessionType,
+                roastLevel: "N/A"
+            )
             
             // begin the session & initial updates (for continuation)
             timerViewModel.startSession()

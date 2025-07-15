@@ -8,17 +8,33 @@ struct TopBarView : View {
     
     @Binding var selectedScreen: LandingScreen;
 
+    private func screenName(_ screen: LandingScreen) -> String {
+        switch screen {
+        case .home: return "home"
+        case .socialMedia: return "social_media"
+        case .leaderboard: return "leaderboard"
+        case .disappointment: return "disappointment"
+        case .account: return "account"
+        }
+    }
+    
     var body: some View {
         HStack{
             Button(action: {
+                let previousScreen = selectedScreen
                 withAnimation {
                     selectedScreen = .account;
+                }
+                if previousScreen != .account {
+                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "account")
+                    AnalyticsManager.shared.trackScreenView("account")
                 }
             }) {
                 PFPDisplay(url: curUser.userPublicProfile?.profile_picture ?? "", width: 32, height: 32)
             }
             
             Button(action: {
+                AnalyticsManager.shared.trackScreenView("feedback")
                 router.toFeedbackView();
             }) {
                 Image(systemName: "bubble.left")
@@ -29,6 +45,7 @@ struct TopBarView : View {
             Spacer()
             
             Button(action: {
+                AnalyticsManager.shared.trackScreenView("invite_friends")
                 router.toInviteFriends();
                 // Add your action here
             }) {
@@ -39,6 +56,7 @@ struct TopBarView : View {
             .buttonStyle(PlainButtonStyle())
             
             Button(action: {
+                AnalyticsManager.shared.trackScreenView("notifications")
                 router.toNotifications();
             }) {
                 ZStack(alignment: .bottomTrailing) {
@@ -60,6 +78,7 @@ struct TopBarView : View {
             .buttonStyle(PlainButtonStyle())
             
             Button(action: {
+                AnalyticsManager.shared.trackScreenView("add_post")
                 router.toAddPost();
             }) {
                 Image(systemName: "plus.square")
@@ -111,40 +130,65 @@ struct BottomBarView : View {
     var body : some View {
         HStack {
             Button(action: {
+                let previousScreen = selectedScreen
                 withAnimation {
                     selectedScreen = .home
+                }
+                if previousScreen != .home {
+                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "home")
+                    AnalyticsManager.shared.trackScreenView("home")
                 }
             }){
                 IconImage("house.fill")
             }
             Spacer()
             Button(action: {
+                let previousScreen = selectedScreen
                 withAnimation {
                     selectedScreen = .socialMedia
+                }
+                if previousScreen != .socialMedia {
+                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "social_media")
+                    AnalyticsManager.shared.trackScreenView("social_media")
                 }
             }){
                 IconImage("person.2.fill")
             }
             Spacer()
             Button(action: {
+                let previousScreen = selectedScreen
                 withAnimation {
                     selectedScreen = .leaderboard
+                }
+                if previousScreen != .leaderboard {
+                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "leaderboard")
+                    AnalyticsManager.shared.trackScreenView("leaderboard")
                 }
             }){
                 IconImage("list.number")
             }
             Spacer()
             Button(action: {
+                let previousScreen = selectedScreen
                 withAnimation {
                     selectedScreen = .disappointment
+                }
+                if previousScreen != .disappointment {
+                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "disappointment")
+                    AnalyticsManager.shared.trackScreenView("disappointment")
                 }
             }){
                 IconImage("photo.fill")
             }
             Spacer()
             Button(action: {
+                let previousScreen = selectedScreen
                 withAnimation {
                     selectedScreen = .account
+                }
+                if previousScreen != .account {
+                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "account")
+                    AnalyticsManager.shared.trackScreenView("account")
                 }
             }){
                 IconImage("gearshape.fill")
@@ -154,6 +198,16 @@ struct BottomBarView : View {
         .padding(.horizontal, 30)
         .frame(height: 60)
         .background(ColorTokens.red300)
+    }
+    
+    private func screenName(_ screen: LandingScreen) -> String {
+        switch screen {
+        case .home: return "home"
+        case .socialMedia: return "social_media"
+        case .leaderboard: return "leaderboard"
+        case .disappointment: return "disappointment"
+        case .account: return "account"
+        }
     }
 }
 

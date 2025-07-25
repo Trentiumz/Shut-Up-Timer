@@ -1,15 +1,15 @@
 import SwiftUI
 
 struct AccountPostView: View {
-    @EnvironmentObject var sessions: Sessions
+    @EnvironmentObject var sessions: SessionLoader
     @EnvironmentObject var postLoader: PostLoader
     @EnvironmentObject var credManager: CredManager
     @EnvironmentObject var curUser: CurUser
-    @EnvironmentObject var todoList: ToDoListV2
     @State private var selectedTab: PostTab = .month
     @State private var uploadingPosts: Set<UUID> = []
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @Environment(\.managedObjectContext) private var viewContext
     
     let month: Int
     let year: Int
@@ -60,7 +60,7 @@ struct AccountPostView: View {
         
         uploadingPosts.insert(post.id)
         Task {
-            let postInfo = post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+            let postInfo = post.toLocalPostInfo(currentUser: curUser, context: viewContext)
             let remoteId = await credManager.fastAPI.createPost(postInfo)
             
             await MainActor.run {
@@ -138,10 +138,10 @@ struct LocalPostListView: View {
     let onRetryUpload: (Post) -> Void
     let uploadingPosts: Set<UUID>
     
-    @EnvironmentObject var sessions: Sessions
+    @EnvironmentObject var sessions: SessionLoader
     @EnvironmentObject var curUser: CurUser
-    @EnvironmentObject var todoList: ToDoListV2
     @State private var animationToggle = false
+    @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -153,7 +153,7 @@ struct LocalPostListView: View {
             } else {
                 ForEach(posts.indices, id: \.self) { index in
                     let post = posts[index]
-                    let postInfo = post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+                    let postInfo = post.toLocalPostInfo(currentUser: curUser, context: viewContext)
                     
                     ZStack {
                         // Original PostItemView
@@ -202,9 +202,7 @@ struct LocalPostListView: View {
 #Preview {
     AccountPostView(month: Calendar.current.component(.month, from: Date()),
                    year: Calendar.current.component(.year, from: Date()))
-        .environmentObject(Sessions(sessions: []))
         .environmentObject(PostLoader.loadPostLoader())
         .environmentObject(CredManager())
-        .environmentObject(ToDoLoader.getToDo())
         .environmentObject(CurUser(credManager: CredManager()))
 }

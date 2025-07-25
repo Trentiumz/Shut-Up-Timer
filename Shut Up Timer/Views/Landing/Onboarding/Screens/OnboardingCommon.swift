@@ -65,7 +65,7 @@ struct Background : View {
         Rectangle()
             .foregroundColor(.clear)
             .background(
-                ImageAssets.onboardingHello67
+                Image(uiImage: ImageAssets.image153)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .clipped()

@@ -4,7 +4,7 @@ protocol CurSessionManager: ObservableObject, Codable {
     var initialParam: TimerParam { get set }
     var startTime: Date { get set }
     var curParam: TimerParam { get set }
-    var tasks: [TaskLog] { get set }
+    var tasks: [TempTaskLog] { get set }
     var curTodo: UUID { get set }
     var status: SessionStatus { get set }
     var managerType: TimerManagerType { get }
@@ -15,7 +15,7 @@ protocol CurSessionManager: ObservableObject, Codable {
     func updateCurTodo(curTodo: UUID)
     func failTimer()
     func succeedTimer()
-    func getSession(endTime: Date) -> SessionEntry
+    func getSession(endTime: Date) -> TempSession
     func appReopen()
     func destroy()
 }
@@ -30,7 +30,7 @@ extension CurSessionManager {
         }
         
         if tasks.isEmpty || tasks.last!.todoID != curTodo {
-            tasks.append(TaskLog(todoID: curTodo, timeIn: timeSince))
+            tasks.append(TempTaskLog(todoID: curTodo, timeIn: timeSince))
         } else {
             tasks[tasks.count - 1].timeIn += timeSince
         }

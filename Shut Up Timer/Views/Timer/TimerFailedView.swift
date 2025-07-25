@@ -2,9 +2,9 @@ import SwiftUI
 
 struct TimerFailedView: View {
     @EnvironmentObject var router: AppRouter;
-    private var session: SessionEntry
+    private var session: TempSession
     
-    init(session: SessionEntry) {
+    init(session: TempSession) {
         self.session = session;
     }
     
@@ -51,5 +51,5 @@ struct TimerFailedView: View {
 }
 
 #Preview {
-    TimerFailedView(session: SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 170, plannedTime: 170, success: false, roast: "You are a big potato and a bad idea :("))
+    TimerFailedView(session: TempSession(tasks: [], started: Date(), ended: Date(), timeLocked: 170, plannedTime: 170, success: false, roast: "You are a big potato and a bad idea :("))
 }

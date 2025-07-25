@@ -1,10 +1,12 @@
 import SwiftUI;
+import CoreData
 
 struct FailedCameraView : View {
     @State private var image: UIImage?;
     @State private var showCamera = false;
-    @EnvironmentObject var sessions: Sessions;
+    @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var router: AppRouter;
+    @Environment(\.managedObjectContext) private var viewContext
     let sessionID: UUID;
     
     var body : some View {
@@ -62,8 +64,18 @@ struct FailedCameraView : View {
                         let imageName: String = UUID().rawValue;
                         let success = ImageLoader.saveImage(name: imageName, image: image)
                         if success {
-                            if let ind = sessions.sessions.lastIndex(where: { $0.id == sessionID }) {
-                                sessions.sessions[ind].imageName = imageName
+                            // Find and update the Core Data Session entity
+                            let sessionRequest: NSFetchRequest<Session> = Session.fetchRequest()
+                            sessionRequest.predicate = NSPredicate(format: "id == %@", sessionID as CVarArg)
+                            
+                            do {
+                                let sessions = try viewContext.fetch(sessionRequest)
+                                if let session = sessions.first {
+                                    session.imageName = imageName
+                                    try viewContext.save()
+                                }
+                            } catch {
+                                print("Failed to update session with image: \(error)")
                             }
                         }
                     }
@@ -81,4 +93,5 @@ struct FailedCameraView : View {
     FailedCameraView(sessionID: UUID())
         .environmentObject(CredManager())
         .environmentObject(AppRouter())
+        .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
 }

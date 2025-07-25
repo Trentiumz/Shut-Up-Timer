@@ -15,14 +15,14 @@ import FamilyControls
 struct Shut_Up_TimerApp: App {
     // register app delegate for push notifications
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    let persistenceController = PersistenceController.shared
     
     let notificationManager = NotificationManager()
     let router = AppRouter()
     let settings = SettingsLoader.loadSettings()
-    let sessions = SessionsLoader.loadSessions()
-    let todoList = ToDoLoader.getToDo()
     let credManager = CredManager()
     let postLoader = PostLoader.loadPostLoader()
+    let sessions = SessionLoader() // New Core Data wrapper
     let curUser: CurUser
     
     init() {
@@ -31,7 +31,7 @@ struct Shut_Up_TimerApp: App {
         
         requestFamilyPermissions()
         // Set up subscriptions
-        setupSubscriptions(sessions: sessions, credManager: credManager, todoList: todoList, settings: settings)
+        setupSubscriptions(credManager: credManager, settings: settings)
     }
     
     private func requestFamilyPermissions() {
@@ -45,18 +45,18 @@ struct Shut_Up_TimerApp: App {
         }
     }
     
-    private func setupSubscriptions(sessions: Sessions, credManager: CredManager, todoList: ToDoListV2, settings: Settings) {
+    private func setupSubscriptions(credManager: CredManager, settings: Settings) {
         // Subscribe to sessions changes
         sessions.didChange
-            .sink { updatedSessions in
-                SessionsLoader.saveSessions(updatedSessions)
+            .sink { _ in
                 // Update backend when user is logged in
                 if credManager.loggedIn {
                     Task {
-                        try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": updatedSessions.getIQ()]).execute()
-                        try await credManager.supabaseClient.rpc("change_hours", params: ["new_hours": toISO(TimeInterval(updatedSessions.getTotalTimeLocked()))]).execute()
-                        try await credManager.supabaseClient.rpc("change_top_categories", params: ["new_top_categories": updatedSessions.getTopCategoryStrings(toDoList: todoList)]).execute()
-                        try await credManager.supabaseClient.rpc("change_roasts", params: ["new_roasts": updatedSessions.getLatestRoasts()]).execute()
+                        let context = persistenceController.container.viewContext
+                        try await credManager.supabaseClient.rpc("change_iq", params: ["new_iq": Session.getTotalIQ(context: context)]).execute()
+                        try await credManager.supabaseClient.rpc("change_hours", params: ["new_hours": toISO(TimeInterval(Session.getTotalTimeLocked(context: context)))]).execute()
+                        try await credManager.supabaseClient.rpc("change_top_categories", params: ["new_top_categories": Session.getTopCategoryStrings(context: context)]).execute()
+                        try await credManager.supabaseClient.rpc("change_roasts", params: ["new_roasts": Session.getLatestRoasts(context: context)]).execute()
                     }
                 }
             }
@@ -68,13 +68,6 @@ struct Shut_Up_TimerApp: App {
                 SettingsLoader.saveSettings(updatedSettings)
             }
             .store(in: &settings.cancellables)
-        
-        // Subscribe to todo list changes
-        todoList.didChange
-            .sink { updatedTodoList in
-                ToDoLoader.saveToDo(todo: updatedTodoList)
-            }
-            .store(in: &todoList.cancellables)
     }
     
     var body: some Scene {
@@ -86,8 +79,8 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(credManager)
                 .environmentObject(notificationManager)
                 .environmentObject(curUser)
-                .environmentObject(todoList)
                 .environmentObject(postLoader)
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .preferredColorScheme(.light)
         }
     }

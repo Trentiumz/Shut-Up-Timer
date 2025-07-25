@@ -32,6 +32,20 @@ enum ImageAssets {
     static let disappointmentChevron = Image("DisappointmentChevron-Polygon 1")
     static let feedbackUpvoteButton = Image("feedback-upvote-image 140")
     static let postBoundPage = Image("post-boundpage-image 0 12")
+    
+    // New images
+    static let image153 = UIImage(named: "image 153")!
+    static let image146 = UIImage(named: "image 146")!
+    static let image147 = UIImage(named: "image 147")!
+    static let image124 = UIImage(named: "image 124")!
+    static let image144 = UIImage(named: "image 144")!
+    static let image145 = UIImage(named: "image 145")!
+    static let image161 = UIImage(named: "image 161")!
+    static let qrCode2 = UIImage(named: "qr-code 2")!
+    static let image156_1 = UIImage(named: "image 156-1")!
+    static let image156 = UIImage(named: "image 156")!
+    static let image164 = UIImage(named: "image 164")!
+    static let image166 = UIImage(named: "image 166")!
 }
 
 struct FormattedImages {
@@ -577,8 +591,86 @@ struct FormattedImages {
             .scaleEffect(scaleFactor)
         }
     }
+    
+    static var Image145: UIImage {
+        cropImage(ImageAssets.image145, to: CGRect(x: 0, y: 9, width: 54, height: 34))!
+    }
+    
+    static var Image144: UIImage {
+        cropImage(ImageAssets.image144, to: CGRect(x: 9, y: 4, width: 34, height: 42))!
+    }
+    
+    static var Image124 = ImageAssets.image124;
+    
+    static var Image147: UIImage {
+        cropImage(ImageAssets.image147, to: CGRect(x: 0, y: 0, width: 47, height: 43))!
+    }
+    
+    static var Image146: UIImage = ImageAssets.image146;
+    
+    static var Image161: UIImage {
+        cropImage(ImageAssets.image161, to: CGRect(x: 20, y: 28, width: 195, height: 245))!
+    }
+    
+    static var Image164: UIImage {
+        cropImage(ImageAssets.image164, to: CGRect(x: 135, y: 70, width: 575, height: 730))!
+    }
+    
+    static var Image166: UIImage {
+        cropImage(ImageAssets.image166, to: CGRect(x: 100, y: 57, width: 620, height: 758))!
+    }
+}
+
+fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {
+    guard let cgImage = image.cgImage?.cropping(to: rect) else { return nil }
+    return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
+}
+
+fileprivate func rotateImage(_ image: UIImage, by angle: CGFloat) -> UIImage? {
+    let radians = angle
+    let newSize = CGSize(
+        width: abs(cos(radians)) * image.size.width + abs(sin(radians)) * image.size.height,
+        height: abs(sin(radians)) * image.size.width + abs(cos(radians)) * image.size.height
+    )
+
+    UIGraphicsBeginImageContextWithOptions(newSize, false, image.scale)
+    guard let context = UIGraphicsGetCurrentContext() else { return nil }
+
+    // Move origin to center for rotation
+    context.translateBy(x: newSize.width / 2, y: newSize.height / 2)
+    context.rotate(by: radians)
+
+    // Draw the image centered
+    image.draw(in: CGRect(
+        x: -image.size.width / 2,
+        y: -image.size.height / 2,
+        width: image.size.width,
+        height: image.size.height
+    ))
+
+    let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+    return rotatedImage
+}
+
+fileprivate func cropAndRotate(_ image: UIImage, cropRect: CGRect?, angle: CGFloat) -> UIImage? {
+    var img = image
+    if let rect = cropRect {
+        guard let cropped = cropImage(img, to: rect) else { return nil }
+        img = cropped
+    }
+    guard let rotated = rotateImage(img, by: angle) else { return nil }
+    return rotated
 }
 
 #Preview {
-    FormattedImages.BoundPage(width: 300)
+    ZStack {
+        Color.black
+        Image(uiImage: FormattedImages.Image166)
+            .overlay(
+                Rectangle()
+                    .stroke(Color.red, lineWidth: 2)
+            )
+            .scaleEffect(0.5)
+    }
 }

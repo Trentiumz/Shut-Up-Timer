@@ -17,7 +17,7 @@ struct TimerView<Manager: CurSessionManager>: View {
     // whether the modal for quitting is open
     @State var quitExpanded: Bool = false;
 
-    @EnvironmentObject var sessions: Sessions;
+    @EnvironmentObject var sessions: SessionLoader;
     
     @Namespace private var todoNamespace
     
@@ -35,13 +35,13 @@ struct TimerView<Manager: CurSessionManager>: View {
         timerViewModel.stopSession();
         let chosenRoast = getRandomRoast();
         
-        var sessionResult = curSession.getSession(endTime: Date());
-        sessionResult.roast = chosenRoast;
+        var tempSession = curSession.getSession(endTime: Date());
+        tempSession.roast = chosenRoast;
         
         // Track timer failure analytics
         let timerType = curSession.managerType == .noLeave ? "no_leave" : "app_block"
-        let plannedDuration = sessionResult.plannedTime
-        let actualDuration = sessionResult.timeLocked
+        let plannedDuration = tempSession.plannedTime
+        let actualDuration = tempSession.timeLocked
         AnalyticsManager.shared.trackTimerFailed(
             type: timerType,
             duration: plannedDuration,
@@ -49,28 +49,28 @@ struct TimerView<Manager: CurSessionManager>: View {
             reason: "user_quit"
         )
         
-        router.toTimerFailed(session: sessionResult);
-        sessions.sessions.append(sessionResult);
+        sessions.addSession(tempSession)
+        router.toTimerFailed(session: tempSession);
     }
 
     func successTransition() {
         TempSessionLoader.clearSession();
         timerViewModel.stopSession();
         
-        let sessionResult = curSession.getSession(endTime: Date())
+        let tempSession = curSession.getSession(endTime: Date())
         
         // Track timer completion analytics
         let timerType = curSession.managerType == .noLeave ? "no_leave" : "app_block"
-        let plannedDuration = sessionResult.plannedTime
-        let actualDuration = sessionResult.timeLocked
+        let plannedDuration = tempSession.plannedTime
+        let actualDuration = tempSession.timeLocked
         AnalyticsManager.shared.trackTimerComplete(
             type: timerType,
             duration: plannedDuration,
             actualDuration: actualDuration
         )
         
-        router.toTimerCompleted(curSession: sessionResult);
-        sessions.sessions.append(curSession.getSession(endTime: Date()));
+        sessions.addSession(tempSession)
+        router.toTimerCompleted(curSession: tempSession);
     }
     
     func handleStatus(_ curStatus: SessionStatus) {

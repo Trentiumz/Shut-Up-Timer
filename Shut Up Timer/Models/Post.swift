@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import CoreData
 
 // Represents a single image associated with a post
 struct PostImage: Identifiable, Codable, Equatable {
@@ -24,21 +25,26 @@ struct Post: Identifiable, Codable, Equatable {
     var images: [PostImage]
     var createdAt: Date
     
-    func toLocalPostInfo(sessions: Sessions, currentUser: CurUser, todoList: ToDoListV2) -> PostInfo {
-        // Find the session associated with this post
-        let session = sessions.sessions.first { $0.id == sessionID }
+    func toLocalPostInfo(currentUser: CurUser, context: NSManagedObjectContext) -> PostInfo {
+        // Find the session associated with this post using Core Data
+        var session: Session? = nil
+        if let sessionID = sessionID {
+            let sessionRequest: NSFetchRequest<Session> = Session.fetchRequest()
+            sessionRequest.predicate = NSPredicate(format: "id == %@", sessionID as CVarArg)
+            session = try? context.fetch(sessionRequest).first
+        }
         
         // Extract session data or use defaults
         let sessionTime = session?.started
         let time = session?.timeLocked ?? 0
         let iqChange = session?.iqChange ?? 0
         
-        // Get top categories as strings for the specific session
+        // Get top categories as strings for the specific session using Core Data
         let topCategories: [String]
         if let session = session {
-            let sessionCategories = session.sortedCategories.prefix(3) // Get top 3 categories
-            topCategories = sessionCategories.compactMap { category in
-                todoList.uuidToEntry(category.todoID)?.todo
+            let taskLogs = session.taskLogsArray.prefix(3) // Get top 3 categories
+            topCategories = taskLogs.compactMap { taskLog in
+                taskLog.todo?.todo
             }
         } else {
             topCategories = []

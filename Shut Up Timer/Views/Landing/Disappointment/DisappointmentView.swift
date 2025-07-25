@@ -1,13 +1,28 @@
 import SwiftUI
+import CoreData
 
 // --- DisappointmentView Main ---
 struct DisappointmentView: View {
-    @EnvironmentObject var sessions: Sessions
     @EnvironmentObject var router: AppRouter
+    @EnvironmentObject var sessions: SessionLoader
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    // Fetch all sessions for album calculation
+    @FetchRequest(
+        entity: Session.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Session.started, ascending: false)]
+    ) private var allSessions: FetchedResults<Session>
+    
+    // Fetch sessions with roasts for favorites
+    @FetchRequest(
+        entity: Session.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Session.started, ascending: false)],
+        predicate: NSPredicate(format: "roast != nil")
+    ) private var sessionsWithRoasts: FetchedResults<Session>
 
     /// albums: [(StringWriting, Month, Year)]
     var albums: [(String, Int, Int)] {
-        let earliest = sessions.sessions.map { $0.started }.min(by: <) ?? Date()
+        let earliest = allSessions.compactMap { $0.started }.min(by: <) ?? Date()
         let calendar = Calendar.current
         let now = Date()
         var current = startOfMonth(earliest)
@@ -24,19 +39,19 @@ struct DisappointmentView: View {
         let month = Calendar.current.component(.month, from: date)
         let year = Calendar.current.component(.year, from: date)
         let formatter = DateFormatter()
-        return ("\(formatter.monthSymbols[month]) \(year)", month, year)
+        return ("\(formatter.monthSymbols[month - 1]) \(year)", month, year)
     }
 
     // Example: ["You're one more '5-minute break' away...", ...]
     var favouriteRoasts: [String] {
-        sessions.getLatestRoasts()
+        return Array(sessionsWithRoasts.compactMap { $0.roast }.prefix(5))
     }
 
     // Called when a book is tapped
     func onAlbumTap(_ album: String) {
         // Implement navigation or filtering logic here
     }
-
+    
     var body: some View {
         ZStack {
             Background()
@@ -101,6 +116,9 @@ struct DisappointmentView: View {
                 }
             }
         }
+        .onAppear {
+            AnalyticsManager.shared.trackScreenView("disappointment")
+        }
     }
 }
 
@@ -156,15 +174,11 @@ fileprivate struct RoastPaper : View {
     }
 }
 
-fileprivate func startOfMonth(_ date: Date) -> Date {
+// --- Helper Views ---
+func startOfMonth(_ date: Date) -> Date {
     let calendar = Calendar.current
     let components = calendar.dateComponents([.year, .month], from: date)
-    if let date = calendar.date(from: components) {
-        return date
-    } else {
-        print("Failed to get start of week for \(date)")
-        return Date()
-    }
+    return calendar.date(from: components) ?? Date()
 }
 
 fileprivate func startOfWeek(_ date: Date) -> Date {
@@ -178,8 +192,8 @@ fileprivate func startOfWeek(_ date: Date) -> Date {
     }
 }
 
-fileprivate func getWeekInfo(sessions: Sessions) -> [[TimeInterval?]] {
-    let dateHours = sessions.getDateHours()
+fileprivate func getWeekInfo(sessions: SessionLoader) -> [[TimeInterval?]] {
+    let dateHours = Session.getDateHours(context: PersistenceController.shared.container.viewContext)
     let calendar = Calendar.current
     let today = calendar.startOfDay(for: Date())
     var result: [[TimeInterval?]] = []
@@ -210,10 +224,11 @@ fileprivate func getWeekInfo(sessions: Sessions) -> [[TimeInterval?]] {
 
 // --- Stats Summary View ---
 fileprivate struct StatsSummaryView: View {
-    var sessions: Sessions
+    var sessions: SessionLoader
     var weeks: [[TimeInterval?]]
+    @Environment(\.managedObjectContext) private var viewContext
     
-    init(sessions: Sessions) {
+    init(sessions: SessionLoader) {
         self.sessions = sessions;
         self.weeks = getWeekInfo(sessions: sessions);
     }
@@ -243,7 +258,7 @@ fileprivate struct StatsSummaryView: View {
         print("Failed to get range index \(ind)")
         return ""
     }
-
+    
     var body: some View {
         ZStack(alignment: .leading) {
             FormattedImages.LinedImageBackground(width: 340, height: 210)
@@ -296,12 +311,7 @@ fileprivate struct StatsSummaryView: View {
 
 #Preview {
     DisappointmentView()
-        .environmentObject(Sessions(sessions: [
-            SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
-            SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
-            SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
-            SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
-            SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You’re one more '5-minute break' away from complete academic collapse."),
-        ]))
-    // RoastPaper("You’re one more '5-minute break' away from complete academic collapse.")
+        .environmentObject(SessionLoader())
+        .environmentObject(AppRouter())
+        .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
 }

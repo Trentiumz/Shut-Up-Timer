@@ -2,7 +2,7 @@ import SwiftUI;
 
 struct TopBarView : View {
     @EnvironmentObject var curUser: CurUser
-    @EnvironmentObject var sessions: Sessions;
+    @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var notificationManager: NotificationManager;
     
@@ -10,48 +10,31 @@ struct TopBarView : View {
 
     private func screenName(_ screen: LandingScreen) -> String {
         switch screen {
-        case .home: return "home"
-        case .socialMedia: return "social_media"
-        case .leaderboard: return "leaderboard"
-        case .disappointment: return "disappointment"
-        case .account: return "account"
+        case .tasks: return "tasks"
+        case .timer: return "timer"
+        case .posts: return "posts"
+        case .stats: return "stats"
+        case .settings: return "settings"
         }
     }
     
     var body: some View {
         HStack{
-            Button(action: {
-                let previousScreen = selectedScreen
-                withAnimation {
-                    selectedScreen = .account;
-                }
-                if previousScreen != .account {
-                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "account")
-                    AnalyticsManager.shared.trackScreenView("account")
-                }
-            }) {
-                PFPDisplay(url: curUser.userPublicProfile?.profile_picture ?? "", width: 32, height: 32)
-            }
+            // App title on the left
+            Text("Shut Up Timer >")
+                .font(FontTokens.architectsDaughter(size: 25))
+                .foregroundColor(.white)
             
-            Button(action: {
-                AnalyticsManager.shared.trackScreenView("feedback")
-                router.toFeedbackView();
-            }) {
-                Image(systemName: "bubble.left")
-                    .resizable()
-                    .foregroundStyle(ColorTokens.shade700)
-                    .frame(width: 32, height: 32)
-            }
             Spacer()
             
+            // Icons on the right
             Button(action: {
                 AnalyticsManager.shared.trackScreenView("invite_friends")
                 router.toInviteFriends();
-                // Add your action here
             }) {
                 Image(systemName: "qrcode")
-                    .font(.system(size: 32))
-                    .foregroundStyle(ColorTokens.shade700)
+                    .font(.system(size: 30))
+                    .foregroundStyle(.white)
             }
             .buttonStyle(PlainButtonStyle())
             
@@ -59,19 +42,19 @@ struct TopBarView : View {
                 AnalyticsManager.shared.trackScreenView("notifications")
                 router.toNotifications();
             }) {
-                ZStack(alignment: .bottomTrailing) {
+                ZStack(alignment: .topTrailing) {
                     Image(systemName: "bell")
-                        .font(.system(size: 32))
-                        .foregroundStyle(ColorTokens.shade700)
+                        .font(.system(size: 30))
+                        .foregroundStyle(.white)
                     if notificationManager.notifications.count > 0 {
                         Text("\(notificationManager.notifications.count)")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .minimumScaleFactor(0.7)
-                            .foregroundColor(ColorTokens.shade100)
+                            .foregroundColor(.white)
                             .frame(width: 16, height: 16)
                             .background(Circle().fill(ColorTokens.red100))
                             .overlay(Circle().stroke(Color.white, lineWidth: 1))
-                            .offset(x: 4, y: 8)
+                            .offset(x: 8, y: -4)
                     }
                 }
             }
@@ -82,13 +65,12 @@ struct TopBarView : View {
                 router.toAddPost();
             }) {
                 Image(systemName: "plus.square")
-                    .font(.system(size: 32))
-                    .foregroundStyle(ColorTokens.shade700)
+                    .font(.system(size: 30))
+                    .foregroundStyle(.white)
             }
             .buttonStyle(PlainButtonStyle())
         }
-        .padding()
-        .background(ColorTokens.red300)
+        .padding(.horizontal)
         .onAppear {
             curUser.refresh(animated: true)
         }
@@ -96,117 +78,127 @@ struct TopBarView : View {
 }
 
 enum LandingScreen {
-    case home;
-    case socialMedia;
-    case leaderboard;
-    case disappointment;
-    case account;
+    case tasks;
+    case timer;
+    case posts;
+    case stats;
+    case settings;
 }
 
 struct BottomBarView : View {
     @Binding var selectedScreen: LandingScreen;
+    @EnvironmentObject var curUser: CurUser
+    @Environment(\.managedObjectContext) private var viewContext
     
     init(selectedScreen : Binding<LandingScreen>) {
         self._selectedScreen = selectedScreen;
     }
     
-    struct IconImage : View {
-        var systemName: String;
-        
-        var buttonStyle = Color.black;
-        var buttonSize: CGFloat = 40;
-        
-        init(_ systemName: String) {
-            self.systemName = systemName;
+    var body : some View {
+        HStack(spacing: 0) {
+            // Profile picture
+            VStack(spacing: 0) {
+                PFPDisplay(url: curUser.userPublicProfile?.profile_picture ?? "", width: 70, height: 70)
+                    .frame(height: 60, alignment: .top)
+                // IQ display
+                Text("\(formatIQ(Session.getTotalIQ(context: viewContext))) IQ")
+                    .font(FontTokens.architectsDaughter(size: 16))
+                    .foregroundColor(.black)
+                    .frame(width: 60)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(.black, lineWidth: 1)
+                            )
+                    )
+            }
+            .frame(width: 20, height: 70, alignment: .bottomLeading)
+            .zIndex(2)
+            
+            HStack(spacing: 12) {
+                // Tab icons in HStack
+                HStack(spacing: 8) {
+                    ForEach(LandingScreen.allCases, id: \.self) { tab in
+                        Button(action: {
+                            let previousScreen = selectedScreen
+                            withAnimation {
+                                selectedScreen = tab
+                            }
+                            if previousScreen != tab {
+                                AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: screenName(tab))
+                                AnalyticsManager.shared.trackScreenView(screenName(tab))
+                            }
+                        }) {
+                            VStack(spacing: 0) {
+                                Image(uiImage: imageForTab(tab))
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 48, height: 40, alignment: .bottom)
+                                Text(screenName(tab))
+                                    .font(FontTokens.architectsDaughter(size: 16))
+                                    .foregroundColor(.black)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.7)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .padding(.leading, 50)
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(ColorTokens.shade200)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(.black, lineWidth: 1)
+                    )
+            )
         }
-        
-        var body : some View {
-            Image(systemName: systemName)
-                .foregroundStyle(buttonStyle)
-                .font(.system(size: buttonSize))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+    
+    private func imageForTab(_ tab: LandingScreen) -> UIImage {
+        switch tab {
+        case .tasks: return FormattedImages.Image145
+        case .timer: return FormattedImages.Image147
+        case .posts: return FormattedImages.Image144
+        case .stats: return FormattedImages.Image124
+        case .settings: return FormattedImages.Image146
         }
     }
     
-    var body : some View {
-        HStack {
-            Button(action: {
-                let previousScreen = selectedScreen
-                withAnimation {
-                    selectedScreen = .home
-                }
-                if previousScreen != .home {
-                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "home")
-                    AnalyticsManager.shared.trackScreenView("home")
-                }
-            }){
-                IconImage("house.fill")
-            }
-            Spacer()
-            Button(action: {
-                let previousScreen = selectedScreen
-                withAnimation {
-                    selectedScreen = .socialMedia
-                }
-                if previousScreen != .socialMedia {
-                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "social_media")
-                    AnalyticsManager.shared.trackScreenView("social_media")
-                }
-            }){
-                IconImage("person.2.fill")
-            }
-            Spacer()
-            Button(action: {
-                let previousScreen = selectedScreen
-                withAnimation {
-                    selectedScreen = .leaderboard
-                }
-                if previousScreen != .leaderboard {
-                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "leaderboard")
-                    AnalyticsManager.shared.trackScreenView("leaderboard")
-                }
-            }){
-                IconImage("list.number")
-            }
-            Spacer()
-            Button(action: {
-                let previousScreen = selectedScreen
-                withAnimation {
-                    selectedScreen = .disappointment
-                }
-                if previousScreen != .disappointment {
-                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "disappointment")
-                    AnalyticsManager.shared.trackScreenView("disappointment")
-                }
-            }){
-                IconImage("photo.fill")
-            }
-            Spacer()
-            Button(action: {
-                let previousScreen = selectedScreen
-                withAnimation {
-                    selectedScreen = .account
-                }
-                if previousScreen != .account {
-                    AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: "account")
-                    AnalyticsManager.shared.trackScreenView("account")
-                }
-            }){
-                IconImage("gearshape.fill")
-            }
+    private func formatIQ(_ iq: Double) -> String {
+        let integerPart = Int(iq)
+        if integerPart >= 100 {
+            return "\(integerPart)"
+        } else {
+            return String(format: "%.1f", iq)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 30)
-        .frame(height: 60)
-        .background(ColorTokens.red300)
     }
     
     private func screenName(_ screen: LandingScreen) -> String {
         switch screen {
-        case .home: return "home"
-        case .socialMedia: return "social_media"
-        case .leaderboard: return "leaderboard"
-        case .disappointment: return "disappointment"
-        case .account: return "account"
+        case .tasks: return "tasks"
+        case .timer: return "timer"
+        case .posts: return "posts"
+        case .stats: return "stats"
+        case .settings: return "settings"
+        }
+    }
+}
+
+extension LandingScreen: CaseIterable {
+    var title: String {
+        switch self {
+        case .tasks: return "Tasks"
+        case .timer: return "Timer"
+        case .posts: return "Posts"
+        case .stats: return "Stats"
+        case .settings: return "Settings"
         }
     }
 }
@@ -214,27 +206,26 @@ struct BottomBarView : View {
 struct BarViewPreviews : PreviewProvider {
     
     struct Wrapper :  View {
-        @State var selectedScreen : LandingScreen = .home;
+        @State var selectedScreen : LandingScreen = .tasks;
         
         var body : some View {
-            VStack {
-                TopBarView(selectedScreen: $selectedScreen)
-                    .environmentObject(CurUser(credManager: CredManager()))
-                    .environmentObject(SessionsLoader.loadSessions())
-                    .environmentObject(AppRouter())
-                    .environmentObject(NotificationManager())
-                    .environmentObject(ToDoLoader.getToDo())
-                Spacer()
+            ZStack {
+                Background()
+                VStack {
+                    TopBarView(selectedScreen: $selectedScreen)
+                    Spacer()
+                    BottomBarView(selectedScreen: $selectedScreen)
+                }
             }
-//            VStack {
-//                Spacer();
-//                BottomBarView(selectedScreen: $selectedScreen)
-//            }
         }
     }
         
     
     static var previews : some View {
         Wrapper()
+            .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
+            .environmentObject(CurUser(credManager: CredManager()))
+            .environmentObject(AppRouter())
+            .environmentObject(NotificationManager())
     }
 }

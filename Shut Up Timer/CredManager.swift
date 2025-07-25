@@ -5,7 +5,7 @@ import GoogleSignIn
 
 /// Handles credentials and utility functions for communicating with various endpoints
 class CredManager: ObservableObject {
-    @Published var session: Session?
+    @Published var session: Auth.Session?
     @Published var connected: Bool = false
     @Published var loggedIn: Bool = false
     

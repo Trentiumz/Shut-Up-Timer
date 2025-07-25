@@ -17,7 +17,7 @@ struct AddPostRawView: View {
     var onRemoveImage: (Int) -> Void
     var onPost: () -> Void
     var onClose: () -> Void
-    var selectedSession: SessionEntry?
+    var selectedSession: Session?
     var date: Date?
     var isUploading: Bool = false
 
@@ -156,21 +156,29 @@ struct AddPostRawView: View {
 }
 
 struct AddPostView: View {
-    @EnvironmentObject var sessions: Sessions
+    @EnvironmentObject var sessions: SessionLoader
     @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var postLoader: PostLoader
     @EnvironmentObject var credManager: CredManager
     @EnvironmentObject var curUser: CurUser
-    @EnvironmentObject var todoList: ToDoListV2
+    @Environment(\.managedObjectContext) private var viewContext
+    
     @State private var text: String = ""
     @State private var images: [UIImage] = []
     @State private var showSessionModal = false
     @State private var showPhotosPicker = false
     @State private var pickedPhoto: PhotosPickerItem? = nil
-    @State private var selectedSession: SessionEntry? = nil
+    @State private var selectedSession: Session? = nil
     @State private var showAlert = false
     @State private var alertMessage: String = ""
     @State private var isUploading = false
+    
+    // Fetch successful sessions using @FetchRequest for automatic updates
+    @FetchRequest(
+        entity: Session.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Session.started, ascending: false)],
+        predicate: NSPredicate(format: "success == YES")
+    ) private var successfulSessions: FetchedResults<Session>
 
     var body: some View {
         AddPostRawView(
@@ -187,7 +195,7 @@ struct AddPostView: View {
             isUploading: isUploading
         )
         .sheet(isPresented: $showSessionModal) {
-            SessionSelectionModal(sessions: sessions.sessions, onSelect: { session in
+            SessionSelectionModal(sessions: Array(successfulSessions), onSelect: { session in
                 selectedSession = session
                 showSessionModal = false
                 // If session has an image, load it
@@ -217,7 +225,7 @@ struct AddPostView: View {
         // Then attempt to upload to server
         isUploading = true
         Task {
-            let postInfo = post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+            let postInfo = post.toLocalPostInfo(currentUser: curUser, context: viewContext)
             let remoteId = await credManager.fastAPI.createPost(postInfo)
             
             await MainActor.run {
@@ -242,38 +250,40 @@ struct AddPostView: View {
 }
 
 struct SessionSelectionModal: View {
-    var sessions: [SessionEntry]
-    var onSelect: (SessionEntry) -> Void
+    var sessions: [Session]
+    var onSelect: (Session) -> Void
     var onCancel: () -> Void
 
     var body: some View {
         NavigationView {
-            List(sessions.sorted { $0.started > $1.started }) { session in
-                Button(action: { onSelect(session) }) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(session.started, formatter: DateFormatter.shortDateTime)
-                                .font(FontTokens.architectsDaughter(size: 18))
-                                .foregroundColor(ColorTokens.shade700)
-                            Text(session.success ? "Success" : "Failed")
-                                .font(FontTokens.architectsDaughter(size: 14))
-                                .foregroundColor(session.success ? .green : .red)
-                        }
-                        Spacer()
-                        if let imageName = session.imageName, let img = ImageLoader.loadImage(name: imageName) {
-                            Image(uiImage: img)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 48, height: 48)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        } else {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray.opacity(0.2))
-                                .frame(width: 48, height: 48)
-                                .overlay(
-                                    Image(systemName: "photo")
-                                        .foregroundColor(.gray)
-                                )
+            List {
+                ForEach(sessions, id: \.objectID) { session in
+                    Button(action: { onSelect(session) }) {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(session.started?.formatted(date: .abbreviated, time: .shortened) ?? "Unknown Date")
+                                    .font(FontTokens.architectsDaughter(size: 18))
+                                    .foregroundColor(ColorTokens.shade700)
+                                Text(session.success ? "Success" : "Failed")
+                                    .font(FontTokens.architectsDaughter(size: 14))
+                                    .foregroundColor(session.success ? .green : .red)
+                            }
+                            Spacer()
+                            if let imageName = session.imageName, let img = ImageLoader.loadImage(name: imageName) {
+                                Image(uiImage: img)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 48, height: 48)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            } else {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(width: 48, height: 48)
+                                    .overlay(
+                                        Image(systemName: "photo")
+                                            .foregroundColor(.gray)
+                                    )
+                            }
                         }
                     }
                 }
@@ -290,21 +300,19 @@ struct SessionSelectionModal: View {
 
 extension DateFormatter {
     static let shortDateTime: DateFormatter = {
-        let df = DateFormatter()
-        df.dateStyle = .medium
-        df.timeStyle = .short
-        return df
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter
     }()
 }
 
 #Preview {
-    let mockSession = SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 3600, plannedTime: 3600, success: true, roast: "Sample roast", imageName: nil)
-    let mockSessions = [mockSession]
     return AddPostView()
-        .environmentObject(Sessions(sessions: mockSessions))
+        .environmentObject(SessionLoader())
         .environmentObject(AppRouter())
         .environmentObject(PostLoader.loadPostLoader())
         .environmentObject(CurUser(credManager: CredManager()))
-        .environmentObject(ToDoLoader.getToDo())
+        .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
 }
 

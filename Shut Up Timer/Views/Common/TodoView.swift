@@ -5,10 +5,17 @@ struct TodoView : View {
     // whether or not we're expanded
     @Binding var expanded: Bool;
     
-    // tracking current list items & what to add
-    @EnvironmentObject var todoList: ToDoListV2
-    @State private var textInputModalShowed: Bool = false;
+    // Core Data access
+    @Environment(\.managedObjectContext) private var viewContext
     
+    // Fetch active todos using @FetchRequest for automatic updates
+    @FetchRequest(
+        entity: Todo.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
+        predicate: NSPredicate(format: "active == YES")
+    ) private var activeTodos: FetchedResults<Todo>
+    
+    @State private var textInputModalShowed: Bool = false;
     @Binding private var selectedTodo: UUID;
     
     @FocusState private var isFocused: Bool;
@@ -30,10 +37,21 @@ struct TodoView : View {
         self.isActive = isActive;
     }
     
-    // adds a task and saves it
+    // adds a task and saves it to Core Data
     func addTask(_ newTaskText: String) {
         DispatchQueue.main.async {
-            todoList.activeLst.append(ToDoEntryV2(todo: newTaskText))
+            let newTodo = Todo(context: viewContext)
+            newTodo.id = UUID()
+            newTodo.todo = newTaskText
+            newTodo.active = true
+            newTodo.completed = false
+            newTodo.created = Date()
+            
+            do {
+                try viewContext.save()
+            } catch {
+                print("Failed to save new todo: \(error)")
+            }
         }
     }
     
@@ -113,9 +131,16 @@ struct TodoView : View {
 }
 
 struct TodoItemList : View {
-    @EnvironmentObject var todoList: ToDoListV2
-    @Binding var selectedTodo: UUID;
+    @Environment(\.managedObjectContext) private var viewContext
     
+    // Fetch active todos using @FetchRequest for automatic updates
+    @FetchRequest(
+        entity: Todo.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
+        predicate: NSPredicate(format: "active == YES")
+    ) private var activeTodos: FetchedResults<Todo>
+    
+    @Binding var selectedTodo: UUID;
     @State private var editingTodo: UUID = UUID();
     @FocusState.Binding var isFocused: Bool;
     
@@ -125,42 +150,54 @@ struct TodoItemList : View {
     
     @State var allowReordering = true
     
+    // Remove task by setting active to false
+    func removeTask(_ todo: Todo) {
+        todo.active = false
+        do {
+            try viewContext.save()
+        } catch {
+            print("Failed to remove todo: \(error)")
+        }
+    }
+    
     var body : some View {
-        ForEach(todoList.activeLst, id: \.id) { todoEntry in
+        ForEach(Array(activeTodos), id: \.objectID) { todo in
             TodoEntryView(
-                entry: todoEntry,
-                selected: selectedTodo == todoEntry.id,
-                isEditing: editingTodo == todoEntry.id,
+                entry: todo,
+                selected: selectedTodo == todo.id,
+                isEditing: editingTodo == todo.id,
                 onSelect: {
                     if self.canSelect {
-                        selectedTodo=todoEntry.id
+                        selectedTodo = todo.id ?? UUID()
                     }
                 },
                 onUnselect: {
-                    if selectedTodo == todoEntry.id {
+                    if selectedTodo == todo.id {
                         selectedTodo = UUID();
                     }
                 },
                 startEditing: {
-                    editingTodo = todoEntry.id;
+                    editingTodo = todo.id ?? UUID();
                 },
                 cancelEditing: {
                     editingTodo = UUID();
                 },
                 removeItem: {
-                    todoList.removeTask(entry: todoEntry);
+                    removeTask(todo);
                 },
                 isFocused: _isFocused)
                 .listRowInsets(EdgeInsets())
                 .frame(maxWidth: .infinity)
                 .padding(.leading, 0)
-                .matchedGeometryEffect(id: "todo-item-\(todoEntry.id)", in: namespace, isSource: isSource)
+                .matchedGeometryEffect(id: "todo-item-\(todo.id?.uuidString ?? "")", in: namespace, isSource: isSource)
         }
         .onMove(perform: move)
     }
     
     func move(from source: IndexSet, to destination: Int) {
-        todoList.activeLst.move(fromOffsets: source, toOffset: destination)
+        // Note: Core Data doesn't have built-in ordering like arrays
+        // For now, we'll just log this - you might want to add an order field to Todo
+        print("Move operation not implemented for Core Data todos")
     }
 }
 
@@ -182,7 +219,6 @@ struct TextInputModal: View {
     }
 }
 
-
 struct Checkbox: View {
     var checked: Bool;
 
@@ -194,7 +230,9 @@ struct Checkbox: View {
 }
 
 struct TodoEntryView : View {
-    @State private var entry: ToDoEntryV2;
+    @ObservedObject var entry: Todo;
+    @Environment(\.managedObjectContext) private var viewContext
+    
     var selected: Bool;
     var isEditing: Bool;
     var onSelect: () -> Void;
@@ -205,7 +243,7 @@ struct TodoEntryView : View {
     
     @FocusState.Binding private var isFocused: Bool
     
-    init(entry: ToDoEntryV2, selected: Bool, isEditing: Bool, onSelect: @escaping () -> Void, onUnselect: @escaping () -> Void, startEditing: @escaping () -> Void, cancelEditing: @escaping () -> Void, removeItem: @escaping () -> Void, isFocused: FocusState<Bool>.Binding) {
+    init(entry: Todo, selected: Bool, isEditing: Bool, onSelect: @escaping () -> Void, onUnselect: @escaping () -> Void, startEditing: @escaping () -> Void, cancelEditing: @escaping () -> Void, removeItem: @escaping () -> Void, isFocused: FocusState<Bool>.Binding) {
         self.entry = entry;
         self.selected = selected;
         self.isEditing = isEditing;
@@ -223,11 +261,19 @@ struct TodoEntryView : View {
                 Checkbox(checked: selected)
             }
             if isEditing {
-                TextField("", text: $entry.todo)
+                TextField("", text: Binding(
+                    get: { entry.todo ?? "" },
+                    set: { entry.todo = $0 }
+                ))
                     .onSubmit {
-                        cancelEditing()
-                        withAnimation {
-                            isFocused = false;
+                        do {
+                            try viewContext.save()
+                            cancelEditing()
+                            withAnimation {
+                                isFocused = false;
+                            }
+                        } catch {
+                            print("Failed to save todo: \(error)")
                         }
                     }
                     .focused(_isFocused)
@@ -239,7 +285,7 @@ struct TodoEntryView : View {
                     .truncationMode(.tail)
                     .clipped()
             } else {
-                Text(entry.todo)
+                Text(entry.todo ?? "")
                     .font(Font.custom("ArchitectsDaughter-Regular", size: 25))
                     .strikethrough(entry.completed)
                     .foregroundColor(ColorTokens.shade700)
@@ -254,6 +300,11 @@ struct TodoEntryView : View {
             withAnimation {
                 onUnselect();
                 entry.completed = !entry.completed;
+                do {
+                    try viewContext.save()
+                } catch {
+                    print("Failed to toggle completion: \(error)")
+                }
                 isFocused = false;
             }
         }
@@ -314,19 +365,16 @@ struct TodoPaper : View {
     }
 }
 
-struct TodoPreview : PreviewProvider {
-    struct Wrapper : View {
-        @State var selectedTodo: UUID = UUID()
-        @State var expanded: Bool = true;
-        @Namespace var sampleNamespace
-        
-        var body : some View {
-            TodoView(expanded: $expanded, selectedTodo: $selectedTodo, namespace: sampleNamespace, isSource: true, isActive: true)
-                .environmentObject(ToDoListV2(activeLst: [ToDoEntryV2(todo: "Hello"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More"), ToDoEntryV2(todo: "No More")]))
-        }
-    }
+fileprivate struct Wrapper : View {
+    @Namespace var namespace
+    @State var expanded = true
+    @State var selectedTodo = UUID()
     
-    static var previews: some View {
-        Wrapper()
+    var body : some View {
+        return TodoView(expanded: $expanded, selectedTodo: $selectedTodo, namespace: namespace, isSource: true, isActive: true)
+            .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
     }
+}
+#Preview {
+    Wrapper()
 }

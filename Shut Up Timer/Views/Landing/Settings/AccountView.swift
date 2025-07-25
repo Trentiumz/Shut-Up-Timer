@@ -5,11 +5,11 @@ struct AccountView : View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
-    @EnvironmentObject var sessions: Sessions;
+    @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var curUser: CurUser
-    @EnvironmentObject var todoList: ToDoListV2
     @State private var friends: [FriendProfileResponse] = [];
     @EnvironmentObject var postLoader: PostLoader;
+    @Environment(\.managedObjectContext) private var viewContext
     
     func updateFriends() {
         Task {
@@ -41,7 +41,7 @@ struct AccountView : View {
     var postAlbums: [(String, Int, Int)] {
         // Convert posts to PostInfo objects
         let postInfos = postLoader.posts.map { post in
-            post.toLocalPostInfo(sessions: sessions, currentUser: curUser, todoList: todoList)
+            post.toLocalPostInfo(currentUser: curUser, context: viewContext)
         }
         
         // Get all posts with dates
@@ -173,10 +173,10 @@ struct AccountView : View {
 
 /// A copy of User Info View with options for editing things
 struct LocalUserInfoView : View {
-    @EnvironmentObject var sessions: Sessions;
+    @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var credManager: CredManager;
-    @EnvironmentObject var todoList: ToDoListV2
     @EnvironmentObject var curUser: CurUser
+    @Environment(\.managedObjectContext) private var viewContext
     
     @State private var pickedImage: PhotosPickerItem?
     @State var showFailAlert: Bool = false
@@ -251,7 +251,7 @@ struct LocalUserInfoView : View {
                         Text("Hours")
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade600)
-                        Text(String(format: "%.2f", sessions.getTotalTimeLocked() / 3600))
+                        Text(String(format: "%.2f", Session.getTotalTimeLocked(context: viewContext) / 3600))
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade700)
                         Spacer()
@@ -263,7 +263,7 @@ struct LocalUserInfoView : View {
                         Text("Categories")
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade600)
-                        let categoryNames = sessions.getTopCategoryStrings(toDoList: todoList);
+                        let categoryNames = Session.getTopCategoryStrings(context: viewContext);
                         Text(categoryNames.joined(separator: ", "))
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade700)
@@ -276,7 +276,7 @@ struct LocalUserInfoView : View {
                         Text("IQ")
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade600)
-                        Text("\(sessions.getIQ())")
+                        Text("\(Session.getTotalIQ(context: viewContext))")
                             .font(FontTokens.architectsDaughter(size: 20))
                             .foregroundColor(ColorTokens.shade700)
                         Spacer()
@@ -303,8 +303,6 @@ struct LocalUserInfoView : View {
     AccountView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings())
-        .environmentObject(SessionsLoader.loadSessions())
-        .environmentObject(ToDoLoader.getToDo())
-        .environmentObject(credManager)
+        .environmentObject(CredManager())
         .environmentObject(CurUser(credManager: credManager))
 }

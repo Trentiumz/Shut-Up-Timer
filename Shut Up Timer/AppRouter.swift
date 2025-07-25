@@ -27,12 +27,12 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.login(onSuccess: onSuccess)))
     }
     
-    func toTimerCompleted(curSession: SessionEntry) {
+    func toTimerCompleted(curSession: TempSession) {
         assert(curSession.success) // ensure we actually completed!
         path.append(PathElement(route: AppRoute.timerCompleted(session: curSession)))
     }
     
-    func toTimerFailed(session: SessionEntry) {
+    func toTimerFailed(session: TempSession) {
         assert(!session.success) // ensure we actually failed
         path.append(PathElement(route: AppRoute.timerFailed(session: session)))
     }

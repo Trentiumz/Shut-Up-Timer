@@ -7,7 +7,7 @@ class AppBlockSessionManager : CurSessionManager {
     var startTime: Date
     
     @Published var curParam: TimerParam
-    @Published var tasks: [TaskLog]
+    @Published var tasks: [TempTaskLog]
     
     var lastUpdate: Date
     
@@ -26,7 +26,7 @@ class AppBlockSessionManager : CurSessionManager {
         initialParam: TimerParam,
         startTime: Date,
         curParam: TimerParam,
-        tasks: [TaskLog],
+        tasks: [TempTaskLog],
         lastUpdate: Date,
         curTodo: UUID,
         status: SessionStatus
@@ -124,10 +124,20 @@ class AppBlockSessionManager : CurSessionManager {
     }
     
     // ------------------ ON COMPLETION SESSION ------------------
-    func getSession(endTime: Date) -> SessionEntry {
-        assert(status == .failed || status == .succeeded)
+    func getSession(endTime: Date) -> TempSession {
+        assert(status == .failed || status == .succeeded);
         
-        return SessionEntry(tasks: tasks, started: startTime, ended: endTime, timeLocked: initialParam.getTotTime() - curParam.getTotTime(), plannedTime: initialParam.getTotTime(), success: status == .succeeded)
+        return TempSession(
+            id: UUID(),
+            tasks: tasks.map { TempTaskLog(id: $0.id, todoID: $0.todoID, timeIn: $0.timeIn) },
+            started: startTime,
+            ended: endTime,
+            timeLocked: initialParam.getTotTime() - curParam.getTotTime(),
+            plannedTime: initialParam.getTotTime(),
+            success: status == .succeeded,
+            roast: nil,
+            imageName: nil
+        )
     }
     
     // ------------------ CODING AND DECODING ------------------
@@ -141,7 +151,7 @@ class AppBlockSessionManager : CurSessionManager {
         initialParam = try container.decode(TimerParam.self, forKey: .initialParam)
         startTime = try container.decode(Date.self, forKey: .startTime)
         curParam = try container.decode(TimerParam.self, forKey: .curParam)
-        tasks = try container.decode([TaskLog].self, forKey: .tasks)
+        tasks = try container.decode([TempTaskLog].self, forKey: .tasks)
         lastUpdate = try container.decode(Date.self, forKey: .lastActiveUpdate)
         curTodo = try container.decode(UUID.self, forKey: .curTodo)
         status = try container.decode(SessionStatus.self, forKey: .status)

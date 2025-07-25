@@ -1,11 +1,41 @@
 import SwiftUI
+import CoreData
 
 struct AlbumView: View {
-    @EnvironmentObject var sessions: Sessions
+    @EnvironmentObject var sessions: SessionLoader
+    @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: AlbumTab = .month
     
     let month: Int
     let year: Int
+    
+    // Fetch all sessions and filter in computed properties
+    @FetchRequest(
+        entity: Session.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Session.started, ascending: false)]
+    ) private var allSessions: FetchedResults<Session>
+    
+    // Computed property for month sessions
+    var monthSessions: [Session] {
+        let startDate = Calendar.current.date(from: DateComponents(year: year, month: month)) ?? Date()
+        let endDate = Calendar.current.date(byAdding: .month, value: 1, to: startDate) ?? Date()
+        
+        return allSessions.filter { session in
+            guard let sessionDate = session.started else { return false }
+            return sessionDate >= startDate && sessionDate < endDate
+        }
+    }
+    
+    // Computed property for year sessions
+    var yearSessions: [Session] {
+        let startDate = Calendar.current.date(from: DateComponents(year: year)) ?? Date()
+        let endDate = Calendar.current.date(byAdding: .year, value: 1, to: startDate) ?? Date()
+        
+        return allSessions.filter { session in
+            guard let sessionDate = session.started else { return false }
+            return sessionDate >= startDate && sessionDate < endDate
+        }
+    }
     
     func getMonthString() -> String {
         let formatter = DateFormatter()
@@ -22,78 +52,63 @@ struct AlbumView: View {
         var id: String { self.rawValue }
     }
 
-    // Placeholder: Get sessions for current month
-    func getMonthSessions() -> [SessionEntry] {
-        var monthSessions : [SessionEntry] = []
-        if let startDate = Calendar.current.date(from: DateComponents(year: year, month: month)) {
-            monthSessions = sessions.sessions.filter { $0.started >= startDate && $0.started < Calendar.current.date(byAdding: .month, value: 1, to: startDate)! }
-        } else {
-            print("Failed to get start date from month \(month) and year \(year)")
-        }
-        // Replace with real filtering logic
-        return monthSessions.sorted { $0.started > $1.started }
-    }
-
-    // Placeholder: Get sessions for current year
-    func getYearSessions() -> [SessionEntry] {
-        var yearSessions : [SessionEntry] = []
-        if let startDate = Calendar.current.date(from: DateComponents(year: year)) {
-            yearSessions = sessions.sessions.filter { $0.started >= startDate && $0.started < Calendar.current.date(byAdding: .year, value: 1, to: startDate)! }
-        } else {
-            print("Failed to get start date from month \(month) and year \(year)")
-        }
-        // Replace with real filtering logic
-        return yearSessions.sorted { $0.started > $1.started }
+    // Get current sessions based on selected tab
+    var currentSessions: [Session] {
+        return selectedTab == .month ? monthSessions : yearSessions
     }
 
     // Get images for display (most recent first)
-    func getImages() -> [(String, SessionEntry)] {
-        let entries = selectedTab == .month ? getMonthSessions() : getYearSessions()
-        return entries.compactMap { entry in
-            if let imageName = entry.imageName {
-                return (imageName, entry)
-            } else {
-                return nil
+    func getImages() -> [(String, Session)] {
+        return currentSessions.compactMap { session in
+            if let imageName = session.imageName {
+                return (imageName, session)
             }
+            return nil
         }
     }
 
     // Get roasts for display (most recent first)
-    func getRoasts() -> [(String, SessionEntry)] {
-        let entries = selectedTab == .month ? getMonthSessions() : getYearSessions()
-        return entries.compactMap { entry in
-            if let roast = entry.roast {
-                return (roast, entry)
-            } else {
-                return nil
+    func getRoasts() -> [(String, Session)] {
+        return currentSessions.compactMap { session in
+            if let roast = session.roast {
+                return (roast, session)
+            }
+            return nil
+        }
+    }
+
+    /// returns items, which is either ("image", image name, Session) or ("roast", roast, Session)
+    func getItems() -> [(String, String, Session)] {
+        var entries = getImages().map { ("image", $0.0, $0.1 )} + getRoasts().map{ ("roast", $0.0, $0.1 )}
+        entries = entries.sorted{ ($0.2.started ?? Date()) > ($1.2.started ?? Date()) }
+        return entries
+    }
+    
+    func removeRoast(session: Session) {
+        session.roast = nil
+        do {
+            try viewContext.save()
+        } catch {
+            print("Failed to remove roast: \(error)")
+        }
+    }
+
+    func removeImage(session: Session) {
+        if let imageName = session.imageName {
+            _ = ImageLoader.deleteImage(name: imageName)
+            session.imageName = nil
+            do {
+                try viewContext.save()
+            } catch {
+                print("Failed to remove image: \(error)")
             }
         }
     }
     
-    /// returns items, which is either ("image", image name, Session) or ("roast", roast, Session)
-    func getItems() -> [(String, String, SessionEntry)] {
-        var entries = getImages().map { ("image", $0.0, $0.1 )} + getRoasts().map{ ("roast", $0.0, $0.1 )}
-        entries = entries.sorted{ $0.2.started > $1.2.started }
-        return entries
-    }
-    
-    func removeRoast(id: UUID) {
-        if let ind = sessions.sessions.firstIndex(where: { $0.id == id }) {
-            sessions.sessions[ind].roast = nil
-        }
-    }
-    
-    func removeImage(id: UUID) {
-        if let ind = sessions.sessions.firstIndex(where: { $0.id == id }) {
-            _ = ImageLoader.deleteImage(name: sessions.sessions[ind].imageName!)
-            sessions.sessions[ind].imageName = nil
-        }
-    }
-    
     struct ImagesRow : View {
-        var items: [(String, String, SessionEntry)]
-        var removeImage: (UUID) -> Void
-        var removeRoast: (UUID) -> Void
+        var items: [(String, String, Session)]
+        var removeImage: (Session) -> Void
+        var removeRoast: (Session) -> Void
         
         var body : some View {
             ScrollView(.horizontal, showsIndicators: false) {
@@ -104,7 +119,7 @@ struct AlbumView: View {
                                 PostImageDisplay(image: image)
                                     .contextMenu {
                                         Button(role: .destructive) {
-                                            removeImage(item.2.id)
+                                            removeImage(item.2)
                                         } label: {
                                             Label("Remove Image", systemImage: "trash")
                                         }
@@ -114,7 +129,7 @@ struct AlbumView: View {
                             RoastDisplay(message: item.1)
                                 .contextMenu {
                                     Button(role: .destructive) {
-                                        removeRoast(item.2.id)
+                                        removeRoast(item.2)
                                     } label: {
                                         Label("Remove Roast", systemImage: "trash")
                                     }
@@ -226,10 +241,6 @@ struct AlbumView: View {
 #Preview {
     AlbumView(month: Calendar.current.component(.month, from: Date()),
               year: Calendar.current.component(.year, from: Date()))
-        .environmentObject(Sessions(sessions: [
-            SessionEntry(tasks: [], started: Calendar.current.date(from: DateComponents(year: 2025, month: 1))!, ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You're one more '5-minute break' away from complete academic collapse.", imageName: "onboarding-hello-image 65"),
-            SessionEntry(tasks: [], started: Date().addingTimeInterval(-86400), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "Your brain's in power-saving mode and it shows.", imageName: "onboarding-hello-image 67"),
-            SessionEntry(tasks: [], started: Date().addingTimeInterval(-172800), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "At this point, your to-do list is fiction.", imageName: "onboarding-hello-image 68"),
-            SessionEntry(tasks: [], started: Date().addingTimeInterval(-259200), ended: Date(), timeLocked: 3600.0, plannedTime: 0, success: false, roast: "You have more breaks than work.", imageName: "onboarding-hello-image 70")
-        ]))
+        .environmentObject(SessionLoader())
+        .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
 }

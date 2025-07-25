@@ -330,8 +330,6 @@ struct SettingsPreview : PreviewProvider {
             SettingsView()
             .environmentObject(AppRouter())
             .environmentObject(SettingsLoader.loadSettings())
-            .environmentObject(SessionsLoader.loadSessions())
-            .environmentObject(ToDoLoader.getToDo())
             .environmentObject(credManager)
             .environmentObject(CurUser(credManager: credManager))
         }

@@ -10,8 +10,7 @@ import SwiftUI
 struct PostListView: View {
     let posts: [PostInfo]
     @EnvironmentObject var postLoader: PostLoader
-    @EnvironmentObject var sessions: Sessions
-    @EnvironmentObject var todoList: ToDoListV2
+    @EnvironmentObject var sessions: SessionLoader
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -318,7 +317,5 @@ struct PostTextView: View {
     
     PostListView(posts: dummyPosts)
         .environmentObject(PostLoader.loadPostLoader())
-        .environmentObject(SessionsLoader.loadSessions())
-        .environmentObject(ToDoLoader.getToDo())
 }
 

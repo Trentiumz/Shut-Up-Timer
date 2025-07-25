@@ -3,8 +3,7 @@ import SwiftUI
 struct SocialMediaView: View {
     @EnvironmentObject var credManager: CredManager
     @EnvironmentObject var postLoader: PostLoader
-    @EnvironmentObject var sessions: Sessions
-    @EnvironmentObject var todoList: ToDoListV2
+    @EnvironmentObject var sessions: SessionLoader
     
     @State private var posts: [PostInfo] = []
     @State private var isLoading = false
@@ -54,6 +53,5 @@ struct SocialMediaView: View {
     SocialMediaView()
         .environmentObject(CredManager())
         .environmentObject(PostLoader.loadPostLoader())
-        .environmentObject(SessionsLoader.loadSessions())
-        .environmentObject(ToDoLoader.getToDo())
+        .environmentObject(SessionLoader())
 }

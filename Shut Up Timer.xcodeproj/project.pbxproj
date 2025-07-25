@@ -87,8 +87,23 @@
 			membershipExceptions = (
 				"External Models/Utils.swift",
 				Models/ClientNotification.swift,
+				PersistenceController.swift,
 			);
 			target = 736831E32E1178BB006BFDFD /* Notification Remote Receival */;
+		};
+		73F6AEC22E318754003A7BB5 /* Exceptions for "Shut Up Timer" folder in "Shut Up TimerTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				PersistenceController.swift,
+			);
+			target = C93EE9992DB5133A00E5080A /* Shut Up TimerTests */;
+		};
+		73F6AEC32E318754003A7BB5 /* Exceptions for "Shut Up Timer" folder in "Shut Up TimerUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				PersistenceController.swift,
+			);
+			target = C93EE9A32DB5133A00E5080A /* Shut Up TimerUITests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -104,6 +119,8 @@
 		C93EE98C2DB5133700E5080A /* Shut Up Timer */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				73F6AEC22E318754003A7BB5 /* Exceptions for "Shut Up Timer" folder in "Shut Up TimerTests" target */,
+				73F6AEC32E318754003A7BB5 /* Exceptions for "Shut Up Timer" folder in "Shut Up TimerUITests" target */,
 				736831F32E1180DD006BFDFD /* Exceptions for "Shut Up Timer" folder in "Notification Remote Receival" target */,
 			);
 			path = "Shut Up Timer";
@@ -630,6 +647,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 7;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Shut Up Timer/Preview Content\"";
 				DEVELOPMENT_TEAM = 77B86BDTVZ;
 				ENABLE_PREVIEWS = YES;

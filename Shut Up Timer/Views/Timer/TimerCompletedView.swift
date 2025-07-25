@@ -1,11 +1,20 @@
 import SwiftUI
+import CoreData
 
 struct TimerCompletedView: View {
     @EnvironmentObject var router: AppRouter;
-    @EnvironmentObject var todoList: ToDoListV2
-    private var session: SessionEntry;
+    @Environment(\.managedObjectContext) private var viewContext
     
-    init(session: SessionEntry) {
+    // Fetch active todos using @FetchRequest for automatic updates
+    @FetchRequest(
+        entity: Todo.entity(),
+        sortDescriptors: [NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
+        predicate: NSPredicate(format: "active == YES")
+    ) private var activeTodos: FetchedResults<Todo>
+    
+    private var session: TempSession;
+    
+    init(session: TempSession) {
         self.session = session;
     }
     
@@ -23,7 +32,10 @@ struct TimerCompletedView: View {
     }
     private var topCategoriesString: String {
         let topCategories = Array(session.sortedCategories.prefix(2))
-        let categoryStrings = topCategories.map { todoList.uuidToEntry($0.todoID)?.todo ?? "Unknown" }.joined(separator: "\n")
+        let categoryStrings = topCategories.map { category in
+            // Find todo by ID using Core Data
+            activeTodos.first(where: { $0.id == category.todoID })?.todo ?? "Unknown"
+        }.joined(separator: "\n")
         return "Categories\n\(categoryStrings)"
     }
     
@@ -108,5 +120,5 @@ struct TimerCompletedView: View {
 }
 
 #Preview {
-    TimerCompletedView(session: SessionEntry(tasks: [], started: Date(), ended: Date(), timeLocked: 0, plannedTime: 0, success: true))
+    TimerCompletedView(session: TempSession(tasks: [], started: Date(), ended: Date(), timeLocked: 0, plannedTime: 0, success: true))
 }

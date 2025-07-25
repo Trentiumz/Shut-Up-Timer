@@ -4,8 +4,8 @@ enum AppRoute {
     case home
     case noLeaveTimer(timerModel: TimerViewModel<NoLeaveSessionManager>)
     case appBlockTimer(timerModel: TimerViewModel<AppBlockSessionManager>)
-    case timerCompleted(session: SessionEntry)
-    case timerFailed(session: SessionEntry)
+    case timerCompleted(session: TempSession)
+    case timerFailed(session: TempSession)
     case timerFailedCamera(sessionID: UUID)
     case login(onSuccess: () -> Void)
     case inviteFriends

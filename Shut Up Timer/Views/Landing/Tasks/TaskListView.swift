@@ -268,7 +268,16 @@ struct DreamGoalsContentView: View {
                     .listRowBackground(Color.clear)
             }
             .onMove { inds, newOffset in
-                print("Move from \(inds) to \(newOffset)")
+                do {
+                    var tempGoals = Array(goals)
+                    tempGoals.move(fromOffsets: inds, toOffset: newOffset)
+                    tempGoals.enumerated().forEach { ind, goal in
+                        goal.order = Int16(ind);
+                    }
+                    try viewContext.save()
+                } catch {
+                    print("Error moving elements: \(error)")
+                }
             }
         }
         .listStyle(.plain)
@@ -305,7 +314,7 @@ struct DreamGoalRowView: View {
                     do {
                         try viewContext.save()
                     } catch {
-                        print("Failed to complete task: \(error)")
+                        print("Failed to redeem goal: \(error)")
                     }
                 }) {
                     Text("Redeem")
@@ -315,6 +324,7 @@ struct DreamGoalRowView: View {
                         .padding(.vertical, 4)
                         .background(ColorTokens.red300)
                         .cornerRadius(4)
+                        .frame(width: 60, height: 20)
                 }
             }
             
@@ -339,6 +349,53 @@ extension Goal {
     }
 }
 
+func addSampleDataToDB(viewContext: NSManagedObjectContext) {
+    do {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Goal.fetchRequest()
+        let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        let _ = try viewContext.execute(batchDeleteRequest) as? NSBatchDeleteResult
+        try viewContext.save()
+        viewContext.refreshAllObjects()
+        
+        let fetchRequest2: NSFetchRequest<NSFetchRequestResult> = Todo.fetchRequest()
+        let batchDeleteRequest2 = NSBatchDeleteRequest(fetchRequest: fetchRequest2)
+        let _ = try viewContext.execute(batchDeleteRequest2) as? NSBatchDeleteResult
+        try viewContext.save()
+        viewContext.refreshAllObjects()
+        
+        let goal = Goal(context: viewContext)
+        goal.created = Date()
+        goal.goal = "Ace Math!"
+        goal.id = UUID()
+        goal.iqGoal = 10.0
+        goal.redeemed = false
+        
+        let goal2 = Goal(context: viewContext)
+        goal2.created = Date()
+        goal2.goal = "Ace Math #2!"
+        goal2.id = UUID()
+        goal2.iqGoal = 10.0
+        goal2.redeemed = false
+        
+        let todo1 = Todo(context: viewContext)
+        todo1.id = UUID()
+        todo1.todo = "Todo 1"
+        todo1.created = Date()
+        todo1.goal = goal
+        
+        let todo2 = Todo(context: viewContext)
+        todo2.id = UUID()
+        todo2.todo = "Todo 1"
+        todo2.created = Date()
+        todo2.goal = nil
+        
+        try viewContext.save()
+        viewContext.processPendingChanges()
+        viewContext.refreshAllObjects()
+    } catch {
+        print("Something went wrong in TaskListPreview: \(error)")
+    }
+}
 
 struct TaskListViewPreview : PreviewProvider {
     struct Wrapper : View {
@@ -347,51 +404,7 @@ struct TaskListViewPreview : PreviewProvider {
         var body : some View {
             TaskListView()
                 .onAppear {
-                    do {
-                        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Goal.fetchRequest()
-                        let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-                        let _ = try viewContext.execute(batchDeleteRequest) as? NSBatchDeleteResult
-                        try viewContext.save()
-                        viewContext.refreshAllObjects()
-                        
-                        let fetchRequest2: NSFetchRequest<NSFetchRequestResult> = Todo.fetchRequest()
-                        let batchDeleteRequest2 = NSBatchDeleteRequest(fetchRequest: fetchRequest2)
-                        let _ = try viewContext.execute(batchDeleteRequest2) as? NSBatchDeleteResult
-                        try viewContext.save()
-                        viewContext.refreshAllObjects()
-                        
-                        let goal = Goal(context: viewContext)
-                        goal.created = Date()
-                        goal.goal = "Ace Math!"
-                        goal.id = UUID()
-                        goal.iqGoal = 10.0
-                        goal.redeemed = false
-                        
-                        let goal2 = Goal(context: viewContext)
-                        goal2.created = Date()
-                        goal2.goal = "Ace Math #2!"
-                        goal2.id = UUID()
-                        goal2.iqGoal = 10.0
-                        goal2.redeemed = false
-                        
-                        let todo1 = Todo(context: viewContext)
-                        todo1.id = UUID()
-                        todo1.todo = "Todo 1"
-                        todo1.created = Date()
-                        todo1.goal = goal
-                        
-                        let todo2 = Todo(context: viewContext)
-                        todo2.id = UUID()
-                        todo2.todo = "Todo 1"
-                        todo2.created = Date()
-                        todo2.goal = nil
-
-                        try viewContext.save()
-                        viewContext.processPendingChanges()
-                        viewContext.refreshAllObjects()
-                    } catch {
-                        print("Something went wrong in TaskListPreview: \(error)")
-                    }
+                    addSampleDataToDB(viewContext: viewContext)
                 }
         }
     }

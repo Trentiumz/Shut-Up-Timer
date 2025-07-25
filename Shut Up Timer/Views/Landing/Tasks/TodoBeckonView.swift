@@ -91,35 +91,17 @@ fileprivate struct SummaryScreen: View {
     var body: some View {
         HStack(spacing: 0) {
             // Grandma image on the left
-            ViewThatFits {
-                // Large size
-                Group {
+            Rectangle()
+                .fill(Color.clear)
+                .overlay(
                     Image(uiImage: FormattedImages.Image161)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 180, height: 250, alignment: .leading)
-                }
-                .frame(width: 140, height: 250, alignment: .leading)
-                
-                // Medium size
-                Group {
-                    Image(uiImage: ImageAssets.image161)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 120, height: 250)
-                }
-                .frame(width: 80, height: 250, alignment: .leading)
-                
-                // Small size
-                Group {
-                    Image(uiImage: ImageAssets.image161)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 80, height: 120)
-                }
-                .frame(width: 40, height: 250, alignment: .leading)
-            }
-            .zIndex(2)
+                        .offset(x: 30)
+                    ,
+                    alignment: .trailing
+                )
+                .zIndex(2)
             
             // Info card on the right
             RoundedRectangle(cornerRadius: 15)
@@ -129,7 +111,7 @@ fileprivate struct SummaryScreen: View {
                         .stroke(ColorTokens.shade100, lineWidth: 2)
                 )
                 .overlay(
-                    VStack(alignment: .trailing, spacing: 25) {
+                    VStack(alignment: .trailing) {
                         // Identity
                         HStack(spacing: 5) {
                             Spacer()
@@ -141,6 +123,10 @@ fileprivate struct SummaryScreen: View {
                                 .foregroundColor(ColorTokens.shade700)
                             Spacer()
                         }
+                        .layoutPriority(1)
+                        
+                        Spacer()
+                            .frame(maxHeight: 25)
                         
                         // Catchphrase
                         VStack(alignment: .trailing, spacing: 5) {
@@ -151,10 +137,15 @@ fileprivate struct SummaryScreen: View {
                             Text("\"hey cant you be better haha you old cousin Jenny?\"")
                                 .font(FontTokens.architectsDaughter(size: 12))
                                 .foregroundColor(ColorTokens.shade700)
-                                .lineLimit(4)
-                                .frame(minHeight: 75, alignment: .top)
+                                .lineLimit(3)
+                                .frame(idealHeight: 65, alignment: .top)
+                                .layoutPriority(1)
                         }
                         .padding(.leading, 30)
+                        .layoutPriority(1)
+                        
+                        Spacer()
+                            .frame(maxHeight: 25)
                         
                         // Patience Level
                         VStack(alignment: .leading, spacing: 5) {
@@ -181,14 +172,15 @@ fileprivate struct SummaryScreen: View {
                             }
                             .frame(height: 20)
                         }
+                        .layoutPriority(1)
                     }
                     .padding(15)
                 )
-                .frame(width: 160, height: 250)
+                .frame(maxWidth: 160, maxHeight: 250)
+                .layoutPriority(1)
         }
-        .frame(maxWidth: .infinity, maxHeight: 250)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.trailing, 20)
     }
 }
 

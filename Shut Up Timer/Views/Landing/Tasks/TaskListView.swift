@@ -111,13 +111,12 @@ struct TaskListView: View {
 
 struct TasksContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @State private var editingTask: UUID = UUID()
-    @FocusState private var isFocused: Bool
     
-    // Fetch active todos using @FetchRequest for automatic updates
+    // Fetch active todos using @FetchRequest with order-based sorting
     @FetchRequest(
         entity: Todo.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Todo.order, ascending: true),
+                          NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
         predicate: NSPredicate(format: "active == YES")
     ) private var activeTodos: FetchedResults<Todo>
     
@@ -130,132 +129,138 @@ struct TasksContentView: View {
     ) private var goals: FetchedResults<Goal>
     
     var body: some View {
-        return ScrollView {
-            LazyVStack(alignment: .leading, spacing: 12) {
-                // Group tasks by goals using Core Data
-                ForEach(Array(goals), id: \.id) { goal in
-                    VStack(alignment: .leading, spacing: 8) {
-                        // Goal header
-                        HStack {
-                            Rectangle()
-                                .fill(ColorTokens.red300)
-                                .frame(width: 4, height: 20)
-                            
-                            Text(goal.goal ?? "Unknown Goal")
-                                .font(FontTokens.architectsDaughter(size: 14))
-                                .foregroundColor(.black)
-                                .fontWeight(.semibold)
-                            
-                            Spacer()
-                        }
-                        
-                        // Tasks for this goal using Core Data relationship
-                        ForEach(Array(goal.tasksArray), id: \.id) { task in
-                            TaskRowView(
-                                task: task,
-                                isEditing: editingTask == task.id,
-                                startEditing: { editingTask = task.id ?? UUID() },
-                                cancelEditing: { editingTask = UUID() },
-                                isFocused: $isFocused
-                            )
-                        }
+        return List {
+            ForEach(activeTodos, id: \.id) { task in
+                TaskRowView(
+                    task: task,
+                    availableGoals: goals
+                )
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            }
+            .onMove { inds, newOffset in
+                do {
+                    var tempTasks = Array(activeTodos)
+                    tempTasks.move(fromOffsets: inds, toOffset: newOffset)
+                    tempTasks.enumerated().forEach { ind, task in
+                        task.order = Int16(ind)
                     }
-                }
-                
-                // Tasks without goals (existing tasks)
-                let tasksWithoutGoals = activeTodos.filter { $0.goal == nil }
-                if !tasksWithoutGoals.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Rectangle()
-                                .fill(ColorTokens.red300)
-                                .frame(width: 4, height: 20)
-                            
-                            Text("General Tasks")
-                                .font(FontTokens.architectsDaughter(size: 14))
-                                .foregroundColor(.black)
-                                .fontWeight(.semibold)
-                            
-                            Spacer()
-                        }
-                        
-                        ForEach(tasksWithoutGoals, id: \.id) { task in
-                            TaskRowView(
-                                task: task,
-                                isEditing: editingTask == task.id,
-                                startEditing: { editingTask = task.id ?? UUID() },
-                                cancelEditing: { editingTask = UUID() },
-                                isFocused: $isFocused
-                            )
-                        }
-                    }
+                    try viewContext.save()
+                } catch {
+                    print("Error moving elements: \(error)")
                 }
             }
-            .padding(.vertical, 8)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .padding(.vertical, 8)
     }
 }
 
 struct TaskRowView: View {
     @ObservedObject var task: Todo
+    var availableGoals: FetchedResults<Goal>
     @Environment(\.managedObjectContext) private var viewContext
     
-    var isEditing: Bool
-    var startEditing: () -> Void
-    var cancelEditing: () -> Void
+    @State var rectState = ExpandingGestureState(maxOffset: 60)
+    @State private var showingGoalPicker = false
+
+    @FocusState private var isFocused: Bool
     
-    @FocusState.Binding var isFocused: Bool
+    var goalColor: Color {
+        if let goal = task.goal {
+            if let gColor = goal.color {
+                return hexStringToColor(gColor)
+            }
+        }
+        return ColorTokens.red300
+    }
     
     var body: some View {
         HStack {
-            if isEditing {
-                TextField("", text: Binding(
-                    get: { task.todo ?? "" },
-                    set: { task.todo = $0 }
-                ))
-                    .onSubmit {
-                        do {
-                            try viewContext.save()
-                            cancelEditing()
-                            withAnimation {
-                                isFocused = false
-                            }
-                        } catch {
-                            print("Failed to save todo: \(error)")
-                        }
+            // Expanding rectangle with text
+            RoundedRectangle(cornerRadius: 4)
+                .fill(goalColor)
+                .frame(width: 4 + rectState.dragOffset, height: 20)
+                .overlay(
+                    HStack {
+                        Text(task.goal?.goal ?? "Goal")
+                            .font(FontTokens.architectsDaughter(size: 14))
+                            .foregroundColor(goodOverlayColor(for: goalColor))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .frame(width: rectState.maxOffset - 12 + 4, alignment: .center) // Fixed size equal to maxOffset
+                        Spacer()
                     }
-                    .focused($isFocused)
-                    .font(FontTokens.architectsDaughter(size: 12))
-                    .foregroundColor(.black)
-                    .strikethrough(task.completed)
-            } else {
-                Text(task.todo ?? "")
-                    .font(FontTokens.architectsDaughter(size: 12))
-                    .foregroundColor(.black)
-                    .strikethrough(task.completed)
-            }
+                    .padding(.leading, 8),
+                    alignment: .leading
+                )
+                .clipped() // Clip to fit within the rectangle
+                .onTapGesture {
+                    showingGoalPicker = true;
+                }
             
-            Spacer()
+            TextField("", text: Binding<String>(
+                get: { task.todo ?? "" },
+                set: { val in
+                    do {
+                        task.todo = val
+                        try viewContext.save()
+                    } catch {
+                        print("Failed to save new value..")
+                    }
+                }
+            ))
+                .focused($isFocused)
+                .font(FontTokens.architectsDaughter(size: 12))
+                .foregroundColor(.black)
+                .strikethrough(task.completed)
+                .lineLimit(1)
+            
+            Rectangle()
+                .fill(.clear)
+                .contentShape(Rectangle())
+                .layoutPriority(-1)
         }
-        .swipeActions {
-            Button(role: .destructive) {
-                task.active = false
+        .simultaneousGesture(
+            ExpandingGestureState.getDragGesture(state: $rectState)
+        )
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if rectState.dragOffset == 0 {
+                Button(role: .destructive) {
+                    task.active = false
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print("Failed to remove task: \(error)")
+                    }
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+        }
+        .confirmationDialog("Select Goal", isPresented: $showingGoalPicker, titleVisibility: .visible) {
+            Button("None") {
+                task.goal = nil
                 do {
                     try viewContext.save()
                 } catch {
-                    print("Failed to remove task: \(error)")
+                    print("Failed to save goal change: \(error)")
                 }
-            } label: {
-                Label("Delete", systemImage: "trash")
             }
             
-            Button {
-                startEditing()
-                isFocused = true
-            } label: {
-                Label("Edit", systemImage: "pencil")
+            ForEach(availableGoals, id: \.id) { goal in
+                Button(goal.goal ?? "Unknown Goal") {
+                    task.goal = goal
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        print("Failed to save goal change: \(error)")
+                    }
+                }
             }
-            .tint(.blue)
+            
+            Button("Cancel", role: .cancel) { }
         }
     }
 }
@@ -298,11 +303,13 @@ struct DreamGoalsContentView: View {
 }
 
 struct DreamGoalRowView: View {
-    let goal: Goal
+    @ObservedObject var goal: Goal
     @Environment(\.managedObjectContext) private var viewContext
     
-    func getGoalColor() -> Color {
-        if let gColor = goal.color {
+    @State var rectState = ExpandingGestureState(maxOffset: 60)
+    
+    func getGoalColor(curColor: String?) -> Color {
+        if let gColor = curColor {
             return hexStringToColor(gColor)
         } else {
             return ColorTokens.red300
@@ -312,49 +319,92 @@ struct DreamGoalRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Rectangle()
-                    .fill(getGoalColor())
-                    .frame(width: 4, height: 20)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(getGoalColor(curColor: goal.color))
+                    .frame(width: 4 + rectState.dragOffset, height: 20)
+                    .onTapGesture {
+                        do {
+                            goal.color = colorToHexString(randomGoalColor())
+                            try viewContext.save()
+                        } catch {
+                            print("Error saving new color: \(error)")
+                        }
+                    }
                 
                 Text(goal.goal ?? "Unknown Goal")
                     .font(FontTokens.architectsDaughter(size: 12))
                     .foregroundColor(.black)
                     .fontWeight(.semibold)
                 
-                Spacer()
+                Rectangle()
+                    .fill(Color.clear)
+                    .contentShape(Rectangle())
+                    .layoutPriority(-1)
                 
                 Text("[\(Int(goal.iqGoal)) IQ Points]")
                     .font(FontTokens.architectsDaughter(size: 10))
                     .foregroundColor(ColorTokens.shade600)
                 
                 // Show "Redeem" button for incomplete tasks only when not editing
-                Button(action: {
-                    goal.redeemed = true
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        print("Failed to redeem goal: \(error)")
+                Text("Redeem")
+                    .font(FontTokens.architectsDaughter(size: 10))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(ColorTokens.red300)
+                    .cornerRadius(4)
+                    .frame(width: 60, height: 20)
+                    .onTapGesture {
+                        goal.redeemed = true
+                        do {
+                            try viewContext.save()
+                        } catch {
+                            print("Failed to redeem goal: \(error)")
+                        }
                     }
-                }) {
-                    Text("Redeem")
-                        .font(FontTokens.architectsDaughter(size: 10))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(ColorTokens.red300)
-                        .cornerRadius(4)
-                        .frame(width: 60, height: 20)
+            }
+            .simultaneousGesture(
+                ExpandingGestureState.getDragGesture(state: $rectState)
+            )
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                if rectState.dragOffset == 0 {
+                    Button(role: .destructive) {
+                        do {
+                            viewContext.delete(goal)
+                            try viewContext.save()
+                        } catch {
+                            print("Failed to remove goal: \(error)")
+                        }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
                 }
             }
-            
-            // Show progress if there are tasks
-            if !goal.tasksArray.isEmpty {
-                Text("Progress: \(String(format: "%.1f", goal.iqCurrent))/\(String(format: "%.1f", goal.iqGoal)) IQ")
-                    .font(FontTokens.architectsDaughter(size: 10))
-                    .foregroundColor(ColorTokens.shade500)
-                    .padding(.leading, 8)
-            }
         }
+    }
+}
+
+struct ExpandingGestureState {
+    var dragOffset: CGFloat = 0;
+    var lastDragOffset: CGFloat = 0;
+    let maxOffset: CGFloat;
+    
+    static func getDragGesture(state: Binding<ExpandingGestureState>) -> some Gesture {
+        return DragGesture()
+            .onChanged { value in
+                let translation = value.translation.width
+                state.wrappedValue.dragOffset = max(min(state.wrappedValue.lastDragOffset + translation, state.wrappedValue.maxOffset), 0)
+            }
+            .onEnded { _ in
+                withAnimation {
+                    if state.wrappedValue.dragOffset > state.wrappedValue.maxOffset * 3 / 4 {
+                        state.wrappedValue.dragOffset = state.wrappedValue.maxOffset;
+                    } else {
+                        state.wrappedValue.dragOffset = 0
+                    }
+                    state.wrappedValue.lastDragOffset = state.wrappedValue.dragOffset
+                }
+            }
     }
 }
 

@@ -4,6 +4,11 @@ import CoreData
 struct TaskListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: TaskTab = .myTasks
+    let onAddGoal: (() -> Void)
+    
+    init(onAddGoal: @escaping () -> Void) {
+        self.onAddGoal = onAddGoal
+    }
     
     enum TaskTab: CaseIterable {
         case myTasks
@@ -72,7 +77,11 @@ struct TaskListView: View {
                                 Spacer()
                                 
                                 Button(action: {
-                                    // TODO: Add functionality later
+                                    if selectedTab == .dreamGoals {
+                                        onAddGoal()
+                                    } else {
+                                        // TODO: Add task functionality later
+                                    }
                                 }) {
                                     Text("+")
                                         .font(FontTokens.architectsDaughter(size: 30))
@@ -290,11 +299,19 @@ struct DreamGoalRowView: View {
     let goal: Goal
     @Environment(\.managedObjectContext) private var viewContext
     
+    func getGoalColor() -> Color {
+        if let gColor = goal.color {
+            return hexStringToColor(gColor)
+        } else {
+            return ColorTokens.red300
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Rectangle()
-                    .fill(ColorTokens.red300)
+                    .fill(getGoalColor())
                     .frame(width: 4, height: 20)
                 
                 Text(goal.goal ?? "Unknown Goal")
@@ -402,7 +419,7 @@ struct TaskListViewPreview : PreviewProvider {
         @Environment(\.managedObjectContext) private var viewContext
         
         var body : some View {
-            TaskListView()
+            TaskListView(onAddGoal: {})
                 .onAppear {
                     addSampleDataToDB(viewContext: viewContext)
                 }

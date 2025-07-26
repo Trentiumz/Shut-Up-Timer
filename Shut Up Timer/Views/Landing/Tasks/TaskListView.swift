@@ -5,9 +5,11 @@ struct TaskListView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: TaskTab = .myTasks
     let onAddGoal: (() -> Void)
+    let onAddTask: (() -> Void)
     
-    init(onAddGoal: @escaping () -> Void) {
+    init(onAddGoal: @escaping () -> Void, onAddTask: @escaping () -> Void) {
         self.onAddGoal = onAddGoal
+        self.onAddTask = onAddTask
     }
     
     enum TaskTab: CaseIterable {
@@ -80,7 +82,7 @@ struct TaskListView: View {
                                     if selectedTab == .dreamGoals {
                                         onAddGoal()
                                     } else {
-                                        // TODO: Add task functionality later
+                                        onAddTask()
                                     }
                                 }) {
                                     Text("+")
@@ -419,7 +421,7 @@ struct TaskListViewPreview : PreviewProvider {
         @Environment(\.managedObjectContext) private var viewContext
         
         var body : some View {
-            TaskListView(onAddGoal: {})
+            TaskListView(onAddGoal: {}, onAddTask: {})
                 .onAppear {
                     addSampleDataToDB(viewContext: viewContext)
                 }

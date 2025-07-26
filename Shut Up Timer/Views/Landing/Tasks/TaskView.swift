@@ -2,7 +2,13 @@ import SwiftUI
 import CoreData
 
 struct TaskView: View {
-    @State private var isAddingGoal = false
+    enum TopTaskScreen {
+        case beckon
+        case addGoal
+        case addTask
+    }
+    
+    @State private var taskScreen: TopTaskScreen = .beckon
     @Environment(\.managedObjectContext) private var viewContext
     
     private let rightwardAnimation = AnyTransition.asymmetric(
@@ -12,26 +18,47 @@ struct TaskView: View {
     
     var body: some View {
         VStack(spacing: 15) {
-            if isAddingGoal {
+            switch(taskScreen) {
+            case .addGoal:
                 GoalAddView { temporaryGoal in
                     let success = addGoal(temporaryGoal)
                     if success {
                         withAnimation {
-                            isAddingGoal = false
+                            taskScreen = .beckon
                         }
                     }
                 }
                 .padding()
                 .transition(rightwardAnimation)
-            } else {
+            case .beckon:
                 TodoBeckonView()
                     .transition(rightwardAnimation)
+            case .addTask:
+                TaskAddView(
+                    onTaskAdd: { tasks in
+                        let success = addTasks(tasks)
+                        if success {
+                            withAnimation {
+                                taskScreen = .beckon
+                            }
+                        }
+                    }
+                )
+                .padding()
+                .transition(rightwardAnimation)
             }
-            TaskListView(onAddGoal: {
-                withAnimation {
-                    isAddingGoal = true
+            TaskListView(
+                onAddGoal: {
+                    withAnimation {
+                        taskScreen = .addGoal
+                    }
+                },
+                onAddTask: {
+                    withAnimation {
+                        taskScreen = .addTask
+                    }
                 }
-            })
+            )
             .frame(maxHeight: 400)
             .padding(.horizontal, 8)
         }
@@ -71,6 +98,31 @@ struct TaskView: View {
             print("Failed to fetch min value: \(error)")
             viewContext.reset()
             return false;
+        }
+    }
+    
+    private func addTasks(_ temporaryTasks: [TemporaryTask]) -> Bool {
+        do {
+            let currentDate = Date()
+            
+            // Create Todo entities from TemporaryTask array
+            for (index, tempTask) in temporaryTasks.enumerated() {
+                let todo = Todo(context: viewContext)
+                todo.id = UUID()
+                todo.todo = tempTask.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                todo.active = true
+                todo.completed = false
+                todo.created = currentDate.addingTimeInterval(Double(index)) // Slight offset for ordering
+                todo.order = Int16(index) // Set order based on position in array
+                todo.goal = tempTask.goal // Link to goal if specified
+            }
+            
+            try viewContext.save()
+            return true
+        } catch {
+            print("Failed to save new tasks: \(error)")
+            viewContext.reset()
+            return false
         }
     }
 }

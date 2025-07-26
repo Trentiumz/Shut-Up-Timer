@@ -397,7 +397,7 @@ fileprivate struct CalculatorComponent: View {
 }
 
 // MARK: - Supporting Views
-fileprivate struct DarkContentContainer<Content: View>: View {
+struct DarkContentContainer<Content: View>: View {
     let content: Content
     
     init(@ViewBuilder content: () -> Content) {

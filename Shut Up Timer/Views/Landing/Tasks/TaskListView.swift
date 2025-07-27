@@ -7,9 +7,12 @@ struct TaskListView: View {
     let onAddGoal: (() -> Void)
     let onAddTask: (() -> Void)
     
-    init(onAddGoal: @escaping () -> Void, onAddTask: @escaping () -> Void) {
+    @FocusState.Binding var todoTitleEditID: UUID?
+    
+    init(onAddGoal: @escaping () -> Void, onAddTask: @escaping () -> Void, todoTitleEditID: FocusState<UUID?>.Binding) {
         self.onAddGoal = onAddGoal
         self.onAddTask = onAddTask
+        self._todoTitleEditID = todoTitleEditID
     }
     
     enum TaskTab: CaseIterable {
@@ -69,9 +72,13 @@ struct TaskListView: View {
                         // Content inside the main area
                         VStack(alignment: .leading, spacing: 8) {
                             if selectedTab == .myTasks {
-                                TasksContentView()
+                                TasksContentView(
+                                    todoTitleEditID: _todoTitleEditID
+                                )
                             } else {
-                                DreamGoalsContentView()
+                                DreamGoalsContentView(
+                                    textEditID: _todoTitleEditID
+                                )
                             }
                             
                             // Plus button at bottom
@@ -128,12 +135,15 @@ struct TasksContentView: View {
         predicate: NSPredicate(format: "redeemed == false")
     ) private var goals: FetchedResults<Goal>
     
+    @FocusState.Binding var todoTitleEditID: UUID?
+    
     var body: some View {
         return List {
             ForEach(activeTodos, id: \.id) { task in
                 TaskRowView(
                     task: task,
-                    availableGoals: goals
+                    availableGoals: goals,
+                    textEditID: _todoTitleEditID
                 )
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -164,8 +174,8 @@ struct TaskRowView: View {
     
     @State var rectState = ExpandingGestureState(maxOffset: 60)
     @State private var showingGoalPicker = false
-
-    @FocusState private var isFocused: Bool
+    
+    @FocusState.Binding var textEditID: UUID?
     
     var goalColor: Color {
         if let goal = task.goal {
@@ -211,11 +221,11 @@ struct TaskRowView: View {
                     }
                 }
             ))
-                .focused($isFocused)
-                .font(FontTokens.architectsDaughter(size: 12))
-                .foregroundColor(.black)
-                .strikethrough(task.completed)
-                .lineLimit(1)
+            .focused(_textEditID, equals: task.id)
+            .font(FontTokens.architectsDaughter(size: 12))
+            .foregroundColor(.black)
+            .strikethrough(task.completed)
+            .lineLimit(1)
             
             Rectangle()
                 .fill(.clear)
@@ -276,10 +286,12 @@ struct DreamGoalsContentView: View {
         predicate: NSPredicate(format: "redeemed == false")
     ) private var goals: FetchedResults<Goal>
     
+    @FocusState.Binding var textEditID: UUID?
+    
     var body: some View {
         return List {
             ForEach(goals, id: \.id) { goal in
-                DreamGoalRowView(goal: goal)
+                DreamGoalRowView(goal: goal, textEditID: _textEditID)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
             }
@@ -308,6 +320,8 @@ struct DreamGoalRowView: View {
     
     @State var rectState = ExpandingGestureState(maxOffset: 60)
     
+    @FocusState.Binding var textEditID: UUID?
+    
     func getGoalColor(curColor: String?) -> Color {
         if let gColor = curColor {
             return hexStringToColor(gColor)
@@ -331,10 +345,21 @@ struct DreamGoalRowView: View {
                         }
                     }
                 
-                Text(goal.goal ?? "Unknown Goal")
-                    .font(FontTokens.architectsDaughter(size: 12))
-                    .foregroundColor(.black)
-                    .fontWeight(.semibold)
+                TextField("", text: Binding<String>(
+                    get: { goal.goal ?? "Unknown Goal" },
+                    set: { val in
+                        do {
+                            goal.goal = val
+                            try viewContext.save()
+                        } catch {
+                            print("Failed to save new value..")
+                        }
+                    }
+                ))
+                .focused(_textEditID, equals: goal.id)
+                .font(FontTokens.architectsDaughter(size: 12))
+                .foregroundColor(.black)
+                .lineLimit(1)
                 
                 Rectangle()
                     .fill(Color.clear)
@@ -469,9 +494,10 @@ func addSampleDataToDB(viewContext: NSManagedObjectContext) {
 struct TaskListViewPreview : PreviewProvider {
     struct Wrapper : View {
         @Environment(\.managedObjectContext) private var viewContext
+        @FocusState var todoTitleEditID: UUID?
         
         var body : some View {
-            TaskListView(onAddGoal: {}, onAddTask: {})
+            TaskListView(onAddGoal: {}, onAddTask: {}, todoTitleEditID: $todoTitleEditID)
                 .onAppear {
                     addSampleDataToDB(viewContext: viewContext)
                 }

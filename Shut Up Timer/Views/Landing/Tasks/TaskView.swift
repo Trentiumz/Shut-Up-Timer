@@ -11,42 +11,52 @@ struct TaskView: View {
     @State private var taskScreen: TopTaskScreen = .beckon
     @Environment(\.managedObjectContext) private var viewContext
     
+    @FocusState var todoTitleEditID: UUID?
+    @State private var displayTop: Bool = true
+    
     private let rightwardAnimation = AnyTransition.asymmetric(
         insertion: AnyTransition.move(edge: .trailing),
         removal: AnyTransition.move(edge: .leading)
     )
     
     var body: some View {
-        VStack(spacing: 15) {
-            switch(taskScreen) {
-            case .addGoal:
-                GoalAddView { temporaryGoal in
-                    let success = addGoal(temporaryGoal)
-                    if success {
-                        withAnimation {
-                            taskScreen = .beckon
-                        }
-                    }
-                }
-                .padding()
-                .transition(rightwardAnimation)
-            case .beckon:
-                TodoBeckonView()
-                    .transition(rightwardAnimation)
-            case .addTask:
-                TaskAddView(
-                    onTaskAdd: { tasks in
-                        let success = addTasks(tasks)
+        VStack {
+            if displayTop {
+                Spacer()
+                switch(taskScreen) {
+                case .addGoal:
+                    GoalAddView { temporaryGoal in
+                        let success = addGoal(temporaryGoal)
                         if success {
                             withAnimation {
                                 taskScreen = .beckon
                             }
                         }
                     }
-                )
-                .padding()
-                .transition(rightwardAnimation)
+                    .padding()
+                    .transition(rightwardAnimation)
+                case .beckon:
+                    TodoBeckonView()
+                        .transition(rightwardAnimation)
+                case .addTask:
+                    TaskAddView(
+                        onTaskAdd: { tasks in
+                            let success = addTasks(tasks)
+                            if success {
+                                withAnimation {
+                                    taskScreen = .beckon
+                                }
+                            }
+                        }
+                    )
+                    .padding()
+                    .transition(rightwardAnimation)
+                }
             }
+            
+            Spacer()
+                .frame(maxHeight: 15)
+            
             TaskListView(
                 onAddGoal: {
                     withAnimation {
@@ -57,13 +67,36 @@ struct TaskView: View {
                     withAnimation {
                         taskScreen = .addTask
                     }
-                }
+                },
+                todoTitleEditID: $todoTitleEditID
             )
             .frame(maxHeight: 400)
             .padding(.horizontal, 8)
+            
+            if !displayTop {
+                Spacer()
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .coordinateSpace(name: "todo-card")
+        .onAppear {
+            syncDisplayTop()
+        }
+        .onChange(of: todoTitleEditID) { _ in
+            syncDisplayTop()
+        }
+    }
+    
+    func syncDisplayTop() {
+        if todoTitleEditID == nil {
+            withAnimation {
+                displayTop = true
+            }
+        } else {
+            withAnimation {
+                displayTop = false
+            }
+        }
     }
     
     private func addGoal(_ temporaryGoal: TemporaryGoal) -> Bool {

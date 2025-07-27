@@ -247,6 +247,44 @@ struct TaskRowView: View {
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
+                
+                if !task.completed {
+                    Button {
+                        do {
+                            let byOrder = Todo.fetchRequest()
+                            byOrder.sortDescriptors = [NSSortDescriptor(key: "order", ascending: false)]
+                            byOrder.fetchLimit = 1
+                            byOrder.propertiesToFetch = ["order"]
+                            byOrder.resultType = .managedObjectResultType
+                            
+                            var maxOrder: Int16 = 0
+                            if let result = try viewContext.fetch(byOrder).first {
+                                maxOrder = result.value(forKey: "order") as? Int16 ?? 0
+                            }
+                            
+                            task.completed = true
+                            task.order = maxOrder + 1
+                            try viewContext.save()
+                        } catch {
+                            print("Error marking todo as completed: \(error)")
+                        }
+                    } label: {
+                        Label("Mark as Complete", systemImage: "checkmark.square")
+                    }
+                    .tint(.mint)
+                } else {
+                    Button() {
+                        do {
+                            task.completed = false
+                            try viewContext.save()
+                        } catch {
+                            print("Error marking todo as incomplete: \(error)")
+                        }
+                    } label: {
+                        Label("Mark as Incomplete", systemImage: "x.square")
+                    }
+                    .tint(.orange)
+                }
             }
         }
         .confirmationDialog("Select Goal", isPresented: $showingGoalPicker, titleVisibility: .visible) {

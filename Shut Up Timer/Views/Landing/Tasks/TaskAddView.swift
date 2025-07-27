@@ -11,6 +11,7 @@ struct TaskAddView: View {
     @State private var tasks: [TemporaryTask] = [TemporaryTask()]
     @Environment(\.managedObjectContext) private var viewContext
     let onTaskAdd: ([TemporaryTask]) -> Void
+    let onCancel: () -> Void
     
     // Fetch available goals
     @FetchRequest(
@@ -87,6 +88,16 @@ struct TaskAddView: View {
                 .padding(.bottom, 20)
             }
         }
+        .overlay(
+            VStack {
+                HStack {
+                    Spacer()
+                    CommonTaskViews.CancelButton(onCancel: onCancel)
+                }
+                Spacer()
+            }
+                .padding(.trailing, 8)
+        )
     }
     
     private func onUserInteract(at index: Int) {
@@ -148,6 +159,7 @@ fileprivate struct TaskMakeView: View {
                     }
                 }
             }
+            .buttonStyle(.plain)
             .frame(width: 70)
             
             // Task name TextField on the right
@@ -210,6 +222,8 @@ func goodOverlayColor(for color: Color) -> Color {
         Color.black
         TaskAddView { _ in
             // Preview handler
+        } onCancel: {
+            
         }
         .frame(height: 300)
     }

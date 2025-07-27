@@ -16,6 +16,7 @@ struct GoalAddView: View {
     @State private var currentScreen = 0
     @State private var temporaryGoal = TemporaryGoal()
     let onGoalAdded: (TemporaryGoal) -> Void
+    let onCancel: () -> Void
     
     var body: some View {
         switch(currentScreen) {
@@ -25,7 +26,7 @@ struct GoalAddView: View {
                 withAnimation {
                     currentScreen = 1
                 }
-            })
+            }, onCancel: onCancel)
             .transition(.opacity)
         case 1:
             // Screen 2 - Hours Calculator
@@ -33,7 +34,7 @@ struct GoalAddView: View {
                 withAnimation {
                     currentScreen = 2
                 }
-            })
+            }, onCancel: onCancel)
             .transition(.opacity)
         case 2:
             // Screen 3 - Weeks Calculator
@@ -42,13 +43,13 @@ struct GoalAddView: View {
                     temporaryGoal.iqGoal = temporaryGoal.hoursPerWeek * temporaryGoal.weeksNeeded;
                     currentScreen = 3
                 }
-            })
+            }, onCancel: onCancel)
             .transition(.opacity)
         default:
-                         // Screen 4 - Summary
-             GoalSummaryScreen(temporaryGoal: $temporaryGoal, onComplete: {
-                 onGoalAdded(temporaryGoal)
-             })
+            // Screen 4 - Summary
+            GoalSummaryScreen(temporaryGoal: $temporaryGoal, onComplete: {
+                onGoalAdded(temporaryGoal)
+            }, onCancel: onCancel)
             .transition(.opacity)
         }
     }
@@ -58,6 +59,7 @@ struct GoalAddView: View {
 fileprivate struct GoalSetupScreen: View {
     @Binding var temporaryGoal: TemporaryGoal
     let onNext: () -> Void
+    let onCancel: () -> Void
     
     var body: some View {
         DarkContentContainer {
@@ -159,6 +161,16 @@ fileprivate struct GoalSetupScreen: View {
             }
             .padding(20)
         }
+        .overlay(
+            VStack {
+                HStack {
+                    Spacer()
+                    CommonTaskViews.CancelButton(onCancel: onCancel)
+                }
+                Spacer()
+            }
+                .padding(.trailing, 8)
+        )
     }
 }
 
@@ -166,13 +178,14 @@ fileprivate struct GoalSetupScreen: View {
 fileprivate struct HoursCalculatorScreen: View {
     @Binding var hoursPerWeek: Double;
     let onNext: () -> Void
+    let onCancel: () -> Void
     
     var body: some View {
         DarkContentContainer {
             VStack(spacing: 0) {
                 Spacer()
                 
-                CalculatorComponent(value: _hoursPerWeek, placeholder: "How many hrs would you spend on this for a week?", onEnter: onNext)
+                CalculatorComponent(value: _hoursPerWeek, placeholder: "How many hrs would you spend on this for a week?", onEnter: onNext, onCancel: onCancel)
                 
                 Spacer()
             }
@@ -187,13 +200,14 @@ fileprivate struct HoursCalculatorScreen: View {
 fileprivate struct WeeksCalculatorScreen: View {
     @Binding var weeksNeeded: Double
     let onNext: () -> Void
+    let onCancel: () -> Void
     
     var body: some View {
         DarkContentContainer {
             VStack(spacing: 20) {
                 Spacer()
                 
-                CalculatorComponent(value: _weeksNeeded, placeholder: "How many weeks do you need to accomplish this goal?", onEnter: onNext)
+                CalculatorComponent(value: _weeksNeeded, placeholder: "How many weeks do you need to accomplish this goal?", onEnter: onNext, onCancel: onCancel)
                 
                 Spacer()
             }
@@ -208,6 +222,7 @@ fileprivate struct WeeksCalculatorScreen: View {
 fileprivate struct GoalSummaryScreen: View {
     @Binding var temporaryGoal: TemporaryGoal
     let onComplete: () -> Void
+    let onCancel: () -> Void
     
     private var formatter: NumberFormatter {
         let nf = NumberFormatter()
@@ -273,6 +288,16 @@ fileprivate struct GoalSummaryScreen: View {
             }
             .padding(20)
         }
+        .overlay(
+            VStack {
+                HStack {
+                    Spacer()
+                    CommonTaskViews.CancelButton(onCancel: onCancel)
+                }
+                Spacer()
+            }
+                .padding(.trailing, 8)
+        )
     }
 }
 
@@ -282,9 +307,14 @@ fileprivate struct CalculatorComponent: View {
     @State private var displayText: String = ""
     let placeholder: String;
     let onEnter: () -> Void
+    let onCancel: () -> Void
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            HStack {
+                Spacer()
+                CommonTaskViews.CancelButton(onCancel: onCancel)
+            }
             // Display
             ZStack(alignment: .trailing) {
                 HStack {
@@ -436,7 +466,7 @@ fileprivate struct CalculatorButtonStyle: ButtonStyle {
         Color.black
         GoalAddView { _ in
             // Preview handler
-        }
+        } onCancel: {}
     }
     .frame(height: 300)
 }

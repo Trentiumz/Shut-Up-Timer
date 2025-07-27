@@ -6,12 +6,14 @@ struct TaskListView: View {
     @State private var selectedTab: TaskTab = .myTasks
     let onAddGoal: (() -> Void)
     let onAddTask: (() -> Void)
+    let onRedeem: (Goal) -> Void
     
     @FocusState.Binding var todoTitleEditID: UUID?
     
-    init(onAddGoal: @escaping () -> Void, onAddTask: @escaping () -> Void, todoTitleEditID: FocusState<UUID?>.Binding) {
+    init(onAddGoal: @escaping () -> Void, onAddTask: @escaping () -> Void, onRedeem: @escaping (Goal) -> Void, todoTitleEditID: FocusState<UUID?>.Binding) {
         self.onAddGoal = onAddGoal
         self.onAddTask = onAddTask
+        self.onRedeem = onRedeem
         self._todoTitleEditID = todoTitleEditID
     }
     
@@ -77,7 +79,8 @@ struct TaskListView: View {
                                 )
                             } else {
                                 DreamGoalsContentView(
-                                    textEditID: _todoTitleEditID
+                                    textEditID: _todoTitleEditID,
+                                    onRedeem: onRedeem
                                 )
                             }
                             
@@ -124,7 +127,7 @@ struct TasksContentView: View {
         entity: Todo.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Todo.order, ascending: true),
                           NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
-        predicate: NSPredicate(format: "active == YES")
+        predicate: NSPredicate(format: "active == YES AND goal.redeemed == NO")
     ) private var activeTodos: FetchedResults<Todo>
     
     // Fetch goals using @FetchRequest for automatic updates
@@ -325,11 +328,12 @@ struct DreamGoalsContentView: View {
     ) private var goals: FetchedResults<Goal>
     
     @FocusState.Binding var textEditID: UUID?
+    let onRedeem: (Goal) -> Void
     
     var body: some View {
         return List {
             ForEach(goals, id: \.id) { goal in
-                DreamGoalRowView(goal: goal, textEditID: _textEditID)
+                DreamGoalRowView(goal: goal, textEditID: _textEditID, onRedeem: onRedeem)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
             }
@@ -359,6 +363,7 @@ struct DreamGoalRowView: View {
     @State var rectState = ExpandingGestureState(maxOffset: 60)
     
     @FocusState.Binding var textEditID: UUID?
+    let onRedeem: (Goal) -> Void
     
     func getGoalColor(curColor: String?) -> Color {
         if let gColor = curColor {
@@ -418,12 +423,7 @@ struct DreamGoalRowView: View {
                     .cornerRadius(4)
                     .frame(width: 60, height: 20)
                     .onTapGesture {
-                        goal.redeemed = true
-                        do {
-                            try viewContext.save()
-                        } catch {
-                            print("Failed to redeem goal: \(error)")
-                        }
+                        onRedeem(goal)
                     }
             }
             .simultaneousGesture(
@@ -535,7 +535,7 @@ struct TaskListViewPreview : PreviewProvider {
         @FocusState var todoTitleEditID: UUID?
         
         var body : some View {
-            TaskListView(onAddGoal: {}, onAddTask: {}, todoTitleEditID: $todoTitleEditID)
+            TaskListView(onAddGoal: {}, onAddTask: {}, onRedeem: { _ in }, todoTitleEditID: $todoTitleEditID)
                 .onAppear {
                     addSampleDataToDB(viewContext: viewContext)
                 }

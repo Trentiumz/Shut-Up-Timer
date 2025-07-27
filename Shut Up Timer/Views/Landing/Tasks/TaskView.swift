@@ -6,6 +6,7 @@ struct TaskView: View {
         case beckon
         case addGoal
         case addTask
+        case redeem(goal: Goal)
     }
     
     @State private var taskScreen: TopTaskScreen = .beckon
@@ -26,11 +27,15 @@ struct TaskView: View {
                 switch(taskScreen) {
                 case .addGoal:
                     GoalAddView { temporaryGoal in
-                        let success = addGoal(temporaryGoal)
-                        if success {
-                            withAnimation {
+                        withAnimation {
+                            let success = addGoal(temporaryGoal)
+                            if success {
                                 taskScreen = .beckon
                             }
+                        }
+                    } onCancel: {
+                        withAnimation {
+                            taskScreen = .beckon
                         }
                     }
                     .padding()
@@ -41,11 +46,38 @@ struct TaskView: View {
                 case .addTask:
                     TaskAddView(
                         onTaskAdd: { tasks in
-                            let success = addTasks(tasks)
-                            if success {
-                                withAnimation {
+                            withAnimation {
+                                let success = addTasks(tasks)
+                                if success {
                                     taskScreen = .beckon
                                 }
+                            }
+                        },
+                        onCancel: {
+                            withAnimation {
+                                taskScreen = .beckon
+                            }
+                        }
+                    )
+                    .padding()
+                    .transition(rightwardAnimation)
+                case .redeem(let goal):
+                    GoalRedeemView(
+                        goal: goal,
+                        onRedeem: { goal in
+                            do {
+                                try withAnimation {
+                                    goal.redeemed = true
+                                    try viewContext.save()
+                                    taskScreen = .beckon
+                                }
+                            } catch {
+                                print("Error redeeming goal: \(error)")
+                            }
+                        },
+                        onCancel: {
+                            withAnimation {
+                                taskScreen = .beckon
                             }
                         }
                     )
@@ -66,6 +98,11 @@ struct TaskView: View {
                 onAddTask: {
                     withAnimation {
                         taskScreen = .addTask
+                    }
+                },
+                onRedeem: { goal in
+                    withAnimation {
+                        taskScreen = .redeem(goal: goal)
                     }
                 },
                 todoTitleEditID: $todoTitleEditID

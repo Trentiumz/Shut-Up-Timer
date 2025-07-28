@@ -1,5 +1,11 @@
 import SwiftUI
 import UserNotifications
+import CoreData
+
+enum TimerScreenState {
+    case mainTimer
+    case taskSelection
+}
 
 struct TimerView<Manager: CurSessionManager>: View {
     // holds the model
@@ -9,9 +15,13 @@ struct TimerView<Manager: CurSessionManager>: View {
     // access for page transitions
     @EnvironmentObject var router: AppRouter;
     @Environment(\.scenePhase) private var scenePhase;
+    @Environment(\.managedObjectContext) private var viewContext
     
-    // whether the todo list is expanded
-    @State var todoExpanded: Bool = false;
+    // Screen state management
+    @State private var currentScreen: TimerScreenState = .mainTimer
+    
+    // Selected todo state
+    @State private var selectedTodoObject: Todo?
     @Binding var selectedTodo: UUID;
     
     // whether the modal for quitting is open
@@ -19,7 +29,7 @@ struct TimerView<Manager: CurSessionManager>: View {
 
     @EnvironmentObject var sessions: SessionLoader;
     
-    @Namespace private var todoNamespace
+    @Namespace private var sharedTimerNamespace
     
     init(timerModel: TimerViewModel<Manager>) {
         self.timerViewModel = timerModel;
@@ -99,86 +109,90 @@ struct TimerView<Manager: CurSessionManager>: View {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["comeBackNotification"])
     }
     
+    // Load selected todo from UUID
+    private func loadSelectedTodo() {
+        let request: NSFetchRequest<Todo> = Todo.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", selectedTodo as CVarArg)
+        
+        do {
+            let results = try viewContext.fetch(request)
+            selectedTodoObject = results.first
+        } catch {
+            print("Failed to fetch selected todo: \(error)")
+            selectedTodoObject = nil
+        }
+    }
+    
     var body: some View {
         ZStack {
             Background()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            VStack {
-                Spacer()
-                HStack {
-                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: !todoExpanded, isActive: !todoExpanded)
-                        .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: !todoExpanded)
-                        .opacity(todoExpanded ? 0 : 1)
-                        .frame(width: 150, height: 180)
-                    Spacer()
-                }
-                .animation(TodoView.mainAnimation, value: todoExpanded)
-                
-                Text("\(Utils.formatTime(curSession.curParam.getTotTime()))")
-                    .font(FontTokens.architectsDaughter(size: 60))
-                    .foregroundStyle(ColorTokens.shade100)
-                
-                ViewThatFits {
-                    PanFrame(0, 240, 240)
-                        .padding(.horizontal)
-                        .frame(width: 240, height: 160, alignment: .bottom)
-                    PanFrame(0, 180, 180)
-                        .padding(.horizontal)
-                        .frame(width: 180, height: 100, alignment: .bottom)
-                }
-                
-                Text("Farming IQ points...")
-                    .font(FontTokens.architectsDaughter(size: 30))
-                    .foregroundStyle(ColorTokens.shade100)
-                
-                ViewThatFits {
-                    OnboardingNextButton(text: "Give Up", onSelect: {
-                        quitExpanded = true;
-                    })
-                    OnboardingNextButton(text: "Give Up", onSelect: {
-                        quitExpanded = true;
-                    }, isSmall: true)
-                }.sheet(isPresented: $quitExpanded) {
-                    GiveUpSlider(onGiveUp: {
-                        curSession.failTimer()
-                        quitExpanded = false;
-                    }, onCancel: {
-                        quitExpanded = false
-                    })
-                }
-            }
-            .edgesIgnoringSafeArea(.bottom)
-            .padding()
             
-            Button(action: {
-                if todoExpanded {
-                    withAnimation {
-                        todoExpanded = false;
-                    }
-                }
-            }) {
-                Rectangle()
-                    .fill(todoExpanded ? Color.black.opacity(0.4) : .clear)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Main Timer Screen
+            Group {
+                TimerMainScreen(
+                    timerParam: curSession.curParam,
+                    iqChange: curSession.iqChange,
+                    selectedTodo: selectedTodoObject,
+                    onTaskTitleTap: {
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            currentScreen = .taskSelection
+                        }
+                    },
+                    onGiveUpTap: {
+                        quitExpanded = true
+                    },
+                    namespace: sharedTimerNamespace,
+                    isSource: currentScreen == .mainTimer
+                )
+                .opacity(currentScreen == .mainTimer ? 1 : 0)
+                .allowsHitTesting(currentScreen == .mainTimer)
             }
-            .allowsHitTesting(todoExpanded)
-            .edgesIgnoringSafeArea(.all)
+            .transition(.asymmetric(
+                insertion: .move(edge: .leading).combined(with: .opacity),
+                removal: .move(edge: .trailing).combined(with: .opacity)
+            ))
             
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer();
-                    TodoView(expanded: $todoExpanded, selectedTodo: $selectedTodo, namespace: todoNamespace, isSource: todoExpanded, isActive: todoExpanded)
-                        .matchedGeometryEffect(id: "todoView", in: todoNamespace, isSource: todoExpanded)
-                        .opacity(todoExpanded ? 1 : 0)
-                        .frame(width: 350, height: 500)
-                    Spacer()
-                }
-                Spacer()
+            // Task Selection Screen
+            Group {
+                TimerTaskSelectionScreen(
+                    timerParam: curSession.curParam,
+                    selectedTodo: selectedTodoObject,
+                    onBack: {
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            currentScreen = .mainTimer
+                        }
+                    },
+                    onTaskSelected: { todo in
+                        selectedTodo = todo.id ?? UUID()
+                        selectedTodoObject = todo
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            currentScreen = .mainTimer
+                        }
+                    },
+                    namespace: sharedTimerNamespace,
+                    isSource: currentScreen == .taskSelection
+                )
+                .opacity(currentScreen == .taskSelection ? 1 : 0)
+                .allowsHitTesting(currentScreen == .taskSelection)
             }
-            .animation(TodoView.mainAnimation, value: todoExpanded)
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            ))
+        }
+        .sheet(isPresented: $quitExpanded) {
+            GiveUpSlider(onGiveUp: {
+                curSession.failTimer()
+                quitExpanded = false;
+            }, onCancel: {
+                quitExpanded = false
+            })
         }
         .onAppear {
+            // Load the selected todo object from UUID
+            loadSelectedTodo()
+            
             // save starting state
             self.timerViewModel.saveTempSession();
             UIApplication.shared.isIdleTimerDisabled = true
@@ -216,6 +230,9 @@ struct TimerView<Manager: CurSessionManager>: View {
                 }
             }
             timerViewModel.updateScenePhase(newVal);
+        }
+        .onChange(of: selectedTodo) { _ in
+            loadSelectedTodo()
         }
     }
 }

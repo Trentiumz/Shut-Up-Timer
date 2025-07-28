@@ -196,12 +196,7 @@ struct TaskRowView: View {
     @Environment(\.taskSelectable) var taskSelectable
     
     var goalColor: Color {
-        if let goal = task.goal {
-            if let gColor = goal.color {
-                return hexStringToColor(gColor)
-            }
-        }
-        return ColorTokens.red300
+        return task.goal?.realColor ?? ColorTokens.red300
     }
     
     var body: some View {

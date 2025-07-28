@@ -375,6 +375,8 @@ fileprivate struct Wrapper : View {
             .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
     }
 }
-#Preview {
-    Wrapper()
+struct TodoViewPreview: PreviewProvider {
+    static var previews: some View {
+        Wrapper()
+    }
 }

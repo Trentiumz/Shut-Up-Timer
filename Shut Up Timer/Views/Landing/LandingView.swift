@@ -38,6 +38,9 @@ struct LandingView: View {
     @State var taskTopScreen: TopTaskScreen = .start
     @State var taskTimerSelectorTodo: Todo? = nil
     
+    @EnvironmentObject var router: AppRouter
+    @EnvironmentObject var settings: Settings
+    
     var isTimer: Bool {
         if selectedScreen == .tasksAndTimer, case .other = taskTopScreen {
             return true
@@ -128,18 +131,23 @@ struct LandingView: View {
                 
                 if isTimer {
                     Group {
-                        Text("START THE GRIND")
-                            .font(FontTokens.architectsDaughter(size: 24))
-                            .foregroundColor(.white)
-                            .padding(.vertical, 10)
-                            .frame(maxWidth: .infinity)
-                            .background(ColorTokens.red300)
-                            .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .inset(by: 1)
-                                    .stroke(.white, lineWidth: 2)
-                            )
+                        Button(action: {
+                            let managerType: TimerManagerType = settings.difficulty == .asian ? .noLeave : .appBlock
+                            router.toTimerState(params: settings.timerParam, todoID: taskTimerSelectorTodo?.id ?? UUID(), managerType: managerType)
+                        }) {
+                            Text("START THE GRIND")
+                                .font(FontTokens.architectsDaughter(size: 24))
+                                .foregroundColor(.white)
+                                .padding(.vertical, 10)
+                                .frame(maxWidth: .infinity)
+                                .background(ColorTokens.red300)
+                                .cornerRadius(10)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .inset(by: 1)
+                                        .stroke(.white, lineWidth: 2)
+                                )
+                        }
                     }
                     .padding(.horizontal, 30)
                     .padding(.bottom)

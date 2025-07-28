@@ -1,46 +1,34 @@
 import SwiftUI
 import CoreData
 
-struct TaskView: View {
-    enum TopTaskScreen {
-        case beckon
-        case addGoal
-        case addTask
-        case redeem(goal: Goal)
-        case timer(todo: Todo?)
-    }
-    
+enum TopTaskScreen {
+    case start
+    case addGoal
+    case addTask
+    case redeem(goal: Goal)
+    case other
+}
+
+struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
     @Binding private var taskScreen: TopTaskScreen
     @Environment(\.managedObjectContext) private var viewContext
     
     @FocusState var todoTitleEditID: UUID?
     @State private var displayTop: Bool = true
     
-    init(taskScreen: Binding<TopTaskScreen>) {
+    @ViewBuilder var startView: () -> DefaultViewType
+    @ViewBuilder var otherView: () -> OtherViewType
+    
+    init(taskScreen: Binding<TopTaskScreen>, @ViewBuilder startView: @escaping () -> DefaultViewType, @ViewBuilder otherView: @escaping () -> OtherViewType) {
         self._taskScreen = taskScreen;
+        self.startView = startView
+        self.otherView = otherView
     }
     
     private let rightwardAnimation = AnyTransition.asymmetric(
         insertion: AnyTransition.move(edge: .trailing),
         removal: AnyTransition.move(edge: .leading)
     )
-    
-    var taskSelectableBehavior: TaskSelectable? {
-        switch(taskScreen) {
-        case .timer(_):
-            TaskSelectable(title: "select", onSelect: { todo in
-                withAnimation {
-                    taskScreen = .timer(todo: todo)
-                }
-            })
-        default:
-            TaskSelectable(title: "lock in", onSelect: { todo in
-                withAnimation {
-                    taskScreen = .timer(todo: todo)
-                }
-            })
-        }
-    }
     
     var body: some View {
         VStack {
@@ -52,18 +40,18 @@ struct TaskView: View {
                         withAnimation {
                             let success = addGoal(temporaryGoal)
                             if success {
-                                taskScreen = .beckon
+                                taskScreen = .start
                             }
                         }
                     } onCancel: {
                         withAnimation {
-                            taskScreen = .beckon
+                            taskScreen = .start
                         }
                     }
                     .padding()
                     .transition(rightwardAnimation)
-                case .beckon:
-                    TodoBeckonView()
+                case .start:
+                    startView()
                         .transition(rightwardAnimation)
                 case .addTask:
                     TaskAddView(
@@ -71,13 +59,13 @@ struct TaskView: View {
                             withAnimation {
                                 let success = addTasks(tasks)
                                 if success {
-                                    taskScreen = .beckon
+                                    taskScreen = .start
                                 }
                             }
                         },
                         onCancel: {
                             withAnimation {
-                                taskScreen = .beckon
+                                taskScreen = .start
                             }
                         }
                     )
@@ -91,7 +79,7 @@ struct TaskView: View {
                                 try withAnimation {
                                     goal.redeemed = true
                                     try viewContext.save()
-                                    taskScreen = .beckon
+                                    taskScreen = .start
                                 }
                             } catch {
                                 print("Error redeeming goal: \(error)")
@@ -99,23 +87,15 @@ struct TaskView: View {
                         },
                         onCancel: {
                             withAnimation {
-                                taskScreen = .beckon
+                                taskScreen = .start
                             }
                         }
                     )
                     .padding()
                     .transition(rightwardAnimation)
-                case .timer(let todo):
-                    VStack {
-                        LandingTimerSelectorView()
-                        let taskToDisplay = todo != nil ? "Selected Task: \(todo!.todo ?? "Unknown")" : "No task selected"
-                        Text(taskToDisplay)
-                            .font(FontTokens.architectsDaughter(size: 16))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                    }
-                    .transition(rightwardAnimation)
+                case .other:
+                    otherView()
+                        .transition(rightwardAnimation)
                 }
             }
             
@@ -142,7 +122,6 @@ struct TaskView: View {
             )
             .frame(maxHeight: 400)
             .padding(.horizontal, 8)
-            .environment(\.taskSelectable, taskSelectableBehavior)
             
             if !displayTop {
                 Spacer()
@@ -233,9 +212,11 @@ struct TaskView: View {
 
 struct TaskViewWrapper : PreviewProvider {
     struct Wrapper: View {
-        @State var taskScreen: TaskView.TopTaskScreen = .beckon
+        @State var taskScreen: TopTaskScreen = .start
         var body: some View {
-            TaskView(taskScreen: $taskScreen)
+            TaskView<TodoBeckonView, EmptyView>(taskScreen: $taskScreen, startView: {
+                TodoBeckonView()
+            }, otherView: { EmptyView() })
                 .environmentObject(AppRouter())
                 .environmentObject(SettingsLoader.loadSettings())
         }

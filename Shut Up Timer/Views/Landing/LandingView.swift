@@ -34,14 +34,35 @@ enum LandingScreen {
 struct LandingView: View {
     @State var selectedScreen: LandingScreen = .tasksAndTimer;
     // we will affect a task view when we select timer, so we keep track of the 'top screen' here
-    @State var taskTopScreen: TaskView.TopTaskScreen = .beckon
+    // In this case, .other = .timer
+    @State var taskTopScreen: TopTaskScreen = .start
+    @State var taskTimerSelectorTodo: Todo? = nil
     
     var isTimer: Bool {
-        if selectedScreen == .tasksAndTimer, case .timer = taskTopScreen {
+        if selectedScreen == .tasksAndTimer, case .other = taskTopScreen {
             return true
         }
         return false
     }
+    
+        var taskSelectableBehavior: TaskSelectable? {
+            switch(taskTopScreen) {
+            case .other:
+                TaskSelectable(title: "select", onSelect: { todo in
+                    withAnimation {
+                        taskTopScreen = .other
+                        taskTimerSelectorTodo = todo
+                    }
+                })
+            default:
+                TaskSelectable(title: "lock in", onSelect: { todo in
+                    withAnimation {
+                        taskTopScreen = .other
+                        taskTimerSelectorTodo = todo
+                    }
+                })
+            }
+        }
     
     var body: some View {
         ZStack {
@@ -53,7 +74,7 @@ struct LandingView: View {
                     HStack {
                         Button(action: {
                             withAnimation {
-                                taskTopScreen = .beckon
+                                taskTopScreen = .start
                             }
                         }) {
                             Circle()
@@ -80,10 +101,11 @@ struct LandingView: View {
                 
                 // Background content views
                 ZStack {
-                    TaskView(taskScreen: $taskTopScreen).tag(LandingScreenOption.tasks)
+                    TaskView<TodoBeckonView, TimerPreStartSelector>(taskScreen: $taskTopScreen, startView: { TodoBeckonView() }, otherView: { TimerPreStartSelector(todo: taskTimerSelectorTodo)}).tag(LandingScreenOption.tasks)
                         .opacity(selectedScreen == .tasksAndTimer ? 1 : 0)
                         .allowsHitTesting(selectedScreen == .tasksAndTimer)
                         .frame(maxHeight: .infinity)
+                        .environment(\.taskSelectable, taskSelectableBehavior)
                 
                     SocialMediaView().tag(LandingScreenOption.posts)
                         .opacity(selectedScreen == .posts ? 1 : 0)
@@ -127,9 +149,10 @@ struct LandingView: View {
                         withAnimation {
                             selectedScreen = LandingScreen.from(screen)
                             if screen == .timer {
-                                taskTopScreen = .timer(todo: nil)
+                                taskTopScreen = .other
+                                taskTimerSelectorTodo = nil
                             } else if screen == .tasks {
-                                taskTopScreen = .beckon
+                                taskTopScreen = .start
                             }
                         }
                         if previousScreen != selectedScreen {

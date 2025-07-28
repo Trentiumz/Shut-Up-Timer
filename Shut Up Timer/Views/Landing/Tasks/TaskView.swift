@@ -7,13 +7,18 @@ struct TaskView: View {
         case addGoal
         case addTask
         case redeem(goal: Goal)
+        case timer(todo: Todo?)
     }
     
-    @State private var taskScreen: TopTaskScreen = .beckon
+    @Binding private var taskScreen: TopTaskScreen
     @Environment(\.managedObjectContext) private var viewContext
     
     @FocusState var todoTitleEditID: UUID?
     @State private var displayTop: Bool = true
+    
+    init(taskScreen: Binding<TopTaskScreen>) {
+        self._taskScreen = taskScreen;
+    }
     
     private let rightwardAnimation = AnyTransition.asymmetric(
         insertion: AnyTransition.move(edge: .trailing),
@@ -82,6 +87,17 @@ struct TaskView: View {
                         }
                     )
                     .padding()
+                    .transition(rightwardAnimation)
+                case .timer(let todo):
+                    VStack {
+                        LandingTimerSelectorView()
+                        let taskToDisplay = todo != nil ? "Selected Task: \(todo!.todo ?? "Unknown")" : "No task selected"
+                        Text(taskToDisplay)
+                            .font(FontTokens.architectsDaughter(size: 16))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
                     .transition(rightwardAnimation)
                 }
             }
@@ -197,8 +213,17 @@ struct TaskView: View {
     }
 }
 
-#Preview {
-    TaskView()
-        .environmentObject(AppRouter())
-        .environmentObject(SettingsLoader.loadSettings())
-} 
+struct TaskViewWrapper : PreviewProvider {
+    struct Wrapper: View {
+        @State var taskScreen: TaskView.TopTaskScreen = .beckon
+        var body: some View {
+            TaskView(taskScreen: $taskScreen)
+                .environmentObject(AppRouter())
+                .environmentObject(SettingsLoader.loadSettings())
+        }
+    }
+    
+    static var previews: some View {
+        Wrapper()
+    }
+}

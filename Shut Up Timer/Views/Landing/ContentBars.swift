@@ -90,8 +90,11 @@ struct BottomBarView : View {
     @EnvironmentObject var curUser: CurUser
     @Environment(\.managedObjectContext) private var viewContext
     
-    init(selectedScreen : Binding<LandingScreen>) {
+    let onScreenSelected: (LandingScreen) -> Void
+    
+    init(selectedScreen : Binding<LandingScreen>, onScreenSelected: @escaping (LandingScreen) -> Void) {
         self._selectedScreen = selectedScreen;
+        self.onScreenSelected = onScreenSelected
     }
     
     var body : some View {
@@ -125,6 +128,7 @@ struct BottomBarView : View {
                             let previousScreen = selectedScreen
                             withAnimation {
                                 selectedScreen = tab
+                                onScreenSelected(tab)
                             }
                             if previousScreen != tab {
                                 AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: screenName(tab))
@@ -214,7 +218,7 @@ struct BarViewPreviews : PreviewProvider {
                 VStack {
                     TopBarView(selectedScreen: $selectedScreen)
                     Spacer()
-                    BottomBarView(selectedScreen: $selectedScreen)
+                    BottomBarView(selectedScreen: $selectedScreen, onScreenSelected: {_ in})
                 }
             }
         }

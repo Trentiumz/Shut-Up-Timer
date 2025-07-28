@@ -34,7 +34,11 @@ struct TaskView: View {
                 }
             })
         default:
-            nil
+            TaskSelectable(title: "lock in", onSelect: { todo in
+                withAnimation {
+                    taskScreen = .timer(todo: todo)
+                }
+            })
         }
     }
     

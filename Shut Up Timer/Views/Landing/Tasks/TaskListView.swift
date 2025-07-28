@@ -170,6 +170,19 @@ struct TasksContentView: View {
     }
 }
 
+struct TaskSelectable: EnvironmentKey {
+    static let defaultValue: TaskSelectable? = nil
+    
+    let title: String
+    let onSelect: (Todo) -> Void
+}
+extension EnvironmentValues {
+    var taskSelectable: TaskSelectable? {
+        get {self[TaskSelectable.self]}
+        set {self[TaskSelectable.self] = newValue}
+    }
+}
+
 struct TaskRowView: View {
     @ObservedObject var task: Todo
     var availableGoals: FetchedResults<Goal>
@@ -179,6 +192,8 @@ struct TaskRowView: View {
     @State private var showingGoalPicker = false
     
     @FocusState.Binding var textEditID: UUID?
+    
+    @Environment(\.taskSelectable) var taskSelectable
     
     var goalColor: Color {
         if let goal = task.goal {
@@ -234,6 +249,13 @@ struct TaskRowView: View {
                 .fill(.clear)
                 .contentShape(Rectangle())
                 .layoutPriority(-1)
+            
+            if let taskSelectable = taskSelectable {
+                TaskSelectText(text: taskSelectable.title)
+                    .onTapGesture {
+                        taskSelectable.onSelect(task)
+                    }
+            }
         }
         .simultaneousGesture(
             ExpandingGestureState.getDragGesture(state: $rectState)
@@ -414,14 +436,7 @@ struct DreamGoalRowView: View {
                     .foregroundColor(ColorTokens.shade600)
                 
                 // Show "Redeem" button for incomplete tasks only when not editing
-                Text("Redeem")
-                    .font(FontTokens.architectsDaughter(size: 10))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(ColorTokens.red300)
-                    .cornerRadius(4)
-                    .frame(width: 60, height: 20)
+                TaskSelectText(text: "Redeem")
                     .onTapGesture {
                         onRedeem(goal)
                     }
@@ -478,6 +493,20 @@ extension Goal {
         return set.sorted { 
             ($0.created ?? Date.distantPast) > ($1.created ?? Date.distantPast)
         }
+    }
+}
+
+fileprivate struct TaskSelectText: View {
+    let text: String
+    var body: some View {
+        Text(text)
+            .font(FontTokens.architectsDaughter(size: 10))
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(ColorTokens.red300)
+            .cornerRadius(4)
+            .frame(width: 60, height: 20)
     }
 }
 

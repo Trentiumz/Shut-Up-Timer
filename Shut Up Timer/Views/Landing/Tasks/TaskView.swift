@@ -25,6 +25,19 @@ struct TaskView: View {
         removal: AnyTransition.move(edge: .leading)
     )
     
+    var taskSelectableBehavior: TaskSelectable? {
+        switch(taskScreen) {
+        case .timer(_):
+            TaskSelectable(title: "select", onSelect: { todo in
+                withAnimation {
+                    taskScreen = .timer(todo: todo)
+                }
+            })
+        default:
+            nil
+        }
+    }
+    
     var body: some View {
         VStack {
             if displayTop {
@@ -125,6 +138,7 @@ struct TaskView: View {
             )
             .frame(maxHeight: 400)
             .padding(.horizontal, 8)
+            .environment(\.taskSelectable, taskSelectableBehavior)
             
             if !displayTop {
                 Spacer()

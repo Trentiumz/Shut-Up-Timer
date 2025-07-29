@@ -175,22 +175,6 @@ fileprivate struct RoastPaper : View {
 }
 
 // --- Helper Views ---
-func startOfMonth(_ date: Date) -> Date {
-    let calendar = Calendar.current
-    let components = calendar.dateComponents([.year, .month], from: date)
-    return calendar.date(from: components) ?? Date()
-}
-
-fileprivate func startOfWeek(_ date: Date) -> Date {
-    let calendar = Calendar.current
-    let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
-    if let date = calendar.date(from: components) {
-        return date
-    } else {
-        print("Failed to get start of week for \(date)")
-        return Date()
-    }
-}
 
 fileprivate func getWeekInfo(sessions: SessionLoader) -> [[TimeInterval?]] {
     let dateHours = Session.getDateHours(context: PersistenceController.shared.container.viewContext)

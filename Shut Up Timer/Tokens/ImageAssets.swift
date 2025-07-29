@@ -48,6 +48,9 @@ enum ImageAssets {
     static let image166 = UIImage(named: "image 166")!
     static let image163 = UIImage(named: "image 163")!
     static let image160 = UIImage(named: "image 160")!
+
+    static let polygon9 = UIImage(named: "Polygon 9")!
+    static let polygon10 = UIImage(named: "Polygon 10")!
 }
 
 struct FormattedImages {
@@ -629,6 +632,10 @@ struct FormattedImages {
     static var Image160: UIImage {
         cropImage(rotateImage(ImageAssets.image160, by: 0.3)!, to: CGRect(x: 150, y: 200, width: 815, height: 600))!
     }
+    
+    static var Polygon9: UIImage = ImageAssets.polygon9;
+    
+    static var Polygon10: UIImage  = ImageAssets.polygon10;
 }
 
 fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {

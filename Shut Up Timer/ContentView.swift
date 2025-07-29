@@ -8,7 +8,6 @@ struct ContentView: View {
     @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var credManager: CredManager;
     
-    @State var selectedScreen: LandingScreen = .tasks;
     @State var showAlert: Bool = false;
     @State var alertMessage: String = "";
     @Environment(\.scenePhase) private var scenePhase
@@ -26,91 +25,56 @@ struct ContentView: View {
                     settings.firstTime = false;
                 })
             } else {
-                ZStack {
-                    Background()
-                    
-                    // Top and bottom bars on top
-                    VStack(spacing: 0) {
-                        TopBarView(selectedScreen: $selectedScreen)
-                            .zIndex(5)
-                        // Background content views
-                        ZStack {
-                            TaskView().tag(LandingScreen.tasks)
-                                .opacity(selectedScreen == .tasks ? 1 : 0)
-                                .allowsHitTesting(selectedScreen == .tasks)
-                                .frame(maxHeight: .infinity)
-                        
-                            SocialMediaView().tag(LandingScreen.posts)
-                                .opacity(selectedScreen == .posts ? 1 : 0)
-                                .allowsHitTesting(selectedScreen == .posts)
-                        
-                            DisappointmentView().tag(LandingScreen.stats)
-                                .opacity(selectedScreen == .stats ? 1 : 0)
-                                .allowsHitTesting(selectedScreen == .stats)
-                        
-                            ViewThatFits {
-                                AccountView().tag(LandingScreen.settings)
-                                    .opacity(selectedScreen == .settings ? 1 : 0)
-                                    .allowsHitTesting(selectedScreen == .settings)
-                                AccountView().tag(LandingScreen.settings)
-                                    .opacity(selectedScreen == .settings ? 1 : 0)
-                                    .allowsHitTesting(selectedScreen == .settings)
-                                    .frame(width: 350)
-                            }
+                LandingView()
+                    .ignoresSafeArea(.keyboard)
+                    .navigationDestination(for: PathElement.self) { elem in
+                        switch elem.route {
+                        case .noLeaveTimer(let timerModel):
+                            // timer started
+                            TimerView(timerModel: timerModel).environmentObject(router)
+                                .navigationBarBackButtonHidden(true)
+                        case .appBlockTimer(let timerModel):
+                            // app block timer started
+                            TimerView(timerModel: timerModel).environmentObject(router)
+                                .navigationBarBackButtonHidden(true)
+                        case .timerCompleted(let session):
+                            // timer completed
+                            TimerCompletedView(session: session)
+                                .navigationBarBackButtonHidden(true)
+                        case .timerFailed(let session):
+                            // timer failed
+                            TimerFailedView(session: session)
+                                .navigationBarBackButtonHidden(true)
+                        case .timerFailedCamera(let sessionID):
+                            FailedCameraView(sessionID: sessionID)
+                                .navigationBarBackButtonHidden(true)
+                        case .login(let onSuccess):
+                            // login screen
+                            LoginView(onLoggedIn: onSuccess)
+                                .navigationBarBackButtonHidden(true)
+                        case .inviteFriends:
+                            // invite friends screen
+                            FriendInvite()
+                                .navigationBarBackButtonHidden(false)
+                        case .viewRequests:
+                            RequestListView()
+                        case .albumView(let month, let year):
+                            AlbumView(month: month, year: year)
+                        case .feedbackView:
+                            FeedbackView()
+                        case .notifications:
+                            NotificationsView()
+                                .navigationBarBackButtonHidden(true)
+                        case .addPost:
+                            AddPostView()
+                                .navigationBarBackButtonHidden(true)
+                        case .postView(let month, let year):
+                            AccountPostView(month: month, year: year)
+                                .navigationBarBackButtonHidden(false)
+                        default:
+                            Text("Invalid")
                         }
-                        BottomBarView(selectedScreen: $selectedScreen)
-                            .zIndex(5)
                     }
-                }
-                .ignoresSafeArea(.keyboard)
-                .navigationDestination(for: PathElement.self) { elem in
-                    switch elem.route {
-                    case .noLeaveTimer(let timerModel):
-                        // timer started
-                        TimerView(timerModel: timerModel).environmentObject(router)
-                            .navigationBarBackButtonHidden(true)
-                    case .appBlockTimer(let timerModel):
-                        // app block timer started
-                        TimerView(timerModel: timerModel).environmentObject(router)
-                            .navigationBarBackButtonHidden(true)
-                    case .timerCompleted(let session):
-                        // timer completed
-                        TimerCompletedView(session: session)
-                            .navigationBarBackButtonHidden(true)
-                    case .timerFailed(let session):
-                        // timer failed
-                        TimerFailedView(session: session)
-                            .navigationBarBackButtonHidden(true)
-                    case .timerFailedCamera(let sessionID):
-                        FailedCameraView(sessionID: sessionID)
-                            .navigationBarBackButtonHidden(true)
-                    case .login(let onSuccess):
-                        // login screen
-                        LoginView(onLoggedIn: onSuccess)
-                            .navigationBarBackButtonHidden(true)
-                    case .inviteFriends:
-                        // invite friends screen
-                        FriendInvite()
-                            .navigationBarBackButtonHidden(false)
-                    case .viewRequests:
-                        RequestListView()
-                    case .albumView(let month, let year):
-                        AlbumView(month: month, year: year)
-                    case .feedbackView:
-                        FeedbackView()
-                    case .notifications:
-                        NotificationsView()
-                            .navigationBarBackButtonHidden(true)
-                    case .addPost:
-                        AddPostView()
-                            .navigationBarBackButtonHidden(true)
-                    case .postView(let month, let year):
-                        AccountPostView(month: month, year: year)
-                            .navigationBarBackButtonHidden(false)
-                    default:
-                        Text("Invalid")
-                    }
-                }
             }
         }
         .environmentObject(router)

@@ -1,19 +1,29 @@
 import SwiftUI
 import CoreData
 
-struct TaskView: View {
-    enum TopTaskScreen {
-        case beckon
-        case addGoal
-        case addTask
-        case redeem(goal: Goal)
-    }
-    
-    @State private var taskScreen: TopTaskScreen = .beckon
+enum TopTaskScreen {
+    case start
+    case addGoal
+    case addTask
+    case redeem(goal: Goal)
+    case other
+}
+
+struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
+    @Binding private var taskScreen: TopTaskScreen
     @Environment(\.managedObjectContext) private var viewContext
     
     @FocusState var todoTitleEditID: UUID?
     @State private var displayTop: Bool = true
+    
+    @ViewBuilder var startView: () -> DefaultViewType
+    @ViewBuilder var otherView: () -> OtherViewType
+    
+    init(taskScreen: Binding<TopTaskScreen>, @ViewBuilder startView: @escaping () -> DefaultViewType, @ViewBuilder otherView: @escaping () -> OtherViewType) {
+        self._taskScreen = taskScreen;
+        self.startView = startView
+        self.otherView = otherView
+    }
     
     private let rightwardAnimation = AnyTransition.asymmetric(
         insertion: AnyTransition.move(edge: .trailing),
@@ -30,18 +40,18 @@ struct TaskView: View {
                         withAnimation {
                             let success = addGoal(temporaryGoal)
                             if success {
-                                taskScreen = .beckon
+                                taskScreen = .start
                             }
                         }
                     } onCancel: {
                         withAnimation {
-                            taskScreen = .beckon
+                            taskScreen = .start
                         }
                     }
                     .padding()
                     .transition(rightwardAnimation)
-                case .beckon:
-                    TodoBeckonView()
+                case .start:
+                    startView()
                         .transition(rightwardAnimation)
                 case .addTask:
                     TaskAddView(
@@ -49,13 +59,13 @@ struct TaskView: View {
                             withAnimation {
                                 let success = addTasks(tasks)
                                 if success {
-                                    taskScreen = .beckon
+                                    taskScreen = .start
                                 }
                             }
                         },
                         onCancel: {
                             withAnimation {
-                                taskScreen = .beckon
+                                taskScreen = .start
                             }
                         }
                     )
@@ -69,7 +79,7 @@ struct TaskView: View {
                                 try withAnimation {
                                     goal.redeemed = true
                                     try viewContext.save()
-                                    taskScreen = .beckon
+                                    taskScreen = .start
                                 }
                             } catch {
                                 print("Error redeeming goal: \(error)")
@@ -77,12 +87,15 @@ struct TaskView: View {
                         },
                         onCancel: {
                             withAnimation {
-                                taskScreen = .beckon
+                                taskScreen = .start
                             }
                         }
                     )
                     .padding()
                     .transition(rightwardAnimation)
+                case .other:
+                    otherView()
+                        .transition(rightwardAnimation)
                 }
             }
             
@@ -197,8 +210,19 @@ struct TaskView: View {
     }
 }
 
-#Preview {
-    TaskView()
-        .environmentObject(AppRouter())
-        .environmentObject(SettingsLoader.loadSettings())
-} 
+struct TaskViewWrapper : PreviewProvider {
+    struct Wrapper: View {
+        @State var taskScreen: TopTaskScreen = .start
+        var body: some View {
+            TaskView<TodoBeckonView, EmptyView>(taskScreen: $taskScreen, startView: {
+                TodoBeckonView()
+            }, otherView: { EmptyView() })
+                .environmentObject(AppRouter())
+                .environmentObject(SettingsLoader.loadSettings())
+        }
+    }
+    
+    static var previews: some View {
+        Wrapper()
+    }
+}

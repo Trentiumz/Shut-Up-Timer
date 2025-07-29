@@ -6,18 +6,6 @@ struct TopBarView : View {
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var notificationManager: NotificationManager;
     
-    @Binding var selectedScreen: LandingScreen;
-
-    private func screenName(_ screen: LandingScreen) -> String {
-        switch screen {
-        case .tasks: return "tasks"
-        case .timer: return "timer"
-        case .posts: return "posts"
-        case .stats: return "stats"
-        case .settings: return "settings"
-        }
-    }
-    
     var body: some View {
         HStack{
             // App title on the left
@@ -77,21 +65,32 @@ struct TopBarView : View {
     }
 }
 
-enum LandingScreen {
+enum LandingScreenOption {
     case tasks;
     case timer;
     case posts;
     case stats;
     case settings;
+    
+    func screenName() -> String {
+        switch self {
+        case .tasks: return "tasks"
+        case .timer: return "timer"
+        case .posts: return "posts"
+        case .stats: return "stats"
+        case .settings: return "settings"
+        }
+    }
 }
 
 struct BottomBarView : View {
-    @Binding var selectedScreen: LandingScreen;
     @EnvironmentObject var curUser: CurUser
     @Environment(\.managedObjectContext) private var viewContext
     
-    init(selectedScreen : Binding<LandingScreen>) {
-        self._selectedScreen = selectedScreen;
+    let onScreenSelected: (LandingScreenOption) -> Void
+    
+    init(onScreenSelected: @escaping (LandingScreenOption) -> Void) {
+        self.onScreenSelected = onScreenSelected
     }
     
     var body : some View {
@@ -120,23 +119,16 @@ struct BottomBarView : View {
             HStack(spacing: 12) {
                 // Tab icons in HStack
                 HStack(spacing: 8) {
-                    ForEach(LandingScreen.allCases, id: \.self) { tab in
+                    ForEach(LandingScreenOption.allCases, id: \.self) { tab in
                         Button(action: {
-                            let previousScreen = selectedScreen
-                            withAnimation {
-                                selectedScreen = tab
-                            }
-                            if previousScreen != tab {
-                                AnalyticsManager.shared.trackTabSwitch(from: screenName(previousScreen), to: screenName(tab))
-                                AnalyticsManager.shared.trackScreenView(screenName(tab))
-                            }
+                            onScreenSelected(tab)
                         }) {
                             VStack(spacing: 0) {
                                 Image(uiImage: imageForTab(tab))
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 48, height: 40, alignment: .bottom)
-                                Text(screenName(tab))
+                                Text(tab.screenName())
                                     .font(FontTokens.architectsDaughter(size: 16))
                                     .foregroundColor(.black)
                                     .lineLimit(1)
@@ -161,7 +153,7 @@ struct BottomBarView : View {
         .padding(.vertical, 8)
     }
     
-    private func imageForTab(_ tab: LandingScreen) -> UIImage {
+    private func imageForTab(_ tab: LandingScreenOption) -> UIImage {
         switch tab {
         case .tasks: return FormattedImages.Image145
         case .timer: return FormattedImages.Image147
@@ -179,19 +171,9 @@ struct BottomBarView : View {
             return String(format: "%.1f", iq)
         }
     }
-    
-    private func screenName(_ screen: LandingScreen) -> String {
-        switch screen {
-        case .tasks: return "tasks"
-        case .timer: return "timer"
-        case .posts: return "posts"
-        case .stats: return "stats"
-        case .settings: return "settings"
-        }
-    }
 }
 
-extension LandingScreen: CaseIterable {
+extension LandingScreenOption: CaseIterable {
     var title: String {
         switch self {
         case .tasks: return "Tasks"
@@ -206,15 +188,15 @@ extension LandingScreen: CaseIterable {
 struct BarViewPreviews : PreviewProvider {
     
     struct Wrapper :  View {
-        @State var selectedScreen : LandingScreen = .tasks;
+        @State var selectedScreen : LandingScreenOption = .tasks;
         
         var body : some View {
             ZStack {
                 Background()
                 VStack {
-                    TopBarView(selectedScreen: $selectedScreen)
+                    TopBarView()
                     Spacer()
-                    BottomBarView(selectedScreen: $selectedScreen)
+                    BottomBarView(onScreenSelected: {_ in})
                 }
             }
         }

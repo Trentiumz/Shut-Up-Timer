@@ -63,4 +63,17 @@ extension CurSessionManager {
             }
         }
     }
+    
+    var iqChange: Double {
+        let plannedTime: TimeInterval = switch(initialParam) {
+        case .countdown(let seconds):
+            seconds
+        }
+        let timeLeft: TimeInterval = switch(curParam) {
+        case .countdown(let seconds):
+            seconds
+        }
+        let timeLocked = plannedTime - timeLeft
+        return timeLocked <= 3600 ? timeLocked / 3600 : 1 + 2 * (timeLocked - 3600) / 3600
+    }
 }

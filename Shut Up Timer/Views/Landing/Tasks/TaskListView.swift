@@ -426,7 +426,7 @@ struct DreamGoalRowView: View {
                     .contentShape(Rectangle())
                     .layoutPriority(-1)
                 
-                Text("[\(Int(goal.iqGoal)) IQ Points]")
+                Text("[\(Int(goal.lastGoalProgress?.iqGoal ?? 0)) IQ Points]")
                     .font(FontTokens.architectsDaughter(size: 10))
                     .foregroundColor(ColorTokens.shade600)
                 
@@ -523,14 +523,12 @@ func addSampleDataToDB(viewContext: NSManagedObjectContext) {
         goal.created = Date()
         goal.goal = "Ace Math!"
         goal.id = UUID()
-        goal.iqGoal = 10.0
         goal.redeemed = false
         
         let goal2 = Goal(context: viewContext)
         goal2.created = Date()
         goal2.goal = "Ace Math #2!"
         goal2.id = UUID()
-        goal2.iqGoal = 10.0
         goal2.redeemed = false
         
         let todo1 = Todo(context: viewContext)

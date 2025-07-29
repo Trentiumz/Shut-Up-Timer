@@ -5,16 +5,22 @@
         <attribute name="created" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="goal" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="iqCurrent" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="iqGoal" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="lastProgressUpdate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="order" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="redeemed" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <relationship name="goalProgress" toMany="YES" deletionRule="Cascade" destinationEntity="GoalProgress" inverseName="goal" inverseEntity="GoalProgress"/>
         <relationship name="tasks" toMany="YES" deletionRule="Nullify" destinationEntity="Todo" inverseName="goal" inverseEntity="Todo"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="id"/>
             </uniquenessConstraint>
         </uniquenessConstraints>
+    </entity>
+    <entity name="GoalProgress" representedClassName="GoalProgress" syncable="YES" codeGenerationType="class">
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="iqCurrent" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="iqGoal" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="goal" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Goal" inverseName="goalProgress" inverseEntity="Goal"/>
     </entity>
     <entity name="Session" representedClassName="Session" syncable="YES" codeGenerationType="class">
         <attribute name="ended" attributeType="Date" usesScalarValueType="NO"/>

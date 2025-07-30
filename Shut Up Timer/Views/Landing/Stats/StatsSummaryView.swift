@@ -26,7 +26,6 @@ struct StatsSummaryView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Spacer()
             // Tab buttons at the top
             HStack(spacing: 0) {
                 ForEach(StatsTab.allCases, id: \.self) { tab in
@@ -84,7 +83,6 @@ struct StatsSummaryView: View {
                     )
             )
         }
-        .padding(.horizontal, 20)
     }
 }
 

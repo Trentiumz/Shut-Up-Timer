@@ -28,6 +28,7 @@ struct RoastDisplay : View {
 // --- FailImageDisplay: Carbon copy but for UIImage ---
 struct PostImageDisplay: View {
     let image: UIImage
+
     var body: some View {
         FormattedImages.PolaroidBG(innerContent: {
             Image(uiImage: image)

@@ -10,7 +10,8 @@ enum AppRoute {
     case login(onSuccess: () -> Void)
     case inviteFriends
     case viewRequests
-    case albumView(month: Int, year: Int)
+    case albumView
+    case achievementsView
     case feedbackView
     case notifications
     case addPost

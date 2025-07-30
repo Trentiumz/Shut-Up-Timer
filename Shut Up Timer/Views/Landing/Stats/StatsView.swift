@@ -28,7 +28,7 @@ struct StatsView : View {
                         FormattedImages.DisappointmentBook("Achievements", width: 150)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 25)
                 
                 StatsSummaryView()
                     .frame(maxHeight: 300, alignment: .top)

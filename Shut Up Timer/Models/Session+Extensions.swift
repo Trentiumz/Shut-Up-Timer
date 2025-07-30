@@ -5,15 +5,13 @@ import Combine
 // MARK: - Session Extensions
 extension Session {
     
+    static func getIQChange(lockedTime: TimeInterval, success: Bool) -> Double {
+        return lockedTime / 3600 - (success ? 0 : 1)
+    }
+    
     /// Calculated IQ change based on session success and planned time
     var iqChange: Double {
-        guard success else { return -1.0 }
-        
-        if plannedTime <= 3600 { // 1 hour or less
-            return plannedTime / 3600
-        } else {
-            return 1.0 + 2.0 * (plannedTime - 3600) / 3600
-        }
+        return Session.getIQChange(lockedTime: timeLocked, success: success)
     }
     
     /// Returns task logs sorted by time spent (descending) with their todo info
@@ -42,6 +40,11 @@ extension Session {
     var taskLogsArray: [TaskLog] {
         guard let taskLogsSet = taskLogs as? Set<TaskLog> else { return [] }
         return Array(taskLogsSet).sorted { $0.timeIn > $1.timeIn }
+    }
+    
+    /// Returns the top task
+    var topTaskLog: TaskLog? {
+        return taskLogsArray.first
     }
 }
 

@@ -57,7 +57,7 @@
         <attribute name="order" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="todo" optional="YES" attributeType="String"/>
         <relationship name="goal" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Goal" inverseName="tasks" inverseEntity="Goal"/>
-        <relationship name="taskLogs" toMany="YES" deletionRule="Cascade" destinationEntity="TaskLog" inverseName="todo" inverseEntity="TaskLog"/>
+        <relationship name="taskLogs" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TaskLog" inverseName="todo" inverseEntity="TaskLog"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="id"/>

@@ -19,12 +19,18 @@ extension Goal {
         }
     }
     
-    /// Add a new progress point 
-    func updateProgress(iqCurrent: Double? = nil, iqGoal: Double? = nil, date: Date = Date()) {
+    /// Add a new progress point. Make sure that at most one of iqCurrentChange and iqCurrent are set
+    func updateProgress(iqCurrentChange: Double? = nil, iqCurrent: Double? = nil, iqGoal: Double? = nil, date: Date = Date()) {
         if let managedObjectContext = self.managedObjectContext {
             let lastGoalProgress = self.lastGoalProgress
             let goalProgress = GoalProgress(context: managedObjectContext)
-            goalProgress.iqCurrent = iqCurrent ?? lastGoalProgress?.iqCurrent ?? 0
+            
+            let lastCurrent = lastGoalProgress?.iqCurrent ?? 0
+            if let iqCurrentChange = iqCurrentChange {
+                goalProgress.iqCurrent = lastCurrent + iqCurrentChange
+            } else {
+                goalProgress.iqCurrent = iqCurrent ?? lastGoalProgress?.iqCurrent ?? 0
+            }
             goalProgress.iqGoal = iqGoal ?? lastGoalProgress?.iqGoal ?? 0
             goalProgress.date = date
             goalProgress.goal = self

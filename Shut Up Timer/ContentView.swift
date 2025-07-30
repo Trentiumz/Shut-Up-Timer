@@ -59,7 +59,7 @@ struct ContentView: View {
                         case .viewRequests:
                             RequestListView()
                         case .albumView(let month, let year):
-                            AlbumView(month: month, year: year)
+                            EmptyView()
                         case .feedbackView:
                             FeedbackView()
                         case .notifications:

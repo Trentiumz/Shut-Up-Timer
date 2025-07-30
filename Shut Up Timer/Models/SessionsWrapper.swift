@@ -21,8 +21,8 @@ struct TempSession: Identifiable, Codable, Equatable {
     var roast: String?
     var imageName: String?
     
-    var iqChange: Double { 
-        success ? (plannedTime <= 3600 ? plannedTime / 3600 : 1 + 2 * (plannedTime - 3600) / 3600) : -1 
+    var iqChange: Double {
+        Session.getIQChange(lockedTime: timeLocked, success: success)
     }
     
     var sortedCategories: [(todoID: UUID, time: TimeInterval)] {
@@ -104,16 +104,20 @@ class SessionLoader : ObservableObject {
         session.roast = tempSession.roast
         session.imageName = tempSession.imageName
         
+        var goalChanges: [Goal: Double] = [:]
         // Add task logs
         for taskData in tempSession.tasks {
-            addTaskLog(to: session, todoID: taskData.todoID, timeIn: taskData.timeIn, taskLogID: taskData.id)
+            addTaskLog(to: session, todoID: taskData.todoID, timeIn: taskData.timeIn, taskLogID: taskData.id, goalChanges: &goalChanges)
+        }
+        for (goal, change) in goalChanges {
+            goal.updateProgress(iqCurrentChange: change)
         }
         
         saveContext()
     }
     
     /// Add a task log to a session
-    private func addTaskLog(to session: Session, todoID: UUID, timeIn: TimeInterval, taskLogID: UUID) {
+    private func addTaskLog(to session: Session, todoID: UUID, timeIn: TimeInterval, taskLogID: UUID, goalChanges: inout [Goal: Double]) {
         // Find the Todo entity by ID
         let todoRequest: NSFetchRequest<Todo> = Todo.fetchRequest()
         todoRequest.predicate = NSPredicate(format: "id == %@", todoID as CVarArg)
@@ -130,6 +134,10 @@ class SessionLoader : ObservableObject {
             taskLog.timeIn = timeIn
             taskLog.session = session
             taskLog.todo = todo
+            
+            if let goal = todo.goal {
+                goalChanges[goal, default: 0] += Session.getIQChange(lockedTime: timeIn, success: true)
+            }
         } catch {
             print("Failed to create task log: \(error)")
         }
@@ -147,6 +155,7 @@ class SessionLoader : ObservableObject {
                 try context.save()
             } catch {
                 print("Failed to save context: \(error)")
+                context.reset()
             }
         }
     }

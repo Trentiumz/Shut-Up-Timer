@@ -74,6 +74,6 @@ extension CurSessionManager {
             seconds
         }
         let timeLocked = plannedTime - timeLeft
-        return timeLocked <= 3600 ? timeLocked / 3600 : 1 + 2 * (timeLocked - 3600) / 3600
+        return Session.getIQChange(lockedTime: timeLocked, success: true)
     }
 }

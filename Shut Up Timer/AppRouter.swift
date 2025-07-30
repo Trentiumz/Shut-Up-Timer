@@ -49,8 +49,12 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.viewRequests))
     }
     
-    func toAlbumView(month: Int, year: Int) {
-        path.append(PathElement(route: AppRoute.albumView(month: month, year: year)))
+    func toAlbumView() {
+        path.append(PathElement(route: AppRoute.albumView))
+    }
+    
+    func toAchievementsView() {
+        path.append(PathElement(route: AppRoute.achievementsView))
     }
     
     func toFeedbackView() {

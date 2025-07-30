@@ -114,7 +114,7 @@ struct LandingView: View {
                         .opacity(selectedScreen == .posts ? 1 : 0)
                         .allowsHitTesting(selectedScreen == .posts)
                 
-                    DisappointmentView().tag(LandingScreenOption.stats)
+                    StatsView().tag(LandingScreenOption.stats)
                         .opacity(selectedScreen == .stats ? 1 : 0)
                         .allowsHitTesting(selectedScreen == .stats)
                 

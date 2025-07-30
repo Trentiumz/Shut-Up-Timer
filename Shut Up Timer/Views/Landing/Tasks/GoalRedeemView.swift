@@ -62,7 +62,7 @@ struct GoalRedeemView: View {
                         .frame(maxHeight: 20)
                     
                     // IQ Cost
-                    Text("\(formatIQ(goal.iqCurrent)) IQ / \(formatIQ(goal.iqGoal))")
+                    Text("\(formatIQ(goal.lastGoalProgress?.iqCurrent ?? 0)) IQ / \(formatIQ(goal.lastGoalProgress?.iqGoal ?? 0))")
                         .font(FontTokens.architectsDaughter(size: 24))
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
@@ -138,22 +138,25 @@ struct GoalRedeemView: View {
     }
 }
 
-#Preview {
-    // Create a mock Goal for preview
-    let context = PersistenceController.shared.container.viewContext
-    let goal = Goal(context: context)
-    goal.goal = "ECO220"
-    goal.iqGoal = 23.0
-    goal.id = UUID()
+struct GoalRedeemPreview: PreviewProvider {
     
-    return ZStack {
-        Color.black
-        GoalRedeemView(
-            goal: goal,
-            onRedeem: { _ in },
-            onCancel: { }
-        )
+    static var previews: some View {
+        // Create a mock Goal for preview
+        let context = PersistenceController.shared.container.viewContext
+        let goal = Goal(context: context)
+        goal.goal = "ECO220"
+        goal.addProgress(iqCurrent: 0, iqGoal: 20)
+        goal.id = UUID()
+        
+        return ZStack {
+            Color.black
+            GoalRedeemView(
+                goal: goal,
+                onRedeem: { _ in },
+                onCancel: { }
+            )
+        }
+        .frame(height: 500)
+        .environment(\.managedObjectContext, context)
     }
-    .frame(height: 500)
-    .environment(\.managedObjectContext, context)
 }

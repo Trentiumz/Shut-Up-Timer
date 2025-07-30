@@ -169,8 +169,7 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
             goal.id = UUID()
             goal.created = Date()
             goal.goal = temporaryGoal.name
-            goal.iqGoal = temporaryGoal.iqGoal
-            goal.iqCurrent = 0.0
+            goal.addProgress(iqCurrent: 0.0, iqGoal: temporaryGoal.iqGoal)
             goal.redeemed = false
             goal.color = colorToHexString(temporaryGoal.color)
             goal.order = minVal - 1

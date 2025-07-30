@@ -58,8 +58,10 @@ struct ContentView: View {
                                 .navigationBarBackButtonHidden(false)
                         case .viewRequests:
                             RequestListView()
-                        case .albumView(let month, let year):
-                            AlbumView(month: month, year: year)
+                        case .albumView:
+                            AlbumView()
+                        case .achievementsView:
+                            AchievementsView()
                         case .feedbackView:
                             FeedbackView()
                         case .notifications:

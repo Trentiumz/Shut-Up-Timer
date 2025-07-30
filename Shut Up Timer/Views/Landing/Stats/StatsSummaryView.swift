@@ -4,12 +4,12 @@ import CoreData
 struct StatsSummaryView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedTab: StatsTab = .yourStats
-    @State private var selectedDate: Date? = Date()
-    @State private var showingDayDetail = true
+    @State private var selectedDate: Date? = nil
+    @State private var showingDayDetail = false
     
-    // Sample data for preview
+    // Weekly hours calculated from database
     @State private var weeklyHours: [String: Double] = [
-        "SUN": 3.2, "MON": 6.5, "TUE": 7.0, "WED": 5.2, "THU": 5.0, "FRI": 3.0, "SAT": 5.5
+        "SUN": 0.0, "MON": 0.0, "TUE": 0.0, "WED": 0.0, "THU": 0.0, "FRI": 0.0, "SAT": 0.0
     ]
     
     enum StatsTab: CaseIterable {
@@ -26,6 +26,7 @@ struct StatsSummaryView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            Spacer()
             // Tab buttons at the top
             HStack(spacing: 0) {
                 ForEach(StatsTab.allCases, id: \.self) { tab in
@@ -94,6 +95,7 @@ struct YourStatsView: View {
     @Binding var showingDayDetail: Bool
     
     @Environment(\.managedObjectContext) private var viewContext
+    @State private var currentWeek: Date = Date()
     
     // Fetch goals
     @FetchRequest(
@@ -105,93 +107,165 @@ struct YourStatsView: View {
     private let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
     
     var body: some View {
-        HStack(spacing: 0) {
-            // Left arrow
-            Button(action: {
-                // Navigate to previous week
-            }) {
-                ZStack {
-                    RoundedTriangle(direction: .left)
-                        .fill(Color.gray)
-                        .frame(width: 20, height: 80)
-                    RoundedTriangle(direction: .left)
-                        .stroke(Color.white, lineWidth: 3)
-                        .frame(width: 20, height: 80)
-                }
+        VStack {
+            HStack {
+                Spacer()
+                Text(getWeekRangeText())
+                    .font(FontTokens.architectsDaughter(size: 14))
+                    .foregroundColor(.black)
             }
-            .buttonStyle(PlainButtonStyle())
-            .padding(.horizontal, 10)
-            
-            // Bar chart
-            HStack(alignment: .bottom, spacing: 4) {
-                ForEach(daysOfWeek, id: \.self) { day in
-                    VStack(spacing: 0) {
-                        // Bar
-                        Group {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(ColorTokens.red300)
-                                .frame(width: 20, height: min(200, CGFloat(weeklyHours[day] ?? 0) * 12))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .stroke(Color.black, lineWidth: 1)
-                                )
-                                .onTapGesture {
-                                    selectedDate = getDateForDay(day)
-                                    showingDayDetail = true
-                                }
+            HStack(spacing: 0) {
+                // Left arrow
+                Button(action: {
+                    withAnimation {
+                        currentWeek = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentWeek) ?? currentWeek
+                        updateWeeklyHours()
+                    }
+                }) {
+                    ZStack {
+                        RoundedTriangle(direction: .left)
+                            .fill(Color.gray)
+                            .frame(width: 20, height: 80)
+                        RoundedTriangle(direction: .left)
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: 20, height: 80)
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 10)
+                
+                // Bar chart
+                HStack(alignment: .bottom, spacing: 4) {
+                    ForEach(daysOfWeek, id: \.self) { day in
+                        VStack(spacing: 0) {
+                            // Bar
+                            Group {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(ColorTokens.red300)
+                                    .frame(width: 20, height: min(200, CGFloat(weeklyHours[day] ?? 0) * 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(Color.black, lineWidth: 1)
+                                    )
+                                    .onTapGesture {
+                                        selectedDate = getDateForDay(day)
+                                        showingDayDetail = true
+                                    }
+                            }
+                            .frame(maxWidth: .infinity)
+                            
+                            // Hours label
+                            Group {
+                                Text("\(String(format: "%.1f", weeklyHours[day] ?? 0))hr")
+                                    .font(FontTokens.architectsDaughter(size: 12))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.7)
+                                    .frame(maxWidth: .infinity)
+                                    .foregroundColor(.black)
+                            }
+                            .frame(height: 15)
+                            
+                            // Day label
+                            Text(day)
+                                .font(FontTokens.architectsDaughter(size: 12))
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .layoutPriority(5)
+                                .lineLimit(1)
                         }
                         .frame(maxWidth: .infinity)
-                        
-                        // Hours label
-                        Group {
-                            Text("\(String(format: "%.1f", weeklyHours[day] ?? 0))hr")
-                                .font(FontTokens.architectsDaughter(size: 12))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-                                .frame(maxWidth: .infinity)
-                                .foregroundColor(.black)
-                        }
-                        .frame(height: 15)
-                        
-                        // Day label
-                        Text(day)
-                            .font(FontTokens.architectsDaughter(size: 12))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .layoutPriority(5)
-                            .lineLimit(1)
                     }
-                    .frame(maxWidth: .infinity)
                 }
+                .padding(.horizontal, 0)
+                .frame(minHeight: 100, alignment: .bottom)
+                
+                // Right arrow
+                Button(action: {
+                    withAnimation {
+                        currentWeek = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentWeek) ?? currentWeek
+                        updateWeeklyHours()
+                    }
+                }) {
+                    ZStack {
+                        RoundedTriangle(direction: .right)
+                            .fill(Color.gray)
+                            .frame(width: 20, height: 80)
+                        RoundedTriangle(direction: .right)
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: 20, height: 80)
+                    }
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, 10)
             }
-            .padding(.horizontal, 0)
             
-            // Right arrow
-            Button(action: {
-                // Navigate to next week
-            }) {
-                ZStack {
-                    RoundedTriangle(direction: .right)
-                        .fill(Color.gray)
-                        .frame(width: 20, height: 80)
-                    RoundedTriangle(direction: .right)
-                        .stroke(Color.white, lineWidth: 3)
-                        .frame(width: 20, height: 80)
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-            .padding(.horizontal, 10)
+            Spacer()
+                .frame(maxHeight: 15)
         }
-        .padding(.vertical, 20)
+        .onAppear {
+            updateWeeklyHours()
+        }
     }
     
     private func getDateForDay(_ day: String) -> Date {
         let calendar = Calendar.current
-        let today = Date()
-        let weekday = calendar.component(.weekday, from: today)
+        let weekday = calendar.component(.weekday, from: currentWeek)
         let dayIndex = daysOfWeek.firstIndex(of: day) ?? 0
         let daysToAdd = dayIndex - (weekday - 1)
-        return calendar.date(byAdding: .day, value: daysToAdd, to: today) ?? today
+        return calendar.date(byAdding: .day, value: daysToAdd, to: currentWeek) ?? currentWeek
+    }
+    
+    private func getWeekRangeText() -> String {
+        let calendar = Calendar.current
+        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: currentWeek)?.start ?? currentWeek
+        let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek) ?? currentWeek
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM d"
+        
+        let startText = dateFormatter.string(from: startOfWeek)
+        let endText = dateFormatter.string(from: endOfWeek)
+        
+        return "\(startText) - \(endText)"
+    }
+    
+    private func updateWeeklyHours() {
+        let calendar = Calendar.current
+        
+        // Calculate start and end of the week
+        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: currentWeek)?.start ?? currentWeek
+        let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) ?? currentWeek
+        
+        // Create fetch request for sessions in this week
+        let fetchRequest: NSFetchRequest<Session> = Session.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "started >= %@ AND started < %@", startOfWeek as NSDate, endOfWeek as NSDate)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \Session.started, ascending: true)]
+        
+        do {
+            let sessions = try viewContext.fetch(fetchRequest)
+            
+            // Initialize weekly hours
+            var newWeeklyHours: [String: Double] = [:]
+            for day in daysOfWeek {
+                newWeeklyHours[day] = 0.0
+            }
+            
+            // Calculate hours per day
+            for session in sessions {
+                guard !session.isDeleted, let started = session.started else { continue }
+                
+                let dayOfWeek = calendar.component(.weekday, from: started)
+                let dayIndex = dayOfWeek - 1 // Calendar weekday is 1-based, array is 0-based
+                let dayKey = daysOfWeek[dayIndex]
+                
+                let hours = session.timeLocked / 3600
+                newWeeklyHours[dayKey, default: 0] += hours
+            }
+            
+            weeklyHours = newWeeklyHours
+        } catch {
+            print("Failed to fetch sessions for weekly hours: \(error)")
+        }
     }
 }
 
@@ -328,14 +402,17 @@ struct DayDetailView: View {
                     
                     // Task content - show three tasks at a time
                     if let currentChunk = taskChunks.dropFirst(currentChunkIndex).first {
-                        HStack(alignment: .bottom, spacing: 12) {
-                            ForEach(Array(currentChunk.enumerated()), id: \.element.todo.id) { index, taskStat in
-                                if !taskStat.todo.isDeleted {
-                                    TaskBarView(taskStat: taskStat, showNameOnTop: index % 2 == 1)
+                        GeometryReader { geo in
+                            HStack(alignment: .bottom, spacing: 12) {
+                                ForEach(Array(currentChunk.enumerated()), id: \.element.todo.id) { index, taskStat in
+                                    if !taskStat.todo.isDeleted {
+                                        TaskBarView(taskStat: taskStat, showNameOnTop: index % 2 == 1, frameHeight: geo.size.height)
+                                    }
                                 }
                             }
+                            .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
                         }
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(
                             BGSizeReader(width: $taskBarWidth)
                             )
@@ -467,6 +544,10 @@ struct DayDetailView: View {
     struct TaskBarView: View {
         let taskStat: TaskStat
         let showNameOnTop: Bool
+        let frameHeight: CGFloat
+        var barHeight: CGFloat {
+            frameHeight - 40
+        }
         
         var body: some View {
             VStack(spacing: 3) {
@@ -491,7 +572,7 @@ struct DayDetailView: View {
                 // Bar
                 RoundedRectangle(cornerRadius: 4)
                     .fill(getTaskColor(taskStat.time))
-                    .frame(width: 15, height: min(160, CGFloat(taskStat.time / 3600) * 20))
+                    .frame(width: 15, height: min(barHeight, CGFloat(taskStat.time / 3600) / 12 * barHeight))
                     .overlay(
                         RoundedRectangle(cornerRadius: 4)
                             .stroke(Color.black, lineWidth: 1)
@@ -539,8 +620,6 @@ struct DayDetailView: View {
         formatter.dateFormat = "EEEE, MMMM d yyyy"
         return formatter
     }
-    
-
     
     private var safeGoals: [Goal] {
         allGoals.filter { !$0.isDeleted }

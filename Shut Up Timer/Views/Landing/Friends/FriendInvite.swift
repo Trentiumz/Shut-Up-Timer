@@ -77,7 +77,9 @@ struct FriendInvite : View {
                 HStack(spacing: 0) {
                     ForEach(FriendTab.allCases, id: \.self) { tab in
                         Button(action: {
-                            selectedTab = tab
+                            withAnimation {
+                                selectedTab = tab
+                            }
                         }) {
                             Text(tab.title)
                                 .font(FontTokens.architectsDaughter(size: 24))
@@ -101,19 +103,22 @@ struct FriendInvite : View {
                 .padding(.top, 10)
                 
                 // Content based on selected tab
-                if selectedTab == .myCode {
+                TabView(selection: $selectedTab) {
                     MyCodeView(
                         userProfile: userProfile,
                         errorMessage: errorMessage,
                         onSendRequest: sendFriendRequest
                     )
-                } else {
+                    .tag(FriendTab.myCode)
+                    
                     ScanView(
                         errorMessage: errorMessage,
                         onSendRequest: sendFriendRequest
                     )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .tag(FriendTab.scan)
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
         }
         .padding(.horizontal, 40)

@@ -91,12 +91,11 @@ struct SettingsView : View {
                         }
                         
                         HStack {
-                            SettingLabel("Public Profile Visibility: ")
-                                .frame(width: 200)
+                            SettingLabel("Private Mode: ")
                             Spacer()
                             Toggle("", isOn: Binding(
-                                get: { privateProfile.is_public_profile_visible },
-                                set: { updateVisibility( "public_profile", $0) }
+                                get: { !privateProfile.is_public_profile_visible },
+                                set: { updateVisibility( "public_profile", !$0) }
                             ))
                         }
                         

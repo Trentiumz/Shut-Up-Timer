@@ -78,10 +78,10 @@
             filePath = "Shut Up Timer/Views/Landing/Friends/RequestList.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "206"
-            endingLineNumber = "206"
-            landmarkName = "body"
-            landmarkType = "24">
+            startingLineNumber = "193"
+            endingLineNumber = "193"
+            landmarkName = "withdrawRequest(requestId:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy

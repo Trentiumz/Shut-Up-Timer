@@ -5,7 +5,7 @@ struct FriendQRInvite : View {
     var data: String;
     var userProfile: UserProfileResponse;
     @EnvironmentObject var curUser: CurUser
-    @EnvironmentObject var appRouter: AppRouter
+    @EnvironmentObject var router: AppRouter
     
     var body : some View {
         ZStack(alignment: .bottom) {

@@ -14,7 +14,9 @@ struct ScanView: View {
                 .contentShape(Rectangle())
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .onTapGesture {
-                    isTextFieldFocused = false
+                    withAnimation {
+                        isTextFieldFocused = false
+                    }
                 }
             
             VStack(spacing: 20) {
@@ -26,14 +28,17 @@ struct ScanView: View {
                             .foregroundColor(ColorTokens.shade100)
                     }
                     .padding()
+                    .transition(.move(edge: .leading))
                 } else {
                     // Normal scan view
                     VStack(spacing: 20) {
                         // QR Scanner (always active)
                         QRScanner(onScan: { code in
                             if let friendCode = extractFriendCode(from: code) {
-                                friendCodeInput = friendCode
-                                isTextFieldFocused = true
+                                withAnimation {
+                                    friendCodeInput = friendCode
+                                    isTextFieldFocused = true
+                                }
                             }
                         })
                             .cornerRadius(12)
@@ -43,8 +48,10 @@ struct ScanView: View {
                         VStack(spacing: 15) {
                             AlbumCodeSelector(onCodeUpdate: { qrCode in
                                 if let friendCode = extractFriendCode(from: qrCode) {
-                                    friendCodeInput = friendCode
-                                    isTextFieldFocused = true
+                                    withAnimation {
+                                        friendCodeInput = friendCode
+                                        isTextFieldFocused = true
+                                    }
                                 }
                             }) {
                                 Text("Scan from photos")
@@ -60,6 +67,7 @@ struct ScanView: View {
                             }
                         }
                     }
+                    .transition(.move(edge: .trailing))
                 }
                 
                 HStack {
@@ -77,6 +85,11 @@ struct ScanView: View {
                         .padding(.horizontal, 6)
                         .background(Color.clear)
                         .focused($isTextFieldFocused)
+                        .onTapGesture {
+                            withAnimation {
+                                isTextFieldFocused = true
+                            }
+                        }
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(ColorTokens.shade100, lineWidth: 2)
@@ -84,8 +97,10 @@ struct ScanView: View {
                     
                     if isTextFieldFocused {
                         Button("Send") {
-                            onSendRequest(friendCodeInput)
-                            isTextFieldFocused = false
+                            withAnimation {
+                                onSendRequest(friendCodeInput)
+                                isTextFieldFocused = false
+                            }
                         }
                         .font(FontTokens.architectsDaughter(size: 18))
                         .foregroundColor(.white)
@@ -93,6 +108,7 @@ struct ScanView: View {
                         .padding(.vertical, 8)
                         .background(ColorTokens.red300)
                         .cornerRadius(8)
+                        .transition(.move(edge: .trailing))
                     }
                 }
                 

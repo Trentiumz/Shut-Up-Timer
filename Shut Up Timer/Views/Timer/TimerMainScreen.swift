@@ -30,23 +30,7 @@ struct TimerMainScreen: View {
             // Top section with user IQ
             if isSource {
                 GeometryReader { screen in
-                    TriangleShape(points: (CGPoint(x: 0, y: 0), CGPoint(x: 0, y: screen.size.height / 4), CGPoint(x: screen.size.width, y: 0)))
-                        .fill(ColorTokens.red300)
-                    Path { path in
-                        path.move(to: CGPoint(x: 0, y: screen.size.height / 4))
-                        path.addLine(to: CGPoint(x: screen.size.width, y: 0))
-                    }
-                    .stroke(.white, lineWidth: 6)
-                    .transition(.move(edge: .top))
-                    
-                    TriangleShape(points: (CGPoint(x: 0, y: screen.size.height), CGPoint(x: screen.size.width, y: screen.size.height), CGPoint(x: screen.size.width, y: screen.size.height * 3 / 4)))
-                        .fill(ColorTokens.red300)
-                    Path { path in
-                        path.move(to: CGPoint(x: 0, y: screen.size.height))
-                        path.addLine(to: CGPoint(x: screen.size.width, y: screen.size.height * 3 / 4))
-                    }
-                    .stroke(.white, lineWidth: 6)
-                    .transition(.move(edge: .bottom))
+                    TimerBackgroundOverlay(screen: screen)
                 }
                 .ignoresSafeArea(.all)
             }
@@ -126,6 +110,30 @@ struct TimerMainScreen: View {
                 .transition(.move(edge: .bottom))
             }
         }
+    }
+}
+
+struct TimerBackgroundOverlay: View {
+    let screen: GeometryProxy
+    
+    var body: some View {
+        TriangleShape(points: (CGPoint(x: 0, y: 0), CGPoint(x: 0, y: screen.size.height / 4), CGPoint(x: screen.size.width, y: 0)))
+            .fill(ColorTokens.red300)
+        Path { path in
+            path.move(to: CGPoint(x: 0, y: screen.size.height / 4))
+            path.addLine(to: CGPoint(x: screen.size.width, y: 0))
+        }
+        .stroke(.white, lineWidth: 6)
+        .transition(.move(edge: .top))
+        
+        TriangleShape(points: (CGPoint(x: 0, y: screen.size.height), CGPoint(x: screen.size.width, y: screen.size.height), CGPoint(x: screen.size.width, y: screen.size.height * 3 / 4)))
+            .fill(ColorTokens.red300)
+        Path { path in
+            path.move(to: CGPoint(x: 0, y: screen.size.height))
+            path.addLine(to: CGPoint(x: screen.size.width, y: screen.size.height * 3 / 4))
+        }
+        .stroke(.white, lineWidth: 6)
+        .transition(.move(edge: .bottom))
     }
     
     struct TriangleShape: Shape {

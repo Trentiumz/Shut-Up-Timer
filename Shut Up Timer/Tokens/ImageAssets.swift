@@ -54,6 +54,12 @@ enum ImageAssets {
     
     static let image172 = UIImage(named: "image 172")!
     static let image173 = UIImage(named: "image 173")!
+    
+    static let image178 = UIImage(named: "image 178")!
+    static let image179 = UIImage(named: "image 179")!
+    
+    static let image180 = UIImage(named: "image 180")!
+    static let image181 = UIImage(named: "image 181")!
 }
 
 struct FormattedImages {
@@ -647,6 +653,13 @@ struct FormattedImages {
     static var Image173: UIImage {
         cropImage(ImageAssets.image173, to: CGRect(x: 201, y: 208, width: 341, height: 484))!
     }
+    
+    static var Image180: UIImage {
+        cropImage(ImageAssets.image180, to: CGRect(x: 0, y: 149, width: 839, height: 243))!
+    }
+    static var Image181: UIImage {
+        cropImage(ImageAssets.image181, to: CGRect(x: 119, y: 63, width: 595, height: 755))!
+    }
 }
 
 fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {
@@ -694,7 +707,7 @@ fileprivate func cropAndRotate(_ image: UIImage, cropRect: CGRect?, angle: CGFlo
 #Preview {
     ZStack {
         Color.black
-        Image(uiImage: FormattedImages.Image173)
+        Image(uiImage: FormattedImages.Image181)
             .overlay(
                 Rectangle()
                     .stroke(Color.red, lineWidth: 3)

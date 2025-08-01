@@ -17,4 +17,5 @@ enum ColorTokens {
     static let brown300 = Color("Brown300")
     static let gray500 = Color("Gray500")
     static let gray800 = Color("Gray800")
+    static let green500 = Color("Green500")
 }

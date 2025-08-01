@@ -1,5 +1,65 @@
 import SwiftUI
 
+// MARK: - Reusable Components
+
+struct TimerResultBox: View {
+    let mainText: String
+    let subText: String
+    let textColor: Color
+    
+    var body: some View {
+        HStack {
+            Text(mainText)
+                .font(FontTokens.architectsDaughter(size: 36))
+                .foregroundColor(textColor)
+                .minimumScaleFactor(0.8)
+                .lineLimit(1)
+            Text(subText)
+                .font(FontTokens.architectsDaughter(size: 18))
+                .lineLimit(2)
+                .foregroundColor(textColor)
+                .minimumScaleFactor(0.5)
+                .frame(maxHeight: .infinity)
+        }
+        .padding(.horizontal, 2)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .frame(height: 70)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(ColorTokens.shade300)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.white, lineWidth: 2)
+                )
+        )
+    }
+}
+
+struct TimerResultButton: View {
+    let text: String
+    let onSelect: () -> Void
+    
+    var body: some View {
+        Button(action: onSelect) {
+            Text(text)
+                .font(FontTokens.architectsDaughter(size: 24))
+                .foregroundColor(.black)
+                .padding(.vertical, 14)
+                .padding(.horizontal, 36)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(ColorTokens.shade200)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(.white, lineWidth: 4)
+                )
+        }
+    }
+}
+
+// MARK: - Main View
+
 struct TimerFailedView: View {
     @EnvironmentObject var router: AppRouter;
     private var session: TempSession
@@ -37,54 +97,22 @@ struct TimerFailedView: View {
                     // Data display boxes
                     HStack(spacing: 15) {
                         // Left box - Study time
-                        HStack {
-                            Text("\(formatStudyTime())")
-                                .font(FontTokens.architectsDaughter(size: 36))
-                                .foregroundColor(ColorTokens.red300)
-                                .minimumScaleFactor(0.8)
-                                .lineLimit(1)
-                            Text("of study")
-                                .font(FontTokens.architectsDaughter(size: 18))
-                                .lineLimit(2)
-                                .foregroundColor(ColorTokens.red300)
-                                .minimumScaleFactor(0.5)
-                                .frame(maxHeight: .infinity)
-                        }
-                        .padding(.horizontal, 2)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .frame(height: 70)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(ColorTokens.shade300)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.white, lineWidth: 2)
-                                )
+                        TimerResultBox(
+                            mainText: formatStudyTime(),
+                            subText: "of study",
+                            textColor: ColorTokens.red300
                         )
                         
                         // Right box - IQ change
-                        HStack {
-                            Text("\(formatIQChange())")
-                                .font(FontTokens.architectsDaughter(size: 36))
-                                .foregroundColor(ColorTokens.red300)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .padding(.horizontal, 2)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .frame(height: 70)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(ColorTokens.shade300)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(Color.white, lineWidth: 2)
-                                )
+                        TimerResultBox(
+                            mainText: formatIQChange(),
+                            subText: "",
+                            textColor: ColorTokens.red300
                         )
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 30)
+                .padding(.bottom, 60)
                 .padding(.top, 40)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
@@ -127,6 +155,15 @@ struct TimerFailedView: View {
                     }.offset(y: -70),
                     alignment: .top
                 )
+                .overlay(
+                    Image(uiImage: FormattedImages.Image160)
+                        .resizable()
+                        .frame(width: 160, height: 120)
+                        .rotationEffect(Angle(degrees: -10))
+                        .offset(x: 15, y: 40)
+                    ,
+                    alignment: .bottomTrailing
+                )
                 .padding(.horizontal, 20)
                 .padding(.leading, 30)
             }
@@ -135,23 +172,9 @@ struct TimerFailedView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    Button(action: {
+                    TimerResultButton(text: "Continue", onSelect: {
                         router.toTimerCameraView(sessionID: session.id)
-                    }) {
-                        Text("Continue")
-                            .font(FontTokens.architectsDaughter(size: 24))
-                            .foregroundColor(.black)
-                            .padding(.vertical, 14)
-                            .padding(.horizontal, 36)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(ColorTokens.shade200)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(.white, lineWidth: 4)
-                            )
-                    }
+                    })
                 }
             }
             .padding()

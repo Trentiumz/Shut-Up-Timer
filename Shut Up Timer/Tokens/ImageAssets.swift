@@ -60,6 +60,8 @@ enum ImageAssets {
     
     static let image180 = UIImage(named: "image 180")!
     static let image181 = UIImage(named: "image 181")!
+    
+    static let image182 = UIImage(named: "image 182")!
 }
 
 struct FormattedImages {
@@ -659,6 +661,10 @@ struct FormattedImages {
     }
     static var Image181: UIImage {
         cropImage(ImageAssets.image181, to: CGRect(x: 119, y: 63, width: 595, height: 755))!
+    }
+    
+    static var Image182: UIImage {
+        cropImage(ImageAssets.image182, to: CGRect(x: 27, y: 181, width: 771, height: 446))!
     }
 }
 

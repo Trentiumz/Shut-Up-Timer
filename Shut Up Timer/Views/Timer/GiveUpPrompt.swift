@@ -7,15 +7,30 @@
 
 import SwiftUI
 
+struct GiveUpPromptView: View {
+    let onNo: () -> Void
+    let onYes: () -> Void
+    
+    var body: some View {
+        GeometryReader { screen in
+            TimerBackgroundOverlay(screen: screen)
+        }
+        .ignoresSafeArea(.all)
+        
+        Group {
+            GiveUpPrompt(onNo: onNo, onYes: onYes)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 40)
+    }
+}
+
 struct GiveUpPrompt: View {
     let onNo: () -> Void
     let onYes: () -> Void
     
     var body: some View {
         ZStack {
-            // Background overlay
-            Color.black.opacity(0.8)
-                .ignoresSafeArea()
             // Sobbing Grandma positioned above the dialog
             SobbingGrandma(middleView: {
                 // Dialog box content goes here as the middle view
@@ -71,10 +86,12 @@ struct GiveUpPrompt: View {
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text("i'll lose")
                                         .font(FontTokens.architectsDaughter(size: 16))
+                                        .minimumScaleFactor(0.7)
                                         .lineLimit(1)
                                         .foregroundColor(.black)
                                     Text("some IQ")
                                         .font(FontTokens.architectsDaughter(size: 16))
+                                        .minimumScaleFactor(0.7)
                                         .lineLimit(1)
                                         .foregroundColor(.black)
                                         .padding(.top, -9)

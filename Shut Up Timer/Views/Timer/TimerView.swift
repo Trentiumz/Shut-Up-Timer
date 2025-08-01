@@ -5,6 +5,7 @@ import CoreData
 enum TimerScreenState {
     case mainTimer
     case taskSelection
+    case giveup
 }
 
 struct TimerView<Manager: CurSessionManager>: View {
@@ -18,14 +19,12 @@ struct TimerView<Manager: CurSessionManager>: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     // Screen state management
+    @State private var prevScreen: TimerScreenState? = nil
     @State private var currentScreen: TimerScreenState = .mainTimer
     
     // Selected todo state
     @State private var selectedTodoObject: Todo?
     @Binding var selectedTodo: UUID;
-    
-    // whether the modal for quitting is open
-    @State var quitExpanded: Bool = false;
 
     @EnvironmentObject var sessions: SessionLoader;
     
@@ -140,7 +139,10 @@ struct TimerView<Manager: CurSessionManager>: View {
                         }
                     },
                     onGiveUpTap: {
-                        quitExpanded = true
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            prevScreen = .mainTimer
+                            currentScreen = .giveup
+                        }
                     },
                     namespace: sharedTimerNamespace,
                     isSource: currentScreen == .mainTimer
@@ -180,14 +182,26 @@ struct TimerView<Manager: CurSessionManager>: View {
                 insertion: .move(edge: .trailing).combined(with: .opacity),
                 removal: .move(edge: .leading).combined(with: .opacity)
             ))
-        }
-        .sheet(isPresented: $quitExpanded) {
-            GiveUpSlider(onGiveUp: {
-                curSession.failTimer()
-                quitExpanded = false;
-            }, onCancel: {
-                quitExpanded = false
-            })
+            
+            // Give up Screen
+            Group {
+                GiveUpPromptView(onNo: {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        currentScreen = prevScreen ?? .mainTimer
+                    }
+                }, onYes: {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        curSession.failTimer()
+                        currentScreen = prevScreen ?? .mainTimer
+                    }
+                })
+                .opacity(currentScreen == .giveup ? 1 : 0)
+                .allowsHitTesting(currentScreen == .giveup)
+            }
+            .transition(.asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            ))
         }
         .onAppear {
             // Load the selected todo object from UUID

@@ -232,13 +232,13 @@
          BreakpointExtensionID = "Xcode.Breakpoint.ExceptionBreakpoint">
          <BreakpointContent
             uuid = "E52DAF62-8E8D-4495-9F46-C2CF225AC37F"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             nameForDebugger = "DeletedObject"
             condition = "name == &quot;NSObjectInaccessibleException&quot;"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             breakpointStackSelectionBehavior = "1"
-            scope = "0"
+            scope = "1"
             stopOnStyle = "0">
             <Actions>
                <BreakpointActionProxy
@@ -297,6 +297,22 @@
             endingLineNumber = "832"
             landmarkName = "BGSizeReader"
             landmarkType = "14">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D9563EEC-EB4C-41F8-A87E-DDE8B2B9C64E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Shut Up Timer/Views/Landing/Friends/QRScanner.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "160"
+            endingLineNumber = "160"
+            landmarkName = "detectQRCode(in:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

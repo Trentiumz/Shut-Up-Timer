@@ -15,7 +15,7 @@ struct Config {
 
     static let apiBaseURL: String = {
 #if DEBUG
-        return "https://b608cd0e567f.ngrok-free.app"
+        return "https://2c5e4633f8b9.ngrok-free.app"
 #else
         return "https://shutuptimer.trentium.ca/"
 #endif
@@ -23,7 +23,7 @@ struct Config {
     
     static let supabaseURL: String = {
 #if DEBUG
-        return "https://0c8e9e89de5e.ngrok-free.app/"
+        return "https://8f9d1b9598f8.ngrok-free.app"
 #else
         return "https://oullomxexthybhywbgpr.supabase.co"
 #endif

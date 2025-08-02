@@ -18,107 +18,143 @@ struct TimerCompletedView: View {
         self.session = session;
     }
     
-    private var iqChangeString: String {
-        let iqChange = session.iqChange;
-        if iqChange >= 0 {
-            return String(format: "IQ\n+%.2f", iqChange)
-        } else {
-            return String(format: "IQ\n%.2f", iqChange)
-        }
-    }
-    private var timeLockedString: String {
-        let timeLocked = session.timeLocked;
-        return String(format: "Time\n%.2f H", timeLocked / 3600)
-    }
-    private var topCategoriesString: String {
-        let topCategories = Array(session.sortedCategories.prefix(2))
-        let categoryStrings = topCategories.map { category in
-            // Find todo by ID using Core Data
-            activeTodos.first(where: { $0.id == category.todoID })?.todo ?? "Unknown"
-        }.joined(separator: "\n")
-        return "Categories\n\(categoryStrings)"
-    }
-    
     var body: some View {
         ZStack {
+            // Background
             Background()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            // Background overlay with red triangles
+            GeometryReader { screen in
+                TimerBackgroundOverlay(screen: screen)
+            }
+            .ignoresSafeArea(.all)
+            
+            // Main content area
+            VStack(spacing: 0) {
+                
+                // Completed dialog box
+                VStack(spacing: 0) {
+                    Text("It's time for a picture...")
+                        .font(FontTokens.architectsDaughter(size: 28))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    
+                    Spacer()
+                        .frame(maxHeight: 40)
+                    
+                    // Data display boxes
+                    HStack(spacing: 15) {
+                        // Left box - Study time
+                        TimerResultBox(
+                            mainText: formatStudyTime(),
+                            subText: "of study",
+                            textColor: ColorTokens.green500
+                        )
+                        
+                        // Right box - IQ change
+                        TimerResultBox(
+                            mainText: formatIQChange(),
+                            subText: "",
+                            textColor: ColorTokens.green500
+                        )
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 50)
+                .padding(.top, 40)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(ColorTokens.gray800)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white, lineWidth: 4)
+                        )
+                )
+                .background(
+                    Image(uiImage: FormattedImages.Image172)
+                        .resizable()
+                        .frame(width: 100, height: 130)
+                        .offset(x: -20, y: -120)
+                    ,
+                    alignment: .topLeading
+                )
+                .overlay(
+                    ZStack(alignment: .top) {
+                        Image(uiImage: FormattedImages.Image180)
+                            .resizable()
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, -10)
+                            .frame(height: 100)
+                        
+                        VStack(spacing: 0) {
+                            Text("BARELY")
+                                .font(FontTokens.architectsDaughter(size: 16))
+                                .foregroundColor(.white)
+                            
+                            Text("PASSING")
+                                .font(FontTokens.architectsDaughter(size: 48))
+                                .minimumScaleFactor(0.7)
+                                .foregroundColor(.white)
+                                .padding(.top, -15)
+                        }
+                        .frame(height: 60, alignment: .top)
+                        .padding(.top, 15)
+                    }.offset(y: -70),
+                    alignment: .top
+                )
+                .overlay(
+                    Image(uiImage: FormattedImages.Image182)
+                        .resizable()
+                        .frame(width: 200, height: 110)
+                        .offset(x: 15, y: 60)
+                    ,
+                    alignment: .bottomTrailing
+                )
+                .padding(.horizontal, 20)
+                .padding(.leading, 30)
+            }
+            
             VStack {
                 Spacer()
-                    .frame(maxHeight: 30)
-                Text("Not too Bad.")
-                    .font(FontTokens.architectsDaughter(size: 50))
-                    .foregroundColor(ColorTokens.shade100)
-                    .frame(width: 328, height: 47, alignment: .topLeading)
-                Spacer()
-                    .frame(maxHeight: 50)
-                
-                FormattedImages.AnimatedMadMother(width: 300)
-                
-                Spacer()
-                    .frame(maxHeight: 50)
-                
                 HStack {
-                    InfoBox(iqChangeString)
-                    InfoBox(timeLockedString)
-                    InfoBox(topCategoriesString)
+                    Spacer()
+                    TimerResultButton(text: "Continue", onSelect: {
+                        router.toHome()
+                    })
                 }
-                
-                Spacer()
-                OnboardingNextButton(text: "Keep Roasting", onSelect: { router.toHome() })
-                
-                Spacer()
-                    .frame(maxHeight: 50)
-                
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // Full-screen view
-            .background(.black.opacity(0.1))
+            .padding()
         }
     }
     
-    struct InfoBox : View {
-        private var text: String;
-        init(_ text: String) {
-            self.text = text;
-        }
-        
-        var body : some View {
-            ZStack(alignment: .bottom) {
-                Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(width: 114, height: 120)
-                  .background(Color(red: 0.51, green: 0.16, blue: 0.17))
-                  .cornerRadius(20)
-                  .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                      .inset(by: 1)
-                      .stroke(.black, lineWidth: 2)
-                  )
-                
-                ZStack {
-                    Rectangle()
-                      .foregroundColor(.clear)
-                      .frame(width: 100, height: 80)
-                      .background(.white)
-                      .cornerRadius(20)
-                      .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                          .inset(by: 1)
-                          .stroke(.black, lineWidth: 2)
-                      )
-                    Text(text)
-                        .font(FontTokens.architectsDaughter(size: 25))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(0)
-                        .foregroundColor(.black)
-                        .minimumScaleFactor(0.5)
-                        .frame(width: 80, height: 80)
-                }.padding(.bottom, 10)
-            }
+    // Helper functions
+    private func formatStudyTime() -> String {
+        let hours = session.timeLocked / 3600
+        return String(format: "%.1fhr", hours)
+    }
+    
+    private func formatIQChange() -> String {
+        let iqChange = session.iqChange
+        if iqChange >= 0 {
+            return "+\(String(format: "%.2f", iqChange))Q"
+        } else {
+            return "\(String(format: "%.2f", iqChange))Q"
         }
     }
 }
 
 #Preview {
-    TimerCompletedView(session: TempSession(tasks: [], started: Date(), ended: Date(), timeLocked: 0, plannedTime: 0, success: true))
+    TimerCompletedView(session: TempSession(
+        tasks: [],
+        started: Date(),
+        ended: Date(),
+        timeLocked: 19100, // ~5.3 hours
+        plannedTime: 36000, // 10 hours planned
+        success: true,
+        roast: nil
+    ))
 }
+
+

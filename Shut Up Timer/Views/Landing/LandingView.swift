@@ -2,14 +2,14 @@ import SwiftUI
 
 enum LandingScreen {
     case tasksAndTimer
-    case posts
+//    case posts
     case stats
     case settings
     
     func screenName() -> String {
         switch self {
         case .tasksAndTimer: return "tasks and timer"
-        case .posts: return "posts"
+//        case .posts: return "posts"
         case .stats: return "stats"
         case .settings: return "settings"
         }
@@ -21,8 +21,8 @@ enum LandingScreen {
                 .tasksAndTimer
         case .timer:
                 .tasksAndTimer
-        case .posts:
-                .posts
+//        case .posts:
+//                .posts
         case .stats:
                 .stats
         case .settings:
@@ -110,10 +110,10 @@ struct LandingView: View {
                         .frame(maxHeight: .infinity)
                         .environment(\.taskSelectable, taskSelectableBehavior)
                 
-                    SocialMediaView().tag(LandingScreenOption.posts)
-                        .opacity(selectedScreen == .posts ? 1 : 0)
-                        .allowsHitTesting(selectedScreen == .posts)
-                
+//                    SocialMediaView().tag(LandingScreenOption.posts)
+//                        .opacity(selectedScreen == .posts ? 1 : 0)
+//                        .allowsHitTesting(selectedScreen == .posts)
+//                
                     StatsView().tag(LandingScreenOption.stats)
                         .opacity(selectedScreen == .stats ? 1 : 0)
                         .allowsHitTesting(selectedScreen == .stats)

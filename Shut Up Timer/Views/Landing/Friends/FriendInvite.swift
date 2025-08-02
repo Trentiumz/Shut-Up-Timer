@@ -1,15 +1,31 @@
 import SwiftUI;
+import AVFoundation;
+
+enum FriendTab: CaseIterable {
+    case myCode
+    case scan
+    
+    var title: String {
+        switch self {
+        case .myCode:
+            return "My Code"
+        case .scan:
+            return "Scan"
+        }
+    }
+}
 
 /// A view that handles friend-related functionality including:
 /// - Displaying incoming friend requests
-/// - Showing the user's friend code
-/// - Allowing users to send friend requests to others
+/// - Showing the user's friend code with QR code
+/// - Allowing users to scan QR codes or enter friend codes
 struct FriendInvite : View {
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var router: AppRouter;
     @State private var userProfile: UserProfileResponse? = nil;
     @State private var errorMessage: String? = nil;
     @State private var requestListRefreshTrigger = UUID();
+    @State private var selectedTab = FriendTab.myCode;
     
     /// Fetches the user's profile information including their friend code (only works if we are logged in)
     func updateUserProfile() {
@@ -56,51 +72,57 @@ struct FriendInvite : View {
         ZStack {
             Background()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            ScrollView {
-                VStack(spacing: 20) {
-                    if credManager.loggedIn {
-                        // Display incoming friend requests at the top
-                        SettingsView.SettingButton(text: "View Requests", onSelect: { router.toViewRequests() })
-                        
-                        if let profile = userProfile {
-                            VStack(spacing: 20) {
-                                FriendQRInvite(data: "shutuptimer://friend-invite?code=\(profile.friend_code)")
-                                
-                                // Display the user's friend code
-                                CodeDisplay(code: profile.friend_code)
-                                
-                                // Input section for sending friend requests
-                                VStack(spacing: 10) {
-                                    FriendCodeAdd(onCommit: sendFriendRequest)
-                                    
-                                    if let error = errorMessage {
-                                        Text(error)
-                                            .foregroundColor(.red)
-                                            .font(.caption)
-                                    }
-                                }
-                                .padding()
-                                .background(Color.gray.opacity(0.1))
-                                .cornerRadius(15)
+            VStack(spacing: 0) {
+                // Tab Navigation
+                HStack(spacing: 0) {
+                    ForEach(FriendTab.allCases, id: \.self) { tab in
+                        Button(action: {
+                            withAnimation {
+                                selectedTab = tab
                             }
-                        } else {
-                            Text("Loading...")
-                        }
-                    } else {
-                        ZStack {
-                            FormattedImages.FriendCodeStripe(width: 350)
-                            Text("Login to get friends!")
-                                .font(FontTokens.architectsDaughter(size: 30))
-                                .minimumScaleFactor(0.5)
-                                .foregroundColor(ColorTokens.shade100)
-                                .frame(maxWidth: 300)
+                        }) {
+                            Text(tab.title)
+                                .font(FontTokens.architectsDaughter(size: 24))
+                                .minimumScaleFactor(0.7)
+                                .lineLimit(1)
+                                .foregroundColor(selectedTab == tab ? ColorTokens.shade100 : ColorTokens.shade700)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Rectangle()
+                                        .fill(selectedTab == tab ? ColorTokens.red300 : ColorTokens.shade200)
+                                        .overlay(
+                                            Rectangle()
+                                                .inset(by: 0)
+                                                .stroke(ColorTokens.shade100, lineWidth: 3)
+                                        )
+                                )
                         }
                     }
                 }
-                .padding()
+                .padding(.top, 10)
+                
+                // Content based on selected tab
+                TabView(selection: $selectedTab) {
+                    MyCodeView(
+                        userProfile: userProfile,
+                        errorMessage: errorMessage,
+                        onSendRequest: sendFriendRequest
+                    )
+                    .tag(FriendTab.myCode)
+                    
+                    ScanView(
+                        errorMessage: errorMessage,
+                        onSendRequest: sendFriendRequest
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .tag(FriendTab.scan)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
+            .padding(.horizontal, 40)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             updateUserProfile()
         }
@@ -153,6 +175,4 @@ struct FriendCodeAdd : View {
 #Preview {
     FriendInvite()
         .environmentObject(CredManager())
-    // CodeDisplay(code: "12345678")
-    // FriendCodeAdd(onCommit: {_ in })
 }

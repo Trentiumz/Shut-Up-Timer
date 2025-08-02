@@ -42,8 +42,6 @@ enum ImageAssets {
     static let image145 = UIImage(named: "image 145")!
     static let image161 = UIImage(named: "image 161")!
     static let qrCode2 = UIImage(named: "qr-code 2")!
-    static let image156_1 = UIImage(named: "image 156-1")!
-    static let image156 = UIImage(named: "image 156")!
     static let image164 = UIImage(named: "image 164")!
     static let image166 = UIImage(named: "image 166")!
     static let image163 = UIImage(named: "image 163")!
@@ -54,6 +52,60 @@ enum ImageAssets {
     
     static let image172 = UIImage(named: "image 172")!
     static let image173 = UIImage(named: "image 173")!
+    
+    static let image178 = UIImage(named: "image 178")!
+    static let image179 = UIImage(named: "image 179")!
+    
+    static let image180 = UIImage(named: "image 180")!
+    static let image181 = UIImage(named: "image 181")!
+    
+    static let image182 = UIImage(named: "image 182")!
+    
+    static let image158 = UIImage(named: "image 158")!
+    static let qrCode3 = UIImage(named: "qr-code 3")!
+    static let image157 = UIImage(named: "image 157")!
+}
+
+fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {
+    guard let cgImage = image.cgImage?.cropping(to: rect) else { return nil }
+    return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
+}
+
+fileprivate func rotateImage(_ image: UIImage, by angle: CGFloat) -> UIImage? {
+    let radians = angle
+    let newSize = CGSize(
+        width: abs(cos(radians)) * image.size.width + abs(sin(radians)) * image.size.height,
+        height: abs(sin(radians)) * image.size.width + abs(cos(radians)) * image.size.height
+    )
+
+    UIGraphicsBeginImageContextWithOptions(newSize, false, image.scale)
+    guard let context = UIGraphicsGetCurrentContext() else { return nil }
+
+    // Move origin to center for rotation
+    context.translateBy(x: newSize.width / 2, y: newSize.height / 2)
+    context.rotate(by: radians)
+
+    // Draw the image centered
+    image.draw(in: CGRect(
+        x: -image.size.width / 2,
+        y: -image.size.height / 2,
+        width: image.size.width,
+        height: image.size.height
+    ))
+
+    let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+    return rotatedImage
+}
+
+fileprivate func cropAndRotate(_ image: UIImage, cropRect: CGRect?, angle: CGFloat) -> UIImage? {
+    var img = image
+    if let rect = cropRect {
+        guard let cropped = cropImage(img, to: rect) else { return nil }
+        img = cropped
+    }
+    guard let rotated = rotateImage(img, by: angle) else { return nil }
+    return rotated
 }
 
 struct FormattedImages {
@@ -647,54 +699,33 @@ struct FormattedImages {
     static var Image173: UIImage {
         cropImage(ImageAssets.image173, to: CGRect(x: 201, y: 208, width: 341, height: 484))!
     }
-}
-
-fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {
-    guard let cgImage = image.cgImage?.cropping(to: rect) else { return nil }
-    return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
-}
-
-fileprivate func rotateImage(_ image: UIImage, by angle: CGFloat) -> UIImage? {
-    let radians = angle
-    let newSize = CGSize(
-        width: abs(cos(radians)) * image.size.width + abs(sin(radians)) * image.size.height,
-        height: abs(sin(radians)) * image.size.width + abs(cos(radians)) * image.size.height
-    )
-
-    UIGraphicsBeginImageContextWithOptions(newSize, false, image.scale)
-    guard let context = UIGraphicsGetCurrentContext() else { return nil }
-
-    // Move origin to center for rotation
-    context.translateBy(x: newSize.width / 2, y: newSize.height / 2)
-    context.rotate(by: radians)
-
-    // Draw the image centered
-    image.draw(in: CGRect(
-        x: -image.size.width / 2,
-        y: -image.size.height / 2,
-        width: image.size.width,
-        height: image.size.height
-    ))
-
-    let rotatedImage = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
-    return rotatedImage
-}
-
-fileprivate func cropAndRotate(_ image: UIImage, cropRect: CGRect?, angle: CGFloat) -> UIImage? {
-    var img = image
-    if let rect = cropRect {
-        guard let cropped = cropImage(img, to: rect) else { return nil }
-        img = cropped
+    
+    static var Image180: UIImage {
+        cropImage(ImageAssets.image180, to: CGRect(x: 0, y: 149, width: 839, height: 243))!
     }
-    guard let rotated = rotateImage(img, by: angle) else { return nil }
-    return rotated
+    static var Image181: UIImage {
+        cropImage(ImageAssets.image181, to: CGRect(x: 119, y: 63, width: 595, height: 755))!
+    }
+    
+    static var Image182: UIImage {
+        cropImage(ImageAssets.image182, to: CGRect(x: 27, y: 181, width: 771, height: 446))!
+    }
+    
+    static var Image158: UIImage {
+        cropImage(ImageAssets.image158, to: CGRect(x: 134, y: 83, width: 595, height: 663))!
+    }
+    static var QrCode3: UIImage {
+        cropImage(ImageAssets.qrCode3, to: CGRect(x: 37, y: 43, width: 429, height: 425))!
+    }
+    static var Image157: UIImage {
+        cropImage(ImageAssets.image157, to: CGRect(x: 59, y: 4, width: 716, height: 795))!
+    }
 }
 
 #Preview {
     ZStack {
         Color.black
-        Image(uiImage: FormattedImages.Image173)
+        Image(uiImage: FormattedImages.Image158)
             .overlay(
                 Rectangle()
                     .stroke(Color.red, lineWidth: 3)

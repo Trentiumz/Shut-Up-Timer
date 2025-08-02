@@ -69,10 +69,10 @@ struct Background : View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .clipped()
-                    .ignoresSafeArea()
+                    .ignoresSafeArea(edges: .all)
                     .allowsHitTesting(false)
             )
-            .ignoresSafeArea(edges: [.top, .bottom])
+            .ignoresSafeArea(edges: .all)
             .allowsHitTesting(false)
     }
 }

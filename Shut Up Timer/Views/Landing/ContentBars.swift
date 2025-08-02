@@ -15,48 +15,53 @@ struct TopBarView : View {
             
             Spacer()
             
-            // Icons on the right
-            Button(action: {
-                AnalyticsManager.shared.trackScreenView("invite_friends")
-                router.toInviteFriends();
-            }) {
-                Image(systemName: "qrcode")
-                    .font(.system(size: 30))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            Button(action: {
-                AnalyticsManager.shared.trackScreenView("notifications")
-                router.toNotifications();
-            }) {
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bell")
-                        .font(.system(size: 30))
-                        .foregroundStyle(.white)
-                    if notificationManager.notifications.count > 0 {
-                        Text("\(notificationManager.notifications.count)")
-                            .font(.system(size: 12, weight: .bold))
-                            .minimumScaleFactor(0.7)
-                            .foregroundColor(.white)
-                            .frame(width: 16, height: 16)
-                            .background(Circle().fill(ColorTokens.red100))
-                            .overlay(Circle().stroke(Color.white, lineWidth: 1))
-                            .offset(x: 8, y: -4)
+            HStack(alignment: .bottom) {
+                // Icons on the right
+                Button(action: {
+                    AnalyticsManager.shared.trackScreenView("invite_friends")
+                    router.toInviteFriends();
+                }) {
+                    Image(uiImage: FormattedImages.QrCode3)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 30)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Button(action: {
+                    AnalyticsManager.shared.trackScreenView("feedback")
+                    router.toFeedbackView()
+                }) {
+                    Image(uiImage: FormattedImages.Image158)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 30)
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                Button(action: {
+                    AnalyticsManager.shared.trackScreenView("notifications")
+                    router.toNotifications();
+                }) {
+                    ZStack(alignment: .topTrailing) {
+                        Image(uiImage: FormattedImages.Image157)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 30)
+                        if notificationManager.notifications.count > 0 {
+                            Text("\(notificationManager.notifications.count)")
+                                .font(.system(size: 12, weight: .bold))
+                                .minimumScaleFactor(0.7)
+                                .foregroundColor(.white)
+                                .frame(width: 16, height: 16)
+                                .background(Circle().fill(ColorTokens.red100))
+                                .overlay(Circle().stroke(Color.white, lineWidth: 1))
+                                .offset(x: 8, y: -4)
+                        }
                     }
                 }
+                .buttonStyle(PlainButtonStyle())
             }
-            .buttonStyle(PlainButtonStyle())
-            
-            Button(action: {
-                AnalyticsManager.shared.trackScreenView("add_post")
-                router.toAddPost();
-            }) {
-                Image(systemName: "plus.square")
-                    .font(.system(size: 30))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(PlainButtonStyle())
         }
         .padding(.horizontal)
         .onAppear {
@@ -68,7 +73,8 @@ struct TopBarView : View {
 enum LandingScreenOption {
     case tasks;
     case timer;
-    case posts;
+// TODO: Add posts
+//    case posts;
     case stats;
     case settings;
     
@@ -76,7 +82,7 @@ enum LandingScreenOption {
         switch self {
         case .tasks: return "tasks"
         case .timer: return "timer"
-        case .posts: return "posts"
+//        case .posts: return "posts"
         case .stats: return "stats"
         case .settings: return "settings"
         }
@@ -151,13 +157,14 @@ struct BottomBarView : View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
+        .padding(.top, 8)
     }
     
     private func imageForTab(_ tab: LandingScreenOption) -> UIImage {
         switch tab {
         case .tasks: return FormattedImages.Image145
         case .timer: return FormattedImages.Image147
-        case .posts: return FormattedImages.Image144
+//        case .posts: return FormattedImages.Image144
         case .stats: return FormattedImages.Image124
         case .settings: return FormattedImages.Image146
         }
@@ -178,7 +185,7 @@ extension LandingScreenOption: CaseIterable {
         switch self {
         case .tasks: return "Tasks"
         case .timer: return "Timer"
-        case .posts: return "Posts"
+//        case .posts: return "Posts"
         case .stats: return "Stats"
         case .settings: return "Settings"
         }

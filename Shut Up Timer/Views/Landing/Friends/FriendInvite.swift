@@ -120,9 +120,9 @@ struct FriendInvite : View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
+            .padding(.horizontal, 40)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(.horizontal, 40)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             updateUserProfile()
         }

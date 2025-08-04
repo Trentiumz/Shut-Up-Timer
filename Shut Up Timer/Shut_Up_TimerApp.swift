@@ -39,6 +39,7 @@ struct Shut_Up_TimerApp: App {
         Task {
             do {
                 try await FamilyControls.AuthorizationCenter.shared.requestAuthorization(for: .individual)
+                
             } catch {
                 print("Authorization failed for family controls: \(error)")
             }

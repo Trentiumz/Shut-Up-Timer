@@ -41,7 +41,7 @@ struct TopBarView : View {
                 
                 Button(action: {
                     AnalyticsManager.shared.trackScreenView("notifications")
-                    router.toNotifications();
+                    router.toViewRequests()
                 }) {
                     ZStack(alignment: .topTrailing) {
                         Image(uiImage: FormattedImages.Image157)

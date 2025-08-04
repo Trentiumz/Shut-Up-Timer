@@ -13,7 +13,7 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
     @Binding private var taskScreen: TopTaskScreen
     @Environment(\.managedObjectContext) private var viewContext
     
-    @FocusState var todoTitleEditID: UUID?
+    @FocusState var fieldFocusItem: TaskListView.FocusItem?
     @State private var displayTop: Bool = true
     
     @ViewBuilder var startView: () -> DefaultViewType
@@ -118,7 +118,7 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                         taskScreen = .redeem(goal: goal)
                     }
                 },
-                todoTitleEditID: $todoTitleEditID
+                fieldFocusItem: $fieldFocusItem
             )
             .frame(maxHeight: 400)
             .padding(.horizontal, 8)
@@ -132,13 +132,13 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
         .onAppear {
             syncDisplayTop()
         }
-        .onChange(of: todoTitleEditID) { _ in
+        .onChange(of: fieldFocusItem) { _ in
             syncDisplayTop()
         }
     }
     
     func syncDisplayTop() {
-        if todoTitleEditID == nil {
+        if fieldFocusItem == nil {
             withAnimation {
                 displayTop = true
             }

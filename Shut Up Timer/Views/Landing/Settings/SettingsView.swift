@@ -173,6 +173,7 @@ struct SettingsView : View {
     struct AppBlockSettings: View {
         @EnvironmentObject var settings: Settings;
         @State private var showAppPicker = false
+        @State private var showMonitorPicker = false
         
         var body: some View {
             VStack {
@@ -194,6 +195,22 @@ struct SettingsView : View {
                                 StylizedLabel("Select")
                             }
                         }
+                        .familyActivityPicker(isPresented: $showAppPicker, selection: $settings.defaultBlockedApps)
+                        
+                        Spacer()
+                            .frame(maxHeight: 8)
+                        
+                        // App blocking selector
+                        HStack {
+                            SettingLabel("Apps to Monitor")
+                            Spacer()
+                            Button(action: {
+                                showMonitorPicker = true
+                            }) {
+                                StylizedLabel("Select")
+                            }
+                        }
+                        .familyActivityPicker(isPresented: $showMonitorPicker, selection: $settings.appsToMonitor)
                         
                         Spacer()
                     }
@@ -202,34 +219,6 @@ struct SettingsView : View {
                     .padding(.top, 5)
                     .padding(.bottom, 5)
                 }.frame(width: 350, height: 240)
-            }
-            .sheet(isPresented: $showAppPicker) {
-                AppBlockPickerModal(selection: $settings.defaultBlockedApps)
-            }
-        }
-    }
-    
-    struct AppBlockPickerModal: View {
-        @Binding var selection: FamilyActivitySelection
-        @Environment(\.dismiss) private var dismiss
-        
-        var body: some View {
-            NavigationView {
-                VStack {
-                    FamilyActivityPicker(selection: $selection)
-                        .padding()
-                }
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden(true)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") {
-                            dismiss()
-                        }
-                        .font(FontTokens.architectsDaughter(size: 18))
-                        .foregroundColor(ColorTokens.shade700)
-                    }
-                }
             }
         }
     }

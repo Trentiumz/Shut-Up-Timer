@@ -6,12 +6,29 @@ struct TopBarView : View {
     @EnvironmentObject var router: AppRouter;
     @EnvironmentObject var notificationManager: NotificationManager;
     
+    enum TitleType {
+        case normal
+        case goBack(action: () -> Void)
+    }
+    var titleType: TitleType = .normal
+    
     var body: some View {
         HStack{
             // App title on the left
-            Text("Shut Up Timer >")
-                .font(FontTokens.architectsDaughter(size: 25))
-                .foregroundColor(.white)
+            switch(titleType) {
+            case .normal:
+                Text("Shut Up Timer >")
+                    .font(FontTokens.architectsDaughter(size: 25))
+                    .foregroundColor(.white)
+            case .goBack(let action):
+                Button(action: {
+                    action()
+                }) {
+                    Text("< Back")
+                        .font(FontTokens.architectsDaughter(size: 25))
+                        .foregroundColor(.white)
+                }
+            }
             
             Spacer()
             

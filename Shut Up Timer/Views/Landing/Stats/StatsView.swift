@@ -2,6 +2,11 @@ import SwiftUI;
 
 struct StatsView : View {
     @EnvironmentObject var router: AppRouter
+    enum StatDisplay {
+        case stats
+        case album
+    }
+    @Binding var statDisplay: StatDisplay
     
     var body: some View {
         ScrollView {
@@ -13,7 +18,9 @@ struct StatsView : View {
                 HStack(spacing: 20) {
                     // Left side - Peculiar Image Button
                     Button(action: {
-                        router.toAlbumView()
+                        withAnimation {
+                            statDisplay = .album
+                        }
                     }) {
                         AlbumViewButtonIcon()
                             .padding(12)
@@ -30,9 +37,15 @@ struct StatsView : View {
                 }
                 .padding(.horizontal, 25)
                 
-                StatsSummaryView()
-                    .frame(maxHeight: 300, alignment: .top)
-                    .padding()
+                switch(statDisplay) {
+                case .stats:
+                    StatsSummaryView()
+                        .frame(maxHeight: 300, alignment: .top)
+                        .padding()
+                case .album:
+                    AlbumView()
+                        .padding()
+                }
             }
         }
     }

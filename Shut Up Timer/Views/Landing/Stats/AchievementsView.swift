@@ -7,7 +7,8 @@ struct AchievementsView: View {
     // Fetch all goals
     @FetchRequest(
         entity: Goal.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true)]
+        sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true)],
+        predicate: NSPredicate(format: "active == true")
     ) private var allGoals: FetchedResults<Goal>
     
     // Computed properties for progress calculation
@@ -16,11 +17,11 @@ struct AchievementsView: View {
     }
     
     var redeemedGoals: Int {
-        allGoals.filter { $0.redeemed }.count
+        allGoals.filter { $0.redeemedAt != nil }.count
     }
     
     var redeemedGoalsList: [Goal] {
-        allGoals.filter { $0.redeemed }
+        allGoals.filter { $0.redeemedAt != nil }
     }
     
     var body: some View {

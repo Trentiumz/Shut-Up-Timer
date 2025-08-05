@@ -132,7 +132,7 @@ struct TasksContentView: View {
         entity: Todo.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Todo.order, ascending: true),
                           NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
-        predicate: NSPredicate(format: "active == YES AND goal.redeemed == NO")
+        predicate: NSPredicate(format: "active == YES AND goal.active == true AND goal.redeemedAt == nil")
     ) private var activeTodos: FetchedResults<Todo>
     
     // Fetch goals using @FetchRequest for automatic updates
@@ -140,7 +140,7 @@ struct TasksContentView: View {
         entity: Goal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true),
                           NSSortDescriptor(keyPath: \Goal.created, ascending: false)],
-        predicate: NSPredicate(format: "redeemed == false")
+        predicate: NSPredicate(format: "redeemedAt == nil")
     ) private var goals: FetchedResults<Goal>
     
     @FocusState.Binding var fieldFocusItem: TaskListView.FocusItem?
@@ -346,7 +346,7 @@ struct DreamGoalsContentView: View {
         entity: Goal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true),
                           NSSortDescriptor(keyPath: \Goal.created, ascending: false)],
-        predicate: NSPredicate(format: "redeemed == false")
+        predicate: NSPredicate(format: "redeemedAt == nil")
     ) private var goals: FetchedResults<Goal>
     
     @FocusState.Binding var fieldFocusItem: TaskListView.FocusItem?
@@ -564,13 +564,11 @@ func addSampleDataToDB(viewContext: NSManagedObjectContext) {
         goal.created = Date()
         goal.goal = "Ace Math!"
         goal.id = UUID()
-        goal.redeemed = false
         
         let goal2 = Goal(context: viewContext)
         goal2.created = Date()
         goal2.goal = "Ace Math #2!"
         goal2.id = UUID()
-        goal2.redeemed = false
         
         let todo1 = Todo(context: viewContext)
         todo1.id = UUID()
@@ -582,7 +580,6 @@ func addSampleDataToDB(viewContext: NSManagedObjectContext) {
         todo2.id = UUID()
         todo2.todo = "Todo 1"
         todo2.created = Date()
-        todo2.goal = nil
         
         try viewContext.save()
         viewContext.processPendingChanges()

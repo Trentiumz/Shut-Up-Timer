@@ -94,13 +94,9 @@ struct YourStatsView: View {
     
     @Environment(\.managedObjectContext) private var viewContext
     @State private var currentWeek: Date = Date()
-    
-    // Fetch goals
-    @FetchRequest(
-        entity: Goal.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true)],
-        predicate: NSPredicate(format: "redeemed == false")
-    ) private var goals: FetchedResults<Goal>
+    @State private var didRedeem: [String: Bool] = [
+        "SUN": false, "MON": false, "TUE": false, "WED": false, "THU": false, "FRI": false, "SAT": false
+    ]
     
     private let daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
     
@@ -118,6 +114,7 @@ struct YourStatsView: View {
                     withAnimation {
                         currentWeek = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: currentWeek) ?? currentWeek
                         updateWeeklyHours()
+                        updateDidRedeem()
                     }
                 }) {
                     ZStack {
@@ -140,10 +137,24 @@ struct YourStatsView: View {
                             Group {
                                 RoundedRectangle(cornerRadius: 4)
                                     .fill(ColorTokens.red300)
-                                    .frame(width: 20, height: min(200, CGFloat(weeklyHours[day] ?? 0) * 12))
+                                    .frame(width: 20, height: min(200, CGFloat(weeklyHours[day] ?? 0) * 12 + 20))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 4)
                                             .stroke(Color.black, lineWidth: 1)
+                                    )
+                                    .overlay(
+                                        ConditionalElement(
+                                            display: didRedeem[day] ?? false,
+                                            ifTrue: {
+                                                Image(uiImage: FormattedImages.Image163)
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fit)
+                                                    .frame(width: 26, height: 34)
+                                                    .offset(y: -10)
+                                            }
+                                        )
+                                        ,
+                                        alignment: .top
                                     )
                                     .onTapGesture {
                                         selectedDate = getDateForDay(day)
@@ -182,6 +193,7 @@ struct YourStatsView: View {
                     withAnimation {
                         currentWeek = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: currentWeek) ?? currentWeek
                         updateWeeklyHours()
+                        updateDidRedeem()
                     }
                 }) {
                     ZStack {
@@ -202,6 +214,7 @@ struct YourStatsView: View {
         }
         .onAppear {
             updateWeeklyHours()
+            updateDidRedeem()
         }
     }
     
@@ -265,6 +278,56 @@ struct YourStatsView: View {
             print("Failed to fetch sessions for weekly hours: \(error)")
         }
     }
+    
+    private func updateDidRedeem() {
+        let calendar = Calendar.current
+        
+        // Calculate start and end of the week
+        let startOfWeek = calendar.dateInterval(of: .weekOfYear, for: currentWeek)?.start ?? currentWeek
+        let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) ?? currentWeek
+        
+        // Create fetch request for goals redeemed within this week
+        let fetchRequest: NSFetchRequest<Goal> = Goal.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "redeemedAt >= %@ AND redeemedAt < %@", startOfWeek as NSDate, endOfWeek as NSDate)
+        
+        do {
+            let goals = try viewContext.fetch(fetchRequest)
+//            print(goals)
+            
+            var newDidRedeem: [String: Bool] = [:]
+            for i in 0..<7 {
+                let dayStart = calendar.date(byAdding: .day, value: i, to: startOfWeek) ?? currentWeek
+                let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart
+//                print("\(i) \(dayStart) \(dayEnd)")
+                newDidRedeem[daysOfWeek[i]] = goals.contains(where: { goal in
+                    if let redeemedAt = goal.redeemedAt {
+                        if dayStart <= redeemedAt && redeemedAt < dayEnd {
+                            return true
+                        }
+                    }
+                    return false
+                })
+            }
+            
+//            print(newDidRedeem)
+            didRedeem = newDidRedeem
+        } catch {
+            print("Failed to fetch goals and update didRedeem: \(error)")
+        }
+    }
+    
+    struct ConditionalElement<Elem: View>: View {
+        let display: Bool
+        @ViewBuilder let ifTrue: () -> Elem
+        
+        var body: some View {
+            if display {
+                ifTrue()
+            } else {
+                EmptyView()
+            }
+        }
+    }
 }
 
 // MARK: - Day Detail View (Group 191)
@@ -280,7 +343,7 @@ struct DayDetailView: View {
     @FetchRequest(
         entity: Goal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true)],
-        predicate: NSPredicate(format: "redeemed == false")
+        predicate: NSPredicate(format: "redeemedAt == nil")
     ) private var allGoals: FetchedResults<Goal>
     
     init(date: Date, onBack: @escaping () -> Void) {
@@ -884,21 +947,18 @@ func addSampleStatsData(viewContext: NSManagedObjectContext) {
         goal1.id = UUID()
         goal1.goal = "Finish this goddamn UI"
         goal1.created = Date()
-        goal1.redeemed = false
         goal1.addProgress(iqCurrent: 34, iqGoal: 100)
         
         let goal2 = Goal(context: viewContext)
         goal2.id = UUID()
         goal2.goal = "Pass ECO exam"
         goal2.created = Date()
-        goal2.redeemed = false
         goal2.addProgress(iqCurrent: 66, iqGoal: 100)
         
         let goal3 = Goal(context: viewContext)
         goal3.id = UUID()
         goal3.goal = "Learn SwiftUI"
         goal3.created = Date()
-        goal3.redeemed = false
         goal3.addProgress(iqCurrent: 25, iqGoal: 50)
         
         try viewContext.save()

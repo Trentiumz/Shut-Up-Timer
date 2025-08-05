@@ -77,7 +77,7 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                         onRedeem: { goal in
                             do {
                                 try withAnimation {
-                                    goal.redeemed = true
+                                    goal.redeemedAt = Date()
                                     try viewContext.save()
                                     taskScreen = .start
                                 }
@@ -170,7 +170,7 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
             goal.created = Date()
             goal.goal = temporaryGoal.name
             goal.addProgress(iqCurrent: 0.0, iqGoal: temporaryGoal.iqGoal)
-            goal.redeemed = false
+            goal.redeemedAt = nil
             goal.color = colorToHexString(temporaryGoal.color)
             goal.order = minVal - 1
             

@@ -397,6 +397,18 @@ struct DreamGoalRowView: View {
         }
     }
     
+    func submitIQGoalChange() {
+        if let iqGoalValue = Double(iqGoalText), iqGoalValue > 0 {
+            goal.addProgress(iqCurrent: goal.lastGoalProgress?.iqCurrent ?? 0, iqGoal: iqGoalValue)
+            do {
+                try viewContext.save()
+            } catch {
+                print("Failed to save IQ goal: \(error)")
+            }
+        }
+        fieldFocusItem = nil
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -441,16 +453,18 @@ struct DreamGoalRowView: View {
                         .multilineTextAlignment(.trailing)
                         .foregroundColor(ColorTokens.shade600)
                         .keyboardType(.numberPad)
-                        .onSubmit {
-                            if let iqGoalValue = Double(iqGoalText), iqGoalValue > 0 {
-                                goal.addProgress(iqCurrent: goal.lastGoalProgress?.iqCurrent ?? 0, iqGoal: iqGoalValue)
-                                do {
-                                    try viewContext.save()
-                                } catch {
-                                    print("Failed to save IQ goal: \(error)")
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    submitIQGoalChange()
+                                    // Dismiss keyboard
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                 }
                             }
-                            fieldFocusItem = nil
+                        }
+                        .onSubmit {
+                            submitIQGoalChange()
                         }
                         .onAppear {
                             iqGoalText = String(Int(goal.lastGoalProgress?.iqGoal ?? 0))

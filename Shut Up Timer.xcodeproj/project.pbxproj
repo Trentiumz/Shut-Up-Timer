@@ -19,6 +19,11 @@
 		736830832E0E4A96006BFDFD /* SwiftUIReorderableForEach in Frameworks */ = {isa = PBXBuildFile; productRef = 736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */; };
 		736831EB2E1178BB006BFDFD /* Notification Remote Receival.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		73D04C542E3E9E190051B807 /* Device Activity Report.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 73D04C482E3E9E190051B807 /* Device Activity Report.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		73D04EA02E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
+		73D04EA12E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
+		73D04EA22E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
+		73D04EA32E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
+		73D04EA42E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
 		C9784C3A2DE50CED00BF0281 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C9784C392DE50CED00BF0281 /* GoogleSignIn */; };
 		C9784C3C2DE50CF200BF0281 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C9784C3B2DE50CF200BF0281 /* GoogleSignInSwift */; };
 		C9E74A992DC3B2FB0014B994 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = C9E74A982DC3B2FB0014B994 /* Auth */; };
@@ -89,6 +94,7 @@
 		734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Notification Remote Receival.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73D04C482E3E9E190051B807 /* Device Activity Report.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = "Device Activity Report.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Shut Up Timer DEV.storekit"; sourceTree = "<group>"; };
 		C93EE98A2DB5133700E5080A /* Shut Up Timer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Shut Up Timer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C93EE99A2DB5133A00E5080A /* Shut Up TimerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Shut Up TimerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C93EE9A42DB5133A00E5080A /* Shut Up TimerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Shut Up TimerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -229,6 +235,7 @@
 		C93EE9812DB5133700E5080A = {
 			isa = PBXGroup;
 			children = (
+				73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */,
 				C93EE98C2DB5133700E5080A /* Shut Up Timer */,
 				C93EE99D2DB5133A00E5080A /* Shut Up TimerTests */,
 				C93EE9A72DB5133A00E5080A /* Shut Up TimerUITests */,
@@ -455,6 +462,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73D04EA02E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */,
 				734C17BB2E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -463,6 +471,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73D04EA42E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -471,6 +480,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				734C17BA2E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
+				73D04EA22E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,6 +488,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73D04EA12E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */,
 				734C17B92E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -486,6 +497,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73D04EA32E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */,
 				734C17B82E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

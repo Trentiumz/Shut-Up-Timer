@@ -7,6 +7,7 @@ struct ContentView: View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var credManager: CredManager;
+    @EnvironmentObject var subscriptionManager: SubscriptionManager;
     
     @State var showAlert: Bool = false;
     @State var alertMessage: String = "";
@@ -24,6 +25,23 @@ struct ContentView: View {
                     AnalyticsManager.shared.trackOnboardingComplete()
                     settings.firstTime = false;
                 })
+            } else if(subscriptionManager.isLoading) {
+                // Show loading screen while checking subscription status
+                ZStack {
+                    Color.white.ignoresSafeArea()
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .scaleEffect(1.5)
+                        Text("Loading...")
+                            .font(.body)
+                            .foregroundColor(Color("ColorlyShadeShade600"))
+                    }
+                }
+            } else if(subscriptionManager.currentSubscription == nil) {
+                // Show subscription purchase view if not subscribed
+                SubscriptionPurchaseView()
+                    .ignoresSafeArea(.keyboard)
             } else {
                 LandingView()
                     .ignoresSafeArea(.keyboard)

@@ -23,6 +23,7 @@ struct Shut_Up_TimerApp: App {
     let credManager = CredManager()
     let postLoader = PostLoader.loadPostLoader()
     let sessions = SessionLoader() // New Core Data wrapper
+    let subscriptionManager = SubscriptionManager()
     let curUser: CurUser
     
     init() {
@@ -81,6 +82,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(notificationManager)
                 .environmentObject(curUser)
                 .environmentObject(postLoader)
+                .environmentObject(subscriptionManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .preferredColorScheme(.light)
         }

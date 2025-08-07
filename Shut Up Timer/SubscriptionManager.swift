@@ -5,6 +5,7 @@ import StoreKit
 class SubscriptionManager: ObservableObject {
     // MARK: - Published Properties
     @Published var currentSubscription: Product? = nil
+    @Published var originalTransactionId: UInt64? = nil
     @Published var availableProducts: [Product] = []
     @Published var isLoading: Bool = false
     @Published var productsLoading: Bool = false
@@ -22,10 +23,10 @@ class SubscriptionManager: ObservableObject {
     init() {
         updateListenerTask = listenForTransactions()
         Task {
-            // Check subscription status first for faster response
-            await updateSubscriptionStatus()
             // Then load products for purchase options
             await loadProducts()
+            // Check subscription status first for faster response
+            await updateSubscriptionStatus()
         }
     }
     
@@ -123,6 +124,7 @@ class SubscriptionManager: ObservableObject {
                     if let product = availableProducts.first(where: { $0.id == transaction.productID }) {
                         await MainActor.run {
                             self.currentSubscription = product
+                            self.originalTransactionId = transaction.originalID
                             self.isLoading = false
                         }
                         return
@@ -137,6 +139,7 @@ class SubscriptionManager: ObservableObject {
         // No active subscription found
         await MainActor.run {
             self.currentSubscription = nil
+            self.originalTransactionId = nil
             self.isLoading = false
         }
     }

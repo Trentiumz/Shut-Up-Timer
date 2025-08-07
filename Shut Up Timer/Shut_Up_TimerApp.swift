@@ -20,13 +20,15 @@ struct Shut_Up_TimerApp: App {
     let notificationManager = NotificationManager()
     let router = AppRouter()
     let settings = SettingsLoader.loadSettings()
-    let credManager = CredManager()
+    let subscriptionManager = SubscriptionManager()
+    let credManager: CredManager
     let postLoader = PostLoader.loadPostLoader()
     let sessions = SessionLoader() // New Core Data wrapper
-    let subscriptionManager = SubscriptionManager()
     let curUser: CurUser
     
     init() {
+        // Create credManager with subscriptionManager
+        self.credManager = CredManager(subscriptionManager: subscriptionManager)
         // Create curUser with the same credManager instance
         self.curUser = CurUser(credManager: credManager)
         

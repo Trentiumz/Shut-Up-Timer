@@ -312,7 +312,7 @@ extension DateFormatter {
         .environmentObject(SessionLoader())
         .environmentObject(AppRouter())
         .environmentObject(PostLoader.loadPostLoader())
-        .environmentObject(CurUser(credManager: CredManager()))
+        .environmentObject(CurUser(credManager: CredManager(subscriptionManager: SubscriptionManager())))
         .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
 }
 

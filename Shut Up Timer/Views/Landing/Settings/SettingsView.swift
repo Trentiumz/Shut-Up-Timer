@@ -312,7 +312,7 @@ struct SettingsPreview : PreviewProvider {
     struct Wrapper : View {
         @State var userPublicProfile: UserPublicProfileResponse? = nil;
         @State var userProfile: UserProfileResponse? = nil;
-        var credManager = CredManager()
+        var credManager = CredManager(subscriptionManager: SubscriptionManager())
         
         var body : some View {
             SettingsView()

@@ -12,7 +12,7 @@ struct Config {
 #endif
     }()
     
-
+    
     static let apiBaseURL: String = {
 #if DEBUG
         return "https://2c5e4633f8b9.ngrok-free.app"
@@ -34,6 +34,22 @@ struct Config {
         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 #else
         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91bGxvbXhleHRoeWJoeXdiZ3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU3NTYwMDYsImV4cCI6MjA2MTMzMjAwNn0.ox6uLdxPQ57WsBACWC2iVhn0akPUWBcQxTTAQ39kwdE"
+#endif
+    }()
+    
+    static let useDebugSubscription: Bool = {
+#if DEBUG
+        return true
+#else
+        return false
+#endif
+    }()
+    
+    static let debugSubscriptionString: String = {
+#if DEBUG
+        return "shut-up-timer-debug-182739"
+#else
+        return ""
 #endif
     }()
 }

@@ -159,7 +159,7 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(Settings(firstTime: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20), defaultBlockedApps: FamilyActivitySelection(), appsToMonitor: FamilyActivitySelection()))
-        .environmentObject(CurUser(credManager: CredManager()))
-        .environmentObject(CredManager())
+        .environmentObject(CurUser(credManager: CredManager(subscriptionManager: SubscriptionManager())))
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
         .environmentObject(AppRouter());
 }

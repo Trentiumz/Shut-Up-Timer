@@ -230,7 +230,7 @@ struct BarViewPreviews : PreviewProvider {
     static var previews : some View {
         Wrapper()
             .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
-            .environmentObject(CurUser(credManager: CredManager()))
+            .environmentObject(CurUser(credManager: CredManager(subscriptionManager: SubscriptionManager())))
             .environmentObject(AppRouter())
             .environmentObject(NotificationManager())
     }

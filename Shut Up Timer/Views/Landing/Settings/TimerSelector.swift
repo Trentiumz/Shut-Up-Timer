@@ -93,7 +93,7 @@ struct TimerSelectorPreview : PreviewProvider {
             TimerSelector(param: $timerParam)
             .environmentObject(AppRouter())
             .environmentObject(SettingsLoader.loadSettings())
-            .environmentObject(CredManager())
+            .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
         }
     }
     

@@ -184,6 +184,6 @@ struct OnboardingView : View {
 #Preview {
     OnboardingView(onDone: {})
         .environmentObject(SettingsLoader.loadSettings())
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
         .environmentObject(AppRouter())
 }

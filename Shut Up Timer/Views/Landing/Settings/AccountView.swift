@@ -299,10 +299,10 @@ struct LocalUserInfoView : View {
 }
 
 #Preview {
-    let credManager = CredManager()
+    let credManager = CredManager(subscriptionManager: SubscriptionManager())
     AccountView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings())
-        .environmentObject(CredManager())
+        .environmentObject(credManager)
         .environmentObject(CurUser(credManager: credManager))
 }

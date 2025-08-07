@@ -325,7 +325,7 @@ struct FeedbackPaperView: View {
 
 #Preview {
     FeedbackPaperView(feedback: FeedbackResponse(id: UUID(), user_id: UUID(), feedback: "Hello there!", developer_response: "Hello back!", created_at: Date(), upvotes: 23, user_upvoted: false), onUpvote: {}, onRemoveUpvote: {}, deleteFeedback: {})
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
 //    FeedbackView()
-//        .environmentObject(CredManager())
+//        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
 }

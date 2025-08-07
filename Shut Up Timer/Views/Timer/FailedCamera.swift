@@ -91,7 +91,7 @@ struct FailedCameraView : View {
 
 #Preview {
     FailedCameraView(sessionID: UUID())
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
         .environmentObject(AppRouter())
         .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
 }

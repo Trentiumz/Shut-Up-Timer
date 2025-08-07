@@ -12,7 +12,7 @@ class CredManager: ObservableObject {
     @Published var supabaseClient: SupabaseClient
     let fastAPI: FastAPIClient
     
-    init() {
+    init(subscriptionManager: SubscriptionManager) {
         // Initialize Supabase client with temporary keys
         let supabaseClient = SupabaseClient(
             supabaseURL: URL(string: Config.supabaseURL)!,
@@ -20,7 +20,7 @@ class CredManager: ObservableObject {
         )
         self.supabaseClient = supabaseClient;
         
-        fastAPI = FastAPIClient(supabase: supabaseClient)
+        fastAPI = FastAPIClient(supabase: supabaseClient, subscriptionManager: subscriptionManager)
             
         // Try to get the current session
         Task {
@@ -49,6 +49,8 @@ class CredManager: ObservableObject {
                 print("Sending token \(token)")
                 Task {
                     try await self.supabaseClient.rpc("set_apn", params: ["new_apn": token]).execute()
+                    // TODO: Remove this test
+                    print(await fastAPI.verifySubscription())
                 }
             }
         }

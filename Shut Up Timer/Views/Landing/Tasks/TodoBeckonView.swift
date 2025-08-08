@@ -95,16 +95,11 @@ fileprivate struct SummaryScreen: View {
     @State var roast: String = "\"hey cant you be better then your old cousin Jenny?\""
     
     func getRoast() async {
-        let featureGenerator = RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
-        do {
-            let newRoast = try await credManager.fastAPI.generateCatchphrase(roastFeatures: featureGenerator.generateFeatures())
-            if let newRoast = newRoast {
-                await MainActor.run {
-                    self.roast = newRoast
-                }
+        let newRoast = await RoastGenerator.generateCatchphrase(viewContext: viewContext, credManager: credManager)
+        if let newRoast = newRoast {
+            await MainActor.run {
+                self.roast = newRoast
             }
-        } catch {
-            print("Error generating new roast: \(error)")
         }
     }
     
@@ -211,7 +206,6 @@ fileprivate struct SummaryScreen: View {
             if let lastRoast = lastRoast,
                 let lastTime = lastRoast.time,
                 lastTime.addingTimeInterval(Config.catchphraseBufferTime) > Date(),
-                let content = lastRoast.content,
                lastTime > roastInformation.getLastCacheTime(type: .catchphrase){
                 return
             } else {

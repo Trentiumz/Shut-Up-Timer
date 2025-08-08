@@ -49,8 +49,6 @@ class CredManager: ObservableObject {
                 print("Sending token \(token)")
                 Task {
                     try await self.supabaseClient.rpc("set_apn", params: ["new_apn": token]).execute()
-                    // TODO: Remove this test
-                    print(await fastAPI.verifySubscription())
                 }
             }
         }

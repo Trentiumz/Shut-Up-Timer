@@ -1,3 +1,5 @@
+import Foundation
+import Combine
 let roastMessages = [
     "Your brain called. It’s buffering.",
     "You studying or just opening tabs again?",
@@ -103,4 +105,46 @@ let roastMessages = [
 
 func getRandomRoast() -> String {
     return roastMessages.randomElement() ?? "No roast for you today. Lucky."
+}
+
+class RoastInformation: ObservableObject {
+    @Published var lastCacheableTime: [RoastGenerator.RoastType:Date] {
+        didSet {
+            didChange.send(self)
+        }
+    }
+    let didChange = PassthroughSubject<RoastInformation, Never>()
+    private static let cacheableKey = "roast-information-cacheable"
+    var cancellables = Set<AnyCancellable>()
+    
+    // MARK: - Codable
+    private init(lastCacheableTime: [RoastGenerator.RoastType:Date] = [:]) {
+        self.lastCacheableTime = lastCacheableTime
+    }
+    
+    deinit {
+        cancellables.removeAll()
+    }
+    
+    // Loads posts from UserDefaults
+    static func loadRoastInformation() -> RoastInformation {
+        let data = UserDefaults.standard.data(forKey: RoastInformation.cacheableKey)
+        if let data = data {
+            if let decoded = try? JSONDecoder().decode([RoastGenerator.RoastType:Date].self, from: data) {
+                return RoastInformation(lastCacheableTime: decoded)
+            }
+        }
+        return RoastInformation()
+    }
+    
+    func getLastCacheTime(type: RoastGenerator.RoastType) -> Date {
+        return self.lastCacheableTime[type] ?? Date.distantPast
+    }
+    
+    // Private: Save posts to UserDefaults
+    func saveRoastInformation() {
+        if let encoded = try? JSONEncoder().encode(self.lastCacheableTime) {
+            UserDefaults.standard.set(encoded, forKey: RoastInformation.cacheableKey)
+        }
+    }
 }

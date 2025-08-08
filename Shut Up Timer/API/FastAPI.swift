@@ -378,7 +378,6 @@ class FastAPIClient {
         
         return postUUIDs
     }
-
 }
 
 enum APIError: Error, LocalizedError {

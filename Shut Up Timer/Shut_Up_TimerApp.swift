@@ -25,6 +25,7 @@ struct Shut_Up_TimerApp: App {
     let postLoader = PostLoader.loadPostLoader()
     let sessions = SessionLoader() // New Core Data wrapper
     let curUser: CurUser
+    let roastInformation = RoastInformation.loadRoastInformation()
     
     init() {
         // Create credManager with subscriptionManager
@@ -72,6 +73,12 @@ struct Shut_Up_TimerApp: App {
                 SettingsLoader.saveSettings(updatedSettings)
             }
             .store(in: &settings.cancellables)
+        
+        roastInformation.didChange
+            .sink { updatedRoastInformation in
+                updatedRoastInformation.saveRoastInformation()
+            }
+            .store(in: &roastInformation.cancellables)
     }
     
     var body: some Scene {
@@ -85,6 +92,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(curUser)
                 .environmentObject(postLoader)
                 .environmentObject(subscriptionManager)
+                .environmentObject(roastInformation)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .preferredColorScheme(.light)
         }

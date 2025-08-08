@@ -88,6 +88,10 @@ class Settings: ObservableObject, Codable, Equatable {
         self.appsToMonitor = appsToMonitor
     }
     
+    deinit {
+        cancellables.removeAll()
+    }
+    
     static func == (l: Settings, r: Settings) -> Bool {
         return l.firstTime == r.firstTime &&
         l.difficulty == r.difficulty &&

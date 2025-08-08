@@ -1,3 +1,4 @@
+import Foundation
 struct Config {
     enum ConfigType {
         case debug
@@ -50,6 +51,14 @@ struct Config {
         return "shut-up-timer-debug-182739"
 #else
         return ""
+#endif
+    }()
+    
+    static let catchphraseBufferTime: TimeInterval = {
+#if DEBUG
+        return 300 // 5 minutes
+#else
+        return 1800
 #endif
     }()
 }

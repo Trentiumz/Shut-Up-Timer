@@ -1,14 +1,20 @@
 import CoreData
 
 extension RoastGenerator {
+    struct RoastFeatures {
+        let features: [String]
+        let recentRoasts: [String]?
+    }
+    
     class RoastFeatureGenerator {
         var viewContext: NSManagedObjectContext
         init(viewContext: NSManagedObjectContext) {
             self.viewContext = viewContext
         }
         
-        func generateFeatures() -> [String] {
+        func generateFeatures(type: RoastGenerator.RoastType? = nil, roastsToSend: Int? = 10) -> RoastFeatures {
             var features: [String] = []
+            var recentRoasts: [String]? = nil
             
             // Note: Funny task detection and interpretation is left to the server/LLM
             // to handle more intelligently based on context and user preferences
@@ -31,7 +37,12 @@ extension RoastGenerator {
             // Add session-specific quirks
             features.append(contentsOf: getSessionQuirkFeatures())
             
-            return features
+            // Get recent roasts if type is specified
+            if let roastType = type, let roastCount = roastsToSend {
+                recentRoasts = getRecentRoasts(type: roastType, count: roastCount)
+            }
+            
+            return RoastFeatures(features: features, recentRoasts: recentRoasts)
         }
         
         // MARK: - User Structure Info
@@ -46,17 +57,12 @@ extension RoastGenerator {
             
             do {
                 let goals = try viewContext.fetch(goalRequest)
-                var goalTaskStructure: [String] = []
                 
                 for goal in goals {
                     let goalName = goal.goal ?? "Unknown Goal"
                     let tasks = goal.tasks?.allObjects as? [Todo] ?? []
                     let taskNames = tasks.compactMap { $0.todo }.joined(separator: ", ")
-                    goalTaskStructure.append("Goal: \(goalName) - Tasks: \(taskNames)")
-                }
-                
-                if !goalTaskStructure.isEmpty {
-                    features.append("User Goals and Tasks: \(goalTaskStructure.joined(separator: " | "))")
+                    features.append("Goal: \(goalName) - Tasks: \(taskNames)")
                 }
             } catch {
                 print("Failed to fetch goals: \(error)")
@@ -89,8 +95,11 @@ extension RoastGenerator {
             
             // Recent vs past week comparison
             if !weekSessions.isEmpty && !recentSessions.isEmpty {
-                let weekAvg = weekSessions.map { $0.timeLocked }.reduce(0, +) / Double(weekSessions.count)
-                let recentAvg = recentSessions.map { $0.timeLocked }.reduce(0, +) / Double(recentSessions.count)
+                let weekTotal = weekSessions.map { $0.timeLocked }.reduce(0, +)
+                let recentTotal = recentSessions.map { $0.timeLocked }.reduce(0, +)
+                
+                let weekAvg = weekTotal / Double(weekSessions.count)
+                let recentAvg = recentTotal / Double(recentSessions.count)
                 
                 let percentageChange = ((recentAvg - weekAvg) / weekAvg) * 100
                 if percentageChange < -20 {
@@ -373,6 +382,13 @@ extension RoastGenerator {
                 print("Failed to fetch sessions: \(error)")
                 return []
             }
+        }
+        
+        // MARK: - Recent Roasts Feature
+        
+        private func getRecentRoasts(type: RoastType, count: Int) -> [String] {
+            let pastRoasts = RoastGenerator.getRecentRoasts(type: type, count: count, viewContext: viewContext)
+            return pastRoasts.compactMap { $0.content }
         }
     }
 }

@@ -25,23 +25,24 @@ struct ContentView: View {
                     AnalyticsManager.shared.trackOnboardingComplete()
                     settings.firstTime = false;
                 })
-            } else if(subscriptionManager.isLoading) {
-                // Show loading screen while checking subscription status
-                ZStack {
-                    Color.white.ignoresSafeArea()
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                            .scaleEffect(1.5)
-                        Text("Loading...")
-                            .font(.body)
-                            .foregroundColor(Color("ColorlyShadeShade600"))
-                    }
-                }
             } else if(subscriptionManager.currentSubscription == nil) {
-                // Show subscription purchase view if not subscribed
-                SubscriptionPurchaseView()
-                    .ignoresSafeArea(.keyboard)
+                if subscriptionManager.isLoading {
+                    // Show loading screen while checking subscription status
+                    ZStack {
+                        Color.white.ignoresSafeArea()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .scaleEffect(1.5)
+                            Text("Loading...")
+                                .font(.body)
+                                .foregroundColor(Color("ColorlyShadeShade600"))
+                        }
+                    }
+                } else {
+                    SubscriptionPurchaseView()
+                        .ignoresSafeArea(.keyboard)
+                }
             } else {
                 LandingView()
                     .ignoresSafeArea(.keyboard)

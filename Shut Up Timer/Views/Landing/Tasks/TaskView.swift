@@ -12,6 +12,7 @@ enum TopTaskScreen {
 struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
     @Binding private var taskScreen: TopTaskScreen
     @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject private var roastInformation: RoastInformation
     
     @FocusState var fieldFocusItem: TaskListView.FocusItem?
     @State private var displayTop: Bool = true
@@ -174,6 +175,8 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
             goal.color = colorToHexString(temporaryGoal.color)
             goal.order = minVal - 1
             
+            roastInformation.lastCacheableTime[.catchphrase] = Date()
+            
             try viewContext.save()
             return true;
         } catch {
@@ -198,6 +201,8 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                 todo.order = Int16(index) // Set order based on position in array
                 todo.goal = tempTask.goal // Link to goal if specified
             }
+            
+            roastInformation.lastCacheableTime[.catchphrase] = Date()
             
             try viewContext.save()
             return true

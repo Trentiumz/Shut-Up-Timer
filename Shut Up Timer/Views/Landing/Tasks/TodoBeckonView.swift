@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreData
 
 struct TodoBeckonView: View {
     @State private var currentScreen = 0
@@ -34,7 +35,7 @@ struct TodoBeckonView: View {
                     SummaryScreen()
                         .tag(0)
                     
-                                         // Screen 2 - Phone screen
+                    // Screen 2 - Phone screen
                      PhoneBeckon()
                          .tag(1)
                     
@@ -88,6 +89,25 @@ struct TodoBeckonView: View {
 }
 
 fileprivate struct SummaryScreen: View {
+    @EnvironmentObject private var credManager: CredManager
+    @Environment(\.managedObjectContext) private var viewContext: NSManagedObjectContext
+    @EnvironmentObject private var roastInformation: RoastInformation
+    @State var roast: String = "\"hey cant you be better then your old cousin Jenny?\""
+    
+    func getRoast() async {
+        let featureGenerator = RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
+        do {
+            let newRoast = try await credManager.fastAPI.generateCatchphrase(roastFeatures: featureGenerator.generateFeatures())
+            if let newRoast = newRoast {
+                await MainActor.run {
+                    self.roast = newRoast
+                }
+            }
+        } catch {
+            print("Error generating new roast: \(error)")
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 0) {
             // Grandma image on the left
@@ -134,11 +154,10 @@ fileprivate struct SummaryScreen: View {
                                 .font(FontTokens.architectsDaughter(size: 16))
                                 .foregroundColor(ColorTokens.shade100)
                                 .lineLimit(1)
-                            Text("\"hey cant you be better haha you old cousin Jenny?\"")
+                            Text(roast)
                                 .font(FontTokens.architectsDaughter(size: 12))
                                 .foregroundColor(ColorTokens.shade700)
-                                .lineLimit(3)
-                                .frame(idealHeight: 65, alignment: .top)
+                                .minimumScaleFactor(0.7)
                                 .layoutPriority(1)
                         }
                         .padding(.leading, 30)
@@ -181,6 +200,27 @@ fileprivate struct SummaryScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.trailing, 20)
+        .onAppear {
+            let lastRoast = RoastGenerator.getLastRoast(type: .catchphrase, viewContext: viewContext)
+            // if we have a last roast, use it temporarily
+            if let lastRoast = lastRoast, let content = lastRoast.content {
+                roast = content
+            }
+            
+            // if the last time can be cached, and it hasn't been too long, and the times exist, then we don't update
+            if let lastRoast = lastRoast,
+                let lastTime = lastRoast.time,
+                lastTime.addingTimeInterval(Config.catchphraseBufferTime) > Date(),
+                let content = lastRoast.content,
+               lastTime > roastInformation.getLastCacheTime(type: .catchphrase){
+                return
+            } else {
+                // otherwise, do update!
+                Task {
+                    await getRoast()
+                }
+            }
+        }
     }
 }
 

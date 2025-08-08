@@ -378,6 +378,33 @@ class FastAPIClient {
         
         return postUUIDs
     }
+    
+    struct LinkSubscriptionResponse: Decodable {
+        let success: Bool
+    }
+    func linkSubscription() async throws -> Bool{
+        print("linking subscription...")
+        do {
+            guard await subscriptionManager.originalTransactionId != nil else {
+                print("No subscriptions, cannot link subscriptions")
+                return false
+            }
+            
+            let data = try await sendAuthSubRequest(
+                params: [:],
+                url: fastAPIURL.appendingPathComponent("link-subscription"),
+                method: "POST"
+            )
+            
+            let decoder = JSONDecoder()
+            let response = try decoder.decode(LinkSubscriptionResponse.self, from: data)
+            print("linked subscription: \(response.success)")
+            return response.success
+        } catch {
+            print("Error linking subscription: \(error)")
+            return false
+        }
+    }
 }
 
 enum APIError: Error, LocalizedError {

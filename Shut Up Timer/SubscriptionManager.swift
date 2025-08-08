@@ -5,7 +5,11 @@ import StoreKit
 class SubscriptionManager: ObservableObject {
     // MARK: - Published Properties
     @Published var currentSubscription: Product? = nil
-    @Published var originalTransactionId: UInt64? = nil
+    @Published var originalTransactionId: UInt64? = nil {
+        didSet {
+            self.transactionIdUpdate.send(originalTransactionId)
+        }
+    }
     @Published var availableProducts: [Product] = []
     @Published var isLoading: Bool = false
     @Published var productsLoading: Bool = false
@@ -18,6 +22,9 @@ class SubscriptionManager: ObservableObject {
     // MARK: - Private Properties
     private var updateListenerTask: Task<Void, Error>? = nil
     private var productsLoaded = false
+    
+    let transactionIdUpdate = PassthroughSubject<UInt64?, Never>()
+    var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
     init() {
@@ -32,6 +39,7 @@ class SubscriptionManager: ObservableObject {
     
     deinit {
         updateListenerTask?.cancel()
+        cancellables.removeAll()
     }
     
     // MARK: - Public Methods

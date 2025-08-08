@@ -46,9 +46,10 @@ class CredManager: ObservableObject {
         print("Sending token??")
         if self.loggedIn {
             if let token = UserDefaults.standard.string(forKey: "device-token-push") {
-                print("Sending token \(token)")
+                print("Sending token \(token), sending subscription too")
                 Task {
                     try await self.supabaseClient.rpc("set_apn", params: ["new_apn": token]).execute()
+                    let _ = try await self.fastAPI.linkSubscription()
                 }
             }
         }

@@ -79,6 +79,19 @@ struct Shut_Up_TimerApp: App {
                 updatedRoastInformation.saveRoastInformation()
             }
             .store(in: &roastInformation.cancellables)
+        
+        subscriptionManager.transactionIdUpdate
+            .sink { id in
+                Task {
+                    do {
+                        let success = try await credManager.fastAPI.linkSubscription()
+                        print("Linking subscription result: \(success)")
+                    } catch {
+                        print("Failed to link subscription: \(error)")
+                    }
+                }
+            }
+            .store(in: &subscriptionManager.cancellables)
     }
     
     var body: some Scene {

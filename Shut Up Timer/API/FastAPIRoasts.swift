@@ -29,8 +29,6 @@ extension FastAPIClient {
                 method: "POST"
             )
             
-            print("roast response: \(data)")
-            
             let decoder = JSONDecoder()
             let response = try decoder.decode(GenerateCommentResponse.self, from: data)
             return response.roast

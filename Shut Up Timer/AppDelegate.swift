@@ -1,4 +1,5 @@
 import UIKit
+import Combine
 import FirebaseCore
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -31,4 +32,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
+    
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        print("Received silent push with userInfo: \(userInfo)")
+        
+        if let flag = userInfo["flag"] as? String,
+            flag == "send-interval-notification-beckon" {
+            SilentPushHandler.handleIntervalNotificationBeckon()
+        }
+        
+        // Fetch data or schedule local notifications here
+        
+        completionHandler(.newData)
+    }
+
 }

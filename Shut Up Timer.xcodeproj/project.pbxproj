@@ -24,6 +24,18 @@
 		73D04EA22E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
 		73D04EA32E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
 		73D04EA42E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
+		73DDFE4F2E46A67400765EB5 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE4E2E46A67400765EB5 /* GoogleSignIn */; };
+		73DDFE512E46A67700765EB5 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE502E46A67700765EB5 /* GoogleSignInSwift */; };
+		73DDFE5A2E46A79400765EB5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE592E46A79400765EB5 /* FirebaseAnalytics */; };
+		73DDFE5C2E46A79400765EB5 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE5B2E46A79400765EB5 /* FirebaseAnalyticsCore */; };
+		73DDFE5E2E46A79400765EB5 /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE5D2E46A79400765EB5 /* FirebaseAnalyticsIdentitySupport */; };
+		73DDFE602E46A79400765EB5 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE5F2E46A79400765EB5 /* FirebaseAppCheck */; };
+		73DDFE652E46A81500765EB5 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE642E46A81500765EB5 /* Auth */; };
+		73DDFE672E46A81500765EB5 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE662E46A81500765EB5 /* PostgREST */; };
+		73DDFE692E46A81500765EB5 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE682E46A81500765EB5 /* Supabase */; };
+		73DDFE6B2E46A81500765EB5 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE6A2E46A81500765EB5 /* FirebaseCore */; };
+		73DDFE6D2E46A82200765EB5 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE6C2E46A82200765EB5 /* Functions */; };
+		73DDFE6F2E46A82200765EB5 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 73DDFE6E2E46A82200765EB5 /* Storage */; };
 		C9784C3A2DE50CED00BF0281 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C9784C392DE50CED00BF0281 /* GoogleSignIn */; };
 		C9784C3C2DE50CF200BF0281 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C9784C3B2DE50CF200BF0281 /* GoogleSignInSwift */; };
 		C9E74A992DC3B2FB0014B994 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = C9E74A982DC3B2FB0014B994 /* Auth */; };
@@ -111,9 +123,24 @@
 		736831F32E1180DD006BFDFD /* Exceptions for "Shut Up Timer" folder in "Notification Remote Receival" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AnalyticsManager.swift,
+				API/FastAPI.swift,
+				API/FastAPIRoasts.swift,
+				Config.swift,
+				CredManager.swift,
+				"External Models/FunctionObjectModels.swift",
+				"External Models/FunctionResponseModels.swift",
 				"External Models/Utils.swift",
 				Models/ClientNotification.swift,
+				Models/ImageLoader.swift,
+				Models/Model.xcdatamodeld,
+				"Models/Session+Extensions.swift",
+				Modules/RoastGenerator/RoastFeatures.swift,
+				Modules/RoastGenerator/RoastGeneration.swift,
+				Modules/RoastGenerator/RoastGenerator.swift,
+				Modules/RoastInformation/RoastInformation.swift,
 				PersistenceController.swift,
+				SubscriptionManager.swift,
 			);
 			target = 736831E32E1178BB006BFDFD /* Notification Remote Receival */;
 		};
@@ -184,6 +211,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73DDFE6F2E46A82200765EB5 /* Storage in Frameworks */,
+				73DDFE4F2E46A67400765EB5 /* GoogleSignIn in Frameworks */,
+				73DDFE5E2E46A79400765EB5 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+				73DDFE512E46A67700765EB5 /* GoogleSignInSwift in Frameworks */,
+				73DDFE652E46A81500765EB5 /* Auth in Frameworks */,
+				73DDFE672E46A81500765EB5 /* PostgREST in Frameworks */,
+				73DDFE692E46A81500765EB5 /* Supabase in Frameworks */,
+				73DDFE6B2E46A81500765EB5 /* FirebaseCore in Frameworks */,
+				73DDFE5A2E46A79400765EB5 /* FirebaseAnalytics in Frameworks */,
+				73DDFE602E46A79400765EB5 /* FirebaseAppCheck in Frameworks */,
+				73DDFE5C2E46A79400765EB5 /* FirebaseAnalyticsCore in Frameworks */,
+				73DDFE6D2E46A82200765EB5 /* Functions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,6 +325,18 @@
 			);
 			name = "Notification Remote Receival";
 			packageProductDependencies = (
+				73DDFE4E2E46A67400765EB5 /* GoogleSignIn */,
+				73DDFE502E46A67700765EB5 /* GoogleSignInSwift */,
+				73DDFE592E46A79400765EB5 /* FirebaseAnalytics */,
+				73DDFE5B2E46A79400765EB5 /* FirebaseAnalyticsCore */,
+				73DDFE5D2E46A79400765EB5 /* FirebaseAnalyticsIdentitySupport */,
+				73DDFE5F2E46A79400765EB5 /* FirebaseAppCheck */,
+				73DDFE642E46A81500765EB5 /* Auth */,
+				73DDFE662E46A81500765EB5 /* PostgREST */,
+				73DDFE682E46A81500765EB5 /* Supabase */,
+				73DDFE6A2E46A81500765EB5 /* FirebaseCore */,
+				73DDFE6C2E46A82200765EB5 /* Functions */,
+				73DDFE6E2E46A82200765EB5 /* Storage */,
 			);
 			productName = "Notification Remote Receival";
 			productReference = 736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */;
@@ -1071,6 +1122,66 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 736830812E0E4A96006BFDFD /* XCRemoteSwiftPackageReference "swiftui-reorderable-foreach" */;
 			productName = SwiftUIReorderableForEach;
+		};
+		73DDFE4E2E46A67400765EB5 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C9784C382DE50CDA00BF0281 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		73DDFE502E46A67700765EB5 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C9784C382DE50CDA00BF0281 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		73DDFE592E46A79400765EB5 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		73DDFE5B2E46A79400765EB5 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		73DDFE5D2E46A79400765EB5 /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		73DDFE5F2E46A79400765EB5 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		73DDFE642E46A81500765EB5 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C9E74A972DC3B2FB0014B994 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		73DDFE662E46A81500765EB5 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C9E74A972DC3B2FB0014B994 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		73DDFE682E46A81500765EB5 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C9E74A972DC3B2FB0014B994 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		73DDFE6A2E46A81500765EB5 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 734C17BC2E26D31E00C6B5A7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		73DDFE6C2E46A82200765EB5 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C9E74A972DC3B2FB0014B994 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		73DDFE6E2E46A82200765EB5 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C9E74A972DC3B2FB0014B994 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
 		};
 		C9784C392DE50CED00BF0281 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;

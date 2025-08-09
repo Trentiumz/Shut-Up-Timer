@@ -86,7 +86,7 @@ extension Session {
     }
     
     /// Efficiently calculate total time locked using Core Data aggregation
-    static func getTotalTimeLocked(context: NSManagedObjectContext) -> Int {
+    static func getTotalTimeLocked(context: NSManagedObjectContext) -> TimeInterval {
         let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: "Session")
         request.resultType = .dictionaryResultType
         
@@ -102,7 +102,7 @@ extension Session {
             let results = try context.fetch(request)
             if let result = results.first,
                let totalTime = result["totalTime"] as? Double {
-                return Int(totalTime)
+                return totalTime
             }
         } catch {
             print("Failed to calculate total time locked: \(error)")

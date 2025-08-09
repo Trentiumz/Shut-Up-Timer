@@ -50,8 +50,30 @@ class CredManager: ObservableObject {
                 Task {
                     try await self.supabaseClient.rpc("set_apn", params: ["new_apn": token]).execute()
                     let _ = try await self.fastAPI.linkSubscription()
+                    
+                    // Also send roast information
+                    await sendRoastInformation()
                 }
             }
+        }
+    }
+    
+    private func sendRoastInformation() async {
+        let persistenceController = PersistenceController.shared
+        
+        let viewContext = persistenceController.container.viewContext
+        let infoGenerator = RoastGenerator.RoastInformationGenerator(viewContext: viewContext)
+        let roastInformation = infoGenerator.generateInformation()
+        
+        do {
+            let success = try await self.fastAPI.sendRoastInformation(roastInformation)
+            if success {
+                print("Successfully sent roast information to backend")
+            } else {
+                print("Failed to send roast information to backend")
+            }
+        } catch {
+            print("Error sending roast information: \(error)")
         }
     }
 

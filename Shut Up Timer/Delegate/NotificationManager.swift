@@ -5,7 +5,9 @@ import UserNotifications
 
 class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     @Published var notifications: [ClientNotification] = []
-    private var cancellables = Set<AnyCancellable>()
+    
+    let remoteNotificationGranted = PassthroughSubject<Void, Never>()
+    var cancellables = Set<AnyCancellable>()
     
     override init() {
         super.init()
@@ -21,10 +23,15 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         }
     }
     
+    deinit {
+        cancellables.removeAll()
+    }
+    
     func registerForPushNotifications(application: UIApplication) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
             if granted {
                 DispatchQueue.main.async {
+                    self.remoteNotificationGranted.send()
                     UIApplication.shared.registerForRemoteNotifications()
                 }
             } else {
@@ -37,6 +44,7 @@ class NotificationManager: NSObject, ObservableObject, UNUserNotificationCenterD
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         UserDefaults.standard.set(token, forKey: "device-token-push")
+        
     }
 
     func didFailToRegisterForRemoteNotifications(error: Error) {

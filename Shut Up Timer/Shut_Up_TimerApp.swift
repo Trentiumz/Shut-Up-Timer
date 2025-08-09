@@ -17,7 +17,6 @@ struct Shut_Up_TimerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     let persistenceController = PersistenceController.shared
     
-    let notificationManager = NotificationManager()
     let router = AppRouter()
     let settings = SettingsLoader.loadSettings()
     let subscriptionManager = SubscriptionManager()
@@ -92,6 +91,12 @@ struct Shut_Up_TimerApp: App {
                 }
             }
             .store(in: &subscriptionManager.cancellables)
+        
+        appDelegate.notificationManager.remoteNotificationGranted
+            .sink {
+                credManager.sendTokenToBackend()
+            }
+            .store(in: &appDelegate.notificationManager.cancellables)
     }
     
     var body: some Scene {
@@ -101,7 +106,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(settings)
                 .environmentObject(sessions)
                 .environmentObject(credManager)
-                .environmentObject(notificationManager)
+                .environmentObject(appDelegate.notificationManager)
                 .environmentObject(curUser)
                 .environmentObject(postLoader)
                 .environmentObject(subscriptionManager)

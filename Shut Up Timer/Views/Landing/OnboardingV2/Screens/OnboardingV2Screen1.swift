@@ -32,9 +32,8 @@ struct OnboardingV2Screen1: View {
                             Image(uiImage: FormattedImages.Image164)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: geometry.size.width, height: geometry.size.width)
+                                .frame(width: geometry.size.width)
                                 .rotationEffect(Angle(degrees: -45))
-                                .clipped()
                         }
                         .frame(width: geometry.size.width / 2, alignment: .leading)
                         .scaleEffect(isFocused ? 0.7 : 1.0)

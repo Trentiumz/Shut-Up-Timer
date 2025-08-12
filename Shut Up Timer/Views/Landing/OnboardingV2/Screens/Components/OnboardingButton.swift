@@ -34,7 +34,7 @@ struct OnboardingButton: View {
         Button(action: action) {
             Text(title)
                 .font(FontTokens.architectsDaughter(size: 16))
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.5)
                 .lineLimit(1)
                 .foregroundColor(textColor)
                 .padding(.horizontal, 16)

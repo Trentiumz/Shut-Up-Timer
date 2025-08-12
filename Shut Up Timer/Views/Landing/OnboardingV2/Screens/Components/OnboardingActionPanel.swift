@@ -39,8 +39,10 @@ struct OnboardingActionPanel: View {
                     switch button {
                     case .redButton(let title, let action):
                         OnboardingRedButton(title: title, action: action)
+                            .layoutPriority(0)
                     case .sendButton(let title, let action):
                         OnboardingSendButton(title: title ?? "Send", action: action)
+                            .layoutPriority(2) // Keep Send most visible when space is tight
                     }
                 }
             }

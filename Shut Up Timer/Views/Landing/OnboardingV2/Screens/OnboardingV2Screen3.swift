@@ -147,6 +147,7 @@ struct OnboardingV2Screen3: View {
                 }
             }
         }
+        .ignoresSafeArea(.keyboard)
     }
 }
 
@@ -163,7 +164,7 @@ private extension OnboardingV2Screen3 {
     func popupContent(iqGoal: Double, advanceAction: @escaping () -> Void, disabled: Bool) -> some View {
         LinedPopup() {
             VStack(alignment: .center, spacing: 10) {
-                Text(String(format: "Your Goal = %.2f IQ pts", iqGoal))
+                Text(String(format: "Your Goal = %.0f IQ pts", iqGoal))
                     .font(FontTokens.architectsDaughter(size: 22))
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.7)

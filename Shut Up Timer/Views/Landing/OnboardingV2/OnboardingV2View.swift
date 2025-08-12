@@ -5,6 +5,7 @@ struct OnboardingV2View: View {
         case screen1
         case screen2
         case screen3
+        case screen3_5
         case screen5
     }
     
@@ -51,6 +52,16 @@ struct OnboardingV2View: View {
                 
             case .screen3:
                 OnboardingV2Screen3(
+                    transitionToNext: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            curStage = .screen3_5
+                        }
+                    }
+                )
+                .transition(screenTransition)
+                
+            case .screen3_5:
+                OnboardingV2Screen3_5(
                     transitionToNext: {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             curStage = .screen5

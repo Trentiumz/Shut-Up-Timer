@@ -37,8 +37,8 @@ struct OnboardingV2Screen3_5: View {
                     }
                     Spacer()
                 }
-                .frame(width: geometry.size.height)
-                .ignoresSafeArea(.keyboard)
+                .frame(height: geometry.size.height)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
                 .onTapGesture {
                     isFocused = false
                 }

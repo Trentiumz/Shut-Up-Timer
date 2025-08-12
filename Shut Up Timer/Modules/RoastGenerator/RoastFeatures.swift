@@ -103,9 +103,9 @@ extension RoastGenerator {
                 
                 let percentageChange = ((recentAvg - weekAvg) / weekAvg) * 100
                 if percentageChange < -20 {
-                    features.append("Recent performance \(String(format: "%.1f", abs(percentageChange)))% below weekly average")
+                    features.append("Recent performance \(String(format: "%.2f", abs(percentageChange)))% below weekly average")
                 } else if percentageChange > 20 {
-                    features.append("Recent performance \(String(format: "%.1f", percentageChange))% above weekly average")
+                    features.append("Recent performance \(String(format: "%.2f", percentageChange))% above weekly average")
                 }
             }
             
@@ -115,9 +115,9 @@ extension RoastGenerator {
                 let yesterdayHours = yesterdayTotal / 3600
                 
                 if yesterdayHours < 1 {
-                    features.append("Yesterday only studied \(String(format: "%.1f", yesterdayHours)) hours")
+                    features.append("Yesterday only studied \(String(format: "%.2f", yesterdayHours)) hours")
                 } else if yesterdayHours > 8 {
-                    features.append("Yesterday studied \(String(format: "%.1f", yesterdayHours)) hours - overachiever")
+                    features.append("Yesterday studied \(String(format: "%.2f", yesterdayHours)) hours - overachiever")
                 }
                 
                 // Check for failed sessions yesterday
@@ -134,7 +134,7 @@ extension RoastGenerator {
             if weekSuccessRate > 0 {
                 let successRateChange = ((recentSuccessRate - weekSuccessRate) / weekSuccessRate) * 100
                 if successRateChange < -20 {
-                    features.append("Recent success rate dropped \(String(format: "%.1f", abs(successRateChange)))% from weekly average")
+                    features.append("Recent success rate dropped \(String(format: "%.2f", abs(successRateChange)))% from weekly average")
                 }
             }
             
@@ -174,13 +174,13 @@ extension RoastGenerator {
                 let sortedTasks = taskUsage.sorted { $0.value.totalTime < $1.value.totalTime }
                 if let leastUsed = sortedTasks.first {
                     let hours = leastUsed.value.totalTime / 3600
-                    features.append("Least used task: '\(leastUsed.key)' - only \(String(format: "%.1f", hours)) hours total")
+                    features.append("Least used task: '\(leastUsed.key)' - only \(String(format: "%.2f", hours)) hours total")
                 }
                 
                 // Find most used tasks
                 if let mostUsed = sortedTasks.last {
                     let hours = mostUsed.value.totalTime / 3600
-                    features.append("Most used task: '\(mostUsed.key)' - \(String(format: "%.1f", hours)) hours total")
+                    features.append("Most used task: '\(mostUsed.key)' - \(String(format: "%.2f", hours)) hours total")
                 }
                 
                 // Find tasks not used recently
@@ -225,9 +225,9 @@ extension RoastGenerator {
                     if let progress = recentProgress {
                         let progressPercentage = (progress.iqCurrent / progress.iqGoal) * 100
                         if progressPercentage < 10 {
-                            features.append("Goal '\(goalName)' only \(String(format: "%.1f", progressPercentage))% complete")
+                            features.append("Goal '\(goalName)' only \(String(format: "%.2f", progressPercentage))% complete")
                         } else if progressPercentage > 90 {
-                            features.append("Goal '\(goalName)' almost complete at \(String(format: "%.1f", progressPercentage))%")
+                            features.append("Goal '\(goalName)' almost complete at \(String(format: "%.2f", progressPercentage))%")
                         }
                     } else {
                         features.append("Goal '\(goalName)' has no progress recorded")
@@ -262,7 +262,7 @@ extension RoastGenerator {
                 if !recentSessions.isEmpty {
                     let shortSessionPercentage = (Double(shortSessions.count) / Double(recentSessions.count)) * 100
                     if shortSessionPercentage > 20 {
-                        features.append("\(String(format: "%.1f", shortSessionPercentage))% of recent sessions were under 5 minutes")
+                        features.append("\(String(format: "%.2f", shortSessionPercentage))% of recent sessions were under 5 minutes")
                     }
                 }
                 
@@ -288,7 +288,7 @@ extension RoastGenerator {
                 if !morningSessions.isEmpty && !nightSessions.isEmpty {
                     let nightToMorningRatio = Double(nightSessions.count) / Double(morningSessions.count)
                     if nightToMorningRatio > 2 {
-                        features.append("Studies \(String(format: "%.1f", nightToMorningRatio))x more at night than in the morning")
+                        features.append("Studies \(String(format: "%.2f", nightToMorningRatio))x more at night than in the morning")
                     }
                 }
                 
@@ -308,7 +308,7 @@ extension RoastGenerator {
                 if !weekdaySessions.isEmpty && !weekendSessions.isEmpty {
                     let weekendToWeekdayRatio = Double(weekendSessions.count) / Double(weekdaySessions.count)
                     if weekendToWeekdayRatio > 1.2 {
-                        features.append("Studies \(String(format: "%.1f", weekendToWeekdayRatio))x more on weekends than weekdays")
+                        features.append("Studies \(String(format: "%.2f", weekendToWeekdayRatio))x more on weekends than weekdays")
                     }
                 }
             }

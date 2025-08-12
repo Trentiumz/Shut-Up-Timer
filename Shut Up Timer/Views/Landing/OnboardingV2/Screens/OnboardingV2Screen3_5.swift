@@ -3,6 +3,7 @@ import SwiftUI
 struct OnboardingV2Screen3_5: View {
     let transitionToNext: () -> Void
     @State private var textInput: String = ""
+    @State private var isFocused: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -11,7 +12,7 @@ struct OnboardingV2Screen3_5: View {
                     // Left side - Text
                     HStack {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("What’s one thing you can\ndo today without crying\nabout it?")
+                            Text("What's one thing you can\ndo today without crying\nabout it?")
                                 .font(FontTokens.architectsDaughter(size: 36))
                                 .minimumScaleFactor(0.7)
                                 .lineLimit(3)
@@ -21,6 +22,7 @@ struct OnboardingV2Screen3_5: View {
                         .frame(maxWidth: .infinity)
                         Spacer()
                     }
+                    .padding()
                     
                     // Right side - Character image (different pose)
                     HStack {
@@ -29,8 +31,16 @@ struct OnboardingV2Screen3_5: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: geometry.size.width * 0.78)
+                            .scaleEffect(isFocused ? 0.7 : 1.0)
+                            .offset(x: isFocused ? geometry.size.width * 0.1 : 0)
+                            .animation(.easeInOut(duration: 0.3), value: isFocused)
                     }
                     Spacer()
+                }
+                .frame(width: geometry.size.height)
+                .ignoresSafeArea(.keyboard)
+                .onTapGesture {
+                    isFocused = false
                 }
                 
                 VStack {
@@ -38,6 +48,7 @@ struct OnboardingV2Screen3_5: View {
                     // Bottom action panel
                     OnboardingActionPanel(
                         textInput: $textInput,
+                        isFocused: $isFocused,
                         instructionText: "Press send to proceed.",
                         actionButtons: [
                             .redButton(title: "Finish Chp 1", action: {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OnboardingActionPanel: View {
     @Binding var textInput: String
+    @Binding var isFocused: Bool
     let instructionText: String
     let actionButtons: [OnboardingActionButton]
     
@@ -15,6 +16,7 @@ struct OnboardingActionPanel: View {
             // Top: Text input with integrated Send button
             OnboardingTextInput(
                 text: $textInput,
+                isFocused: $isFocused,
                 placeholder: instructionText,
                 sendAction: {
                     // Find the send button action
@@ -52,10 +54,12 @@ struct OnboardingActionPanel: View {
 #Preview {
     struct PreviewWrapper: View {
         @State private var textInput = ""
+        @State private var isFocused = false
         
         var body: some View {
             OnboardingActionPanel(
                 textInput: $textInput,
+                isFocused: $isFocused,
                 instructionText: "Press send to proceed.",
                 actionButtons: [
                     .redButton(title: "Spare me.", action: {

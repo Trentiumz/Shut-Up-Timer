@@ -3,6 +3,7 @@ import SwiftUI
 struct OnboardingV2Screen2: View {
     let transitionToNext: () -> Void
     @State private var textInput: String = ""
+    @State private var isFocused: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -21,6 +22,7 @@ struct OnboardingV2Screen2: View {
                         .frame(maxWidth: .infinity)
                         Spacer()
                     }
+                    .padding()
                     
                     // Right side - Character image
                     HStack {
@@ -29,8 +31,15 @@ struct OnboardingV2Screen2: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: geometry.size.width * 3 / 4)
+                            .scaleEffect(isFocused ? 0.7 : 1.0)
+                            .offset(x: isFocused ? geometry.size.width * 0.1 : 0)
+                            .animation(.easeInOut(duration: 0.3), value: isFocused)
                     }
                     Spacer()
+                }
+                .frame(height: geometry.size.height)
+                .onTapGesture {
+                    isFocused = false
                 }
                 
                 VStack {
@@ -38,6 +47,7 @@ struct OnboardingV2Screen2: View {
                     // Bottom action panel
                     OnboardingActionPanel(
                         textInput: $textInput,
+                        isFocused: $isFocused,
                         instructionText: "Press send to proceed.",
                         actionButtons: [
                             .redButton(title: "Learn to code", action: {

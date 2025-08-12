@@ -17,7 +17,8 @@ struct OnboardingV2Screen5: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 16) {
-                Spacer().frame(height: 6)
+                Spacer()
+                
                 switch step {
                 case .quiz:
                     quizCard
@@ -30,6 +31,7 @@ struct OnboardingV2Screen5: View {
                         }
                     })
                 }
+                
                 Spacer()
             }
             .padding(.horizontal)

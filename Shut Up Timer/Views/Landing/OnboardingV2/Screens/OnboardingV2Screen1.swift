@@ -4,6 +4,7 @@ struct OnboardingV2Screen1: View {
     let transitionToNext: () -> Void
     @State private var textInput: String = ""
     @State private var showPopup: Bool = false
+    @State private var isFocused: Bool = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -22,6 +23,7 @@ struct OnboardingV2Screen1: View {
                         .frame(maxWidth: .infinity)
                         Spacer()
                     }
+                    .padding()
                     
                     // Right side - Character image
                     HStack {
@@ -35,34 +37,43 @@ struct OnboardingV2Screen1: View {
                                 .clipped()
                         }
                         .frame(width: geometry.size.width / 2, alignment: .leading)
+                        .scaleEffect(isFocused ? 0.7 : 1.0)
+                        .offset(x: isFocused ? geometry.size.width * 0.1 : 0)
+                        .animation(.easeInOut(duration: 0.3), value: isFocused)
                     }
+                    .layoutPriority(-1)
                     Spacer()
-                    
-                    VStack {
-                        Spacer()
-                        // Bottom action panel
-                        OnboardingActionPanel(
-                            textInput: $textInput,
-                            instructionText: "Press send to proceed.",
-                            actionButtons: [
-                                .redButton(title: "Spare me.", action: {
-                                    textInput = "Spare me."
-                                }),
-                                .redButton(title: "Yes, mother.", action: {
-                                    textInput = "Yes, mother."
-                                }),
-                                .sendButton(title: "Send", action: {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        showPopup = true
-                                    }
-                                })
-                            ]
-                        )
-                        .frame(maxWidth: .infinity)
-                        .ignoresSafeArea(.container)
-                    }
                 }
                 .frame(height: geometry.size.height)
+                .ignoresSafeArea(.keyboard, edges: .bottom)
+                .onTapGesture {
+                    isFocused = false
+                }
+
+                VStack {
+                    Spacer()
+                    // Bottom action panel
+                    OnboardingActionPanel(
+                        textInput: $textInput,
+                        isFocused: $isFocused,
+                        instructionText: "Press send to proceed.",
+                        actionButtons: [
+                            .redButton(title: "Spare me.", action: {
+                                textInput = "Spare me."
+                            }),
+                            .redButton(title: "Yes, mother.", action: {
+                                textInput = "Yes, mother."
+                            }),
+                            .sendButton(title: "Send", action: {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    showPopup = true
+                                }
+                            })
+                        ]
+                    )
+                    .frame(maxWidth: .infinity)
+                    .ignoresSafeArea(.container)
+                }
                 
                 // Popup overlay
                 if showPopup {
@@ -106,8 +117,8 @@ struct OnboardingV2Screen1: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
+            .frame(height: geometry.size.height)
         }
-        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
     
     private func dismissPopupAndProceed() {

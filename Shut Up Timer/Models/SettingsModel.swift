@@ -141,7 +141,8 @@ class SettingsLoader {
                                                     appsToMonitor: FamilyActivitySelection())
     static func loadSettings() -> Settings {
         let data = UserDefaults.standard.data(forKey: "user-settings")
-        if let liveData = data {
+        // TODO: get rid of "if false"
+        if false, let liveData = data {
             if let decoded = try? JSONDecoder().decode(Settings.self, from: liveData) {
                 decoded.firstTime = false
                 return decoded

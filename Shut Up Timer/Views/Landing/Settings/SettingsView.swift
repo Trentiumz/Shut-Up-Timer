@@ -200,6 +200,8 @@ struct SettingsView : View {
                         Spacer()
                             .frame(maxHeight: 8)
                         
+                        // TODO: Add app monitoring
+                        /*
                         // App blocking selector
                         HStack {
                             SettingLabel("Apps to Monitor")
@@ -211,6 +213,7 @@ struct SettingsView : View {
                             }
                         }
                         .familyActivityPicker(isPresented: $showMonitorPicker, selection: $settings.appsToMonitor)
+                         */
                         
                         Spacer()
                     }

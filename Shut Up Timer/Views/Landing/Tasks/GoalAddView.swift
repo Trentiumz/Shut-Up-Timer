@@ -190,7 +190,7 @@ fileprivate struct HoursCalculatorScreen: View {
                 Spacer()
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .padding(.bottom, 14)
             .padding(.top, 10)
         }
     }
@@ -212,7 +212,7 @@ fileprivate struct WeeksCalculatorScreen: View {
                 Spacer()
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .padding(.bottom, 14)
             .padding(.top, 10)
         }
     }
@@ -302,18 +302,20 @@ fileprivate struct GoalSummaryScreen: View {
 }
 
 // MARK: - Calculator Component
-fileprivate struct CalculatorComponent: View {
+struct CalculatorComponent: View {
     @Binding var value: Double
     @State private var displayText: String = ""
     let placeholder: String;
     let onEnter: () -> Void
-    let onCancel: () -> Void
+    var onCancel: (() -> Void)? = nil
     
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                CommonTaskViews.CancelButton(onCancel: onCancel)
+            if let onCancel = onCancel {
+                HStack {
+                    Spacer()
+                    CommonTaskViews.CancelButton(onCancel: onCancel)
+                }
             }
             // Display
             ZStack(alignment: .trailing) {
@@ -346,21 +348,31 @@ fileprivate struct CalculatorComponent: View {
                 .frame(maxHeight: 20)
             
             // Calculator buttons
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 6) {
-                 ForEach(calculatorButtons, id: \.self) { button in
-                     Button(action: {
-                         handleButtonPress(button)
-                     }) {
-                         Text(button)
-                             .font(FontTokens.architectsDaughter(size: 24))
-                             .foregroundColor(.white)
+            GeometryReader { geometry in
+                let availableWidth = geometry.size.width
+                let buttonSize = (availableWidth - 18) / 4 // 18 = 3 * 6 spacing
+                let buttonHeight = (geometry.size.height - 12) / 3
+                
+                LazyVGrid(columns: Array(repeating: GridItem(.fixed(buttonSize), spacing: 6), count: 4), spacing: 6) {
+                     ForEach(calculatorButtons, id: \.self) { button in
+                         Button(action: {
+                             handleButtonPress(button)
+                         }) {
+                             Text(button)
+                                 .font(FontTokens.architectsDaughter(size: 24))
+                                 .minimumScaleFactor(0.7)
+                                 .foregroundColor(.white)
+                         }
+                         .buttonStyle(CalculatorButtonStyle(buttonSize: CGSize(width: buttonSize, height: buttonHeight)))
+                         .frame(width: buttonSize, height: buttonHeight)
                      }
-                     .buttonStyle(CalculatorButtonStyle())
                  }
-             }
+                .frame(width: geometry.size.width, height: geometry.size.height)
+            }
             .layoutPriority(1)
             
             Spacer()
+                .frame(height: 4)
             
             // Enter button
             Button(action: {
@@ -369,29 +381,16 @@ fileprivate struct CalculatorComponent: View {
                 }
                 onEnter()
             }) {
-                ViewThatFits {
-                    Text("Enter")
-                        .font(FontTokens.architectsDaughter(size: 18))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(ColorTokens.red300)
-                        )
-                    
-                    Text("Enter")
-                        .font(FontTokens.architectsDaughter(size: 18))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(ColorTokens.red300)
-                        )
-                }
+                Text("Enter")
+                    .font(FontTokens.architectsDaughter(size: 18))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(ColorTokens.red300)
+                    )
             }
         }
     }
@@ -448,14 +447,27 @@ struct DarkContentContainer<Content: View>: View {
 }
 
 fileprivate struct CalculatorButtonStyle: ButtonStyle {
+    let buttonSize: CGSize
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.6))
-                    .scaleEffect(configuration.isPressed ? 0.9 : 1.0)
+                Group {
+                    if buttonSize.width > buttonSize.height {
+                        // Rounded rectangle when width > height
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.gray.opacity(0.6))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        // Circle with padding when height >= width
+                        Circle()
+                            .fill(Color.gray.opacity(0.6))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(4)
+                    }
+                }
+                .scaleEffect(configuration.isPressed ? 0.9 : 1.0)
             )
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
@@ -464,9 +476,18 @@ fileprivate struct CalculatorButtonStyle: ButtonStyle {
 #Preview {
     ZStack {
         Color.black
-        GoalAddView { _ in
-            // Preview handler
-        } onCancel: {}
+        DarkContentContainer {
+            CalculatorComponent(
+                value: .constant(0),
+                placeholder: "How many weeks do you need to accomplish this goal?",
+                onEnter: {
+                },
+                onCancel: {}
+            )
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+            .padding(.top, 10)
+        }
     }
-    .frame(height: 300)
+    .frame(height: 500)
 }

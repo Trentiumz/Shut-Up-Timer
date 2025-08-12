@@ -30,6 +30,7 @@ class SubscriptionManager: ObservableObject {
     init() {
         updateListenerTask = listenForTransactions()
         Task {
+            isLoading = true
             // Then load products for purchase options
             await loadProducts()
             // Check subscription status first for faster response
@@ -80,12 +81,9 @@ class SubscriptionManager: ObservableObject {
                 // Check whether the transaction is verified
                 switch verification {
                 case .verified(let transaction):
+                    await transaction.finish()
                     // Deliver content to the user
                     await deliverContent(for: transaction)
-                    await transaction.finish()
-                    
-                    // Update subscription status
-                    await updateSubscriptionStatus()
                     return true
                     
                 case .unverified(_, let error):
@@ -158,8 +156,8 @@ class SubscriptionManager: ObservableObject {
         
         do {
             try await AppStore.sync()
-            await updateSubscriptionStatus()
             await loadProducts()
+            await updateSubscriptionStatus()
             return true
         } catch {
             await MainActor.run {
@@ -177,8 +175,8 @@ class SubscriptionManager: ObservableObject {
                 switch result {
                 case .verified(let transaction):
                     // Deliver content to the user
-                    await self.deliverContent(for: transaction)
                     await transaction.finish()
+                    await self.deliverContent(for: transaction)
                     
                 case .unverified(_, let error):
                     print("Transaction verification failed: \(error)")

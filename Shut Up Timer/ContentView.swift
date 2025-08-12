@@ -21,7 +21,7 @@ struct ContentView: View {
         NavigationStack(path:$router.path){
             if(settings.firstTime) {
                 // onboarding
-                OnboardingView(onDone: {
+                OnboardingV2View(onDone: {
                     AnalyticsManager.shared.trackOnboardingComplete()
                     settings.firstTime = false;
                 })

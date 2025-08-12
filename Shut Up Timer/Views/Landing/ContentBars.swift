@@ -45,6 +45,8 @@ struct TopBarView : View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 
+                // TODO: Feedback was removed here
+                /*
                 Button(action: {
                     AnalyticsManager.shared.trackScreenView("feedback")
                     router.toFeedbackView()
@@ -55,6 +57,7 @@ struct TopBarView : View {
                         .frame(height: 30)
                 }
                 .buttonStyle(PlainButtonStyle())
+                 */
                 
                 Button(action: {
                     AnalyticsManager.shared.trackScreenView("notifications")

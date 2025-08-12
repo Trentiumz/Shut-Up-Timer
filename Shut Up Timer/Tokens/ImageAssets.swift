@@ -64,6 +64,14 @@ enum ImageAssets {
     static let image158 = UIImage(named: "image 158")!
     static let qrCode3 = UIImage(named: "qr-code 3")!
     static let image157 = UIImage(named: "image 157")!
+    
+    static let image134 = UIImage(named: "image 134")!
+    static let image141 = UIImage(named: "image 141")!
+    
+    static let image188 = UIImage(named: "image 188")!
+    static let image189 = UIImage(named: "image 189")!
+    
+    static let popQuiz = UIImage(named: "POP QUIZ")!
 }
 
 fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {
@@ -720,6 +728,23 @@ struct FormattedImages {
     static var Image157: UIImage {
         cropImage(ImageAssets.image157, to: CGRect(x: 59, y: 4, width: 716, height: 795))!
     }
+    
+    static var Image134: UIImage {
+        cropImage(ImageAssets.image134, to: CGRect(x: 35, y: 205, width: 796, height: 563))!
+    }
+    
+    static var Image141: UIImage {
+        cropImage(ImageAssets.image141, to: CGRect(x: 624, y: 1135, width: 814, height: 244))!
+    }
+    
+    static var Image188: UIImage {
+        cropImage(ImageAssets.image188, to: CGRect(x: 148, y: 25, width: 478, height: 787))!
+    }
+    static var Image189: UIImage {
+        cropImage(ImageAssets.image189, to: CGRect(x: 175, y: 232, width: 500, height: 464))!
+    }
+    
+    static var PopQuiz: UIImage = ImageAssets.popQuiz
 }
 
 #Preview {

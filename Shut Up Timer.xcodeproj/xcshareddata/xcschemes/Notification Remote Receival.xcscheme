@@ -56,8 +56,7 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
-      launchAutomaticallySubstyle = "2"
-      notificationPayloadFile = "Example/watchOSSample/SampleWatchAppWatchKitExtension/PushNotificationPayload.apns">
+      launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "0"
          BundleIdentifier = "kd.Shut-Up-Timer"

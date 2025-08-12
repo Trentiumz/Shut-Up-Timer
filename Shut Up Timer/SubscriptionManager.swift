@@ -144,8 +144,6 @@ class SubscriptionManager: ObservableObject {
         
         // No active subscription found
         await MainActor.run {
-            self.currentSubscription = nil
-            self.originalTransactionId = nil
             self.isLoading = false
         }
     }

@@ -15,6 +15,7 @@ struct TimerView<Manager: CurSessionManager>: View {
     
     // access for page transitions
     @EnvironmentObject var router: AppRouter;
+    @EnvironmentObject var liveActivityManager: LiveActivityManager
     @Environment(\.scenePhase) private var scenePhase;
     @Environment(\.managedObjectContext) private var viewContext
     
@@ -59,6 +60,7 @@ struct TimerView<Manager: CurSessionManager>: View {
         )
         
         sessions.addSession(tempSession)
+        liveActivityManager.userFinishedStudying();
         router.toTimerFailed(session: tempSession);
     }
 
@@ -79,6 +81,7 @@ struct TimerView<Manager: CurSessionManager>: View {
         )
         
         sessions.addSession(tempSession)
+        liveActivityManager.userFinishedStudying();
         router.toTimerCompleted(curSession: tempSession);
     }
     

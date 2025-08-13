@@ -172,8 +172,11 @@ struct SettingsView : View {
     
     struct AppBlockSettings: View {
         @EnvironmentObject var settings: Settings;
+        @EnvironmentObject var liveActivitManager: LiveActivityManager
         @State private var showAppPicker = false
         @State private var showMonitorPicker = false
+        @State private var showCountdownPicker = false
+        @State private var showLiveActivityInfo = false
         
         var body: some View {
             VStack {
@@ -199,6 +202,71 @@ struct SettingsView : View {
                         
                         Spacer()
                             .frame(maxHeight: 8)
+                        
+                        HStack {
+                            SettingLabel("Live Activity Countdown")
+                                .layoutPriority(2)
+                            Spacer()
+                                .layoutPriority(-1)
+                            Toggle("", isOn: Binding<Bool>(
+                                get: {
+                                    self.liveActivitManager.settings.isEnabled
+                                },
+                                set: {
+                                    if $0 {
+                                        self.liveActivitManager.enableLiveActivity()
+                                        self.showLiveActivityInfo = true
+                                    } else {
+                                        self.liveActivitManager.disableLiveActivity()
+                                    }
+                                }
+                            ))
+                        }
+                        .alert("Live Activity Enabled", isPresented: $showLiveActivityInfo) {
+                            Button("OK", role: .cancel) { };
+                        } message: {
+                            Text("This automatically creates a live activity countdown from when you last studied.");
+                        }
+
+                        if self.liveActivitManager.settings.isEnabled {
+                            HStack {
+                                SettingLabel("Countdown Time")
+                                    .layoutPriority(2)
+                                Spacer()
+                                    .layoutPriority(-1)
+                                let countdownHours = max(1, Int(self.liveActivitManager.settings.durationParameter / 3600))
+                                Button(action: { showCountdownPicker = true }) {
+                                    StylizedLabel("\(countdownHours) \(countdownHours == 1 ? "hour" : "hours")")
+                                }
+                                .sheet(isPresented: $showCountdownPicker) {
+                                    VStack(spacing: 16) {
+                                        Text("Select Countdown Hours")
+                                            .font(FontTokens.architectsDaughter(size: 22))
+                                            .foregroundColor(ColorTokens.shade700)
+                                        Picker(
+                                            "Hours",
+                                            selection: Binding<Int>(
+                                                get: {
+                                                    countdownHours
+                                                },
+                                                set: { newValue in
+                                                    self.liveActivitManager.userRequestedTimeChange(newDuration: TimeInterval(newValue * 3600))
+                                                }
+                                            )
+                                        ) {
+                                            ForEach(1...2400, id: \.self) { hour in
+                                                Text("\(hour) \(hour == 1 ? "hour" : "hours")").tag(hour)
+                                            }
+                                        }
+                                        .pickerStyle(WheelPickerStyle())
+                                        Button("Done") { showCountdownPicker = false }
+                                            .font(FontTokens.architectsDaughter(size: 20))
+                                            .foregroundColor(ColorTokens.shade700)
+                                    }
+                                    .padding()
+                                }
+                            }
+                        }
                         
                         // TODO: Add app monitoring
                         /*
@@ -323,6 +391,7 @@ struct SettingsPreview : PreviewProvider {
             .environmentObject(SettingsLoader.loadSettings())
             .environmentObject(credManager)
             .environmentObject(CurUser(credManager: credManager))
+            .environmentObject(LiveActivityManager(fastAPIClient: credManager.fastAPI))
         }
     }
     

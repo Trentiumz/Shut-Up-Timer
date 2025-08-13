@@ -8,6 +8,7 @@ struct ContentView: View {
     @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var credManager: CredManager;
     @EnvironmentObject var subscriptionManager: SubscriptionManager;
+    @EnvironmentObject var liveActivityManager: LiveActivityManager
     
     @State var showAlert: Bool = false;
     @State var alertMessage: String = "";
@@ -99,11 +100,16 @@ struct ContentView: View {
             }
         }
         .environmentObject(router)
-        .onAppear{
+        .onAppear {
             if let sessionInProgress = TempSessionLoader.getSession() {
                 // if there is an active session, navigate to the timer
                 let sessionWrapper = CurSessionManagerType(from: sessionInProgress)
-                router.toTimerState(sessionInProgress: sessionWrapper, appReopened: true)
+                router.toTimerState(sessionInProgress: sessionWrapper, liveActivityManager: liveActivityManager, appReopened: true)
+            }
+        }
+        .onAppear {
+            Task {
+                await liveActivityManager.synchronizeLiveActivity()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

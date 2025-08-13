@@ -12,7 +12,7 @@ extension FastAPIClient {
     
     fileprivate func generateComment(endpoint: CommentEndpoint, roastFeatures: RoastGenerator.RoastFeatures) async throws -> String? {
         do {
-            guard await subscriptionManager.originalTransactionId != nil else {
+            guard await subscriptionManager.getTransactionId() != nil else {
                 print("Cannot generate roast, no subscription")
                 return nil
             }
@@ -69,7 +69,7 @@ extension FastAPIClient {
     
     func generateBeckonMessages(roastFeatures: RoastGenerator.RoastFeatures) async throws -> (messages: [String], title: String)? {
         do {
-            guard await subscriptionManager.originalTransactionId != nil else {
+            guard await subscriptionManager.getTransactionId() != nil else {
                 print("Cannot generate beckon messages, no subscription")
                 return nil
             }

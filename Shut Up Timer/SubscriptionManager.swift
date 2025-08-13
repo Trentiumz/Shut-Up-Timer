@@ -22,6 +22,7 @@ class SubscriptionManager: ObservableObject {
     // MARK: - Private Properties
     private var updateListenerTask: Task<Void, Error>? = nil
     private var productsLoaded = false
+    private var initializationTask: Task<Void, Never>? = nil
     
     let transactionIdUpdate = PassthroughSubject<UInt64?, Never>()
     var cancellables = Set<AnyCancellable>()
@@ -29,7 +30,7 @@ class SubscriptionManager: ObservableObject {
     // MARK: - Initialization
     init() {
         updateListenerTask = listenForTransactions()
-        Task {
+        initializationTask = Task {
             isLoading = true
             // Then load products for purchase options
             await loadProducts()
@@ -68,6 +69,14 @@ class SubscriptionManager: ObservableObject {
             }
         }
     }
+
+    /// Returns the original transaction ID after initial loading completes
+    func getTransactionId() async -> UInt64? {
+        if let initializationTask {
+            _ = await initializationTask.value
+        }
+        return originalTransactionId
+    }
     
     /// Purchase a subscription product
     func purchase(_ product: Product) async -> Bool {
@@ -83,7 +92,7 @@ class SubscriptionManager: ObservableObject {
                 case .verified(let transaction):
                     await transaction.finish()
                     // Deliver content to the user
-                    await deliverContent(for: transaction)
+                    self.updateStateForVerifiedTransaction(for: transaction)
                     return true
                     
                 case .unverified(_, let error):
@@ -119,6 +128,7 @@ class SubscriptionManager: ObservableObject {
     /// Check if user is subscribed to any product
     func updateSubscriptionStatus() async {
         isLoading = true
+        print("updating subscription status")
         
         // Check for any active subscription
         for await result in Transaction.currentEntitlements {
@@ -129,6 +139,7 @@ class SubscriptionManager: ObservableObject {
                     // Find the corresponding product
                     if let product = availableProducts.first(where: { $0.id == transaction.productID }) {
                         await MainActor.run {
+                            print("verified subscription")
                             self.currentSubscription = product
                             self.originalTransactionId = transaction.originalID
                             self.isLoading = false
@@ -144,6 +155,7 @@ class SubscriptionManager: ObservableObject {
         
         // No active subscription found
         await MainActor.run {
+            print("couldn't find verified subscription")
             self.isLoading = false
         }
     }
@@ -174,7 +186,7 @@ class SubscriptionManager: ObservableObject {
                 case .verified(let transaction):
                     // Deliver content to the user
                     await transaction.finish()
-                    await self.deliverContent(for: transaction)
+                    await self.updateStateForVerifiedTransaction(for: transaction)
                     
                 case .unverified(_, let error):
                     print("Transaction verification failed: \(error)")
@@ -183,9 +195,11 @@ class SubscriptionManager: ObservableObject {
         }
     }
     
-    private func deliverContent(for transaction: Transaction) async {
-        // Update subscription status when a transaction is completed
-        await updateSubscriptionStatus()
+    private func updateStateForVerifiedTransaction(for transaction: Transaction) {
+        self.currentSubscription = self.availableProducts.first { product in product.id == transaction.productID}
+        if self.currentSubscription != nil {
+            self.originalTransactionId = transaction.originalID
+        }
     }
     
     // MARK: - Helper Methods

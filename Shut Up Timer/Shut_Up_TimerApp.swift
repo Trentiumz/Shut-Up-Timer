@@ -26,11 +26,14 @@ struct Shut_Up_TimerApp: App {
     let curUser: CurUser
     let roastInformation = RoastInformation.loadRoastInformation()
     
+    let liveActivityManager: LiveActivityManager
+    
     init() {
         // Create credManager with subscriptionManager
         self.credManager = CredManager(subscriptionManager: subscriptionManager)
         // Create curUser with the same credManager instance
         self.curUser = CurUser(credManager: credManager)
+        self.liveActivityManager = LiveActivityManager(fastAPIClient: credManager.fastAPI)
         
         requestFamilyPermissions()
         // Set up subscriptions
@@ -111,6 +114,7 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(postLoader)
                 .environmentObject(subscriptionManager)
                 .environmentObject(roastInformation)
+                .environmentObject(liveActivityManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .preferredColorScheme(.light)
         }

@@ -21,7 +21,7 @@ class NotificationService: UNNotificationServiceExtension {
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
         if let bestAttemptContent = bestAttemptContent {
-            let userInfo = bestAttemptContent.userInfo
+            let _ = bestAttemptContent.userInfo
             
             // Check for interval notification beckon
             processMutableNotificaiton(content: bestAttemptContent)

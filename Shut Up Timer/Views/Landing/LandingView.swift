@@ -45,6 +45,7 @@ struct LandingView: View {
     
     @EnvironmentObject var router: AppRouter
     @EnvironmentObject var settings: Settings
+    @EnvironmentObject var liveActivityManager: LiveActivityManager
     
     var isTimer: Bool {
         if selectedScreen == .tasksAndTimer, case .other = taskTopScreen {
@@ -164,7 +165,7 @@ struct LandingView: View {
                     Group {
                         Button(action: {
                             let managerType: TimerManagerType = settings.difficulty == .asian ? .noLeave : .appBlock
-                            router.toTimerState(params: settings.timerParam, todoID: taskTimerSelectorTodo?.id ?? UUID(), managerType: managerType)
+                            router.toTimerState(params: settings.timerParam, todoID: taskTimerSelectorTodo?.id ?? UUID(), managerType: managerType, liveActivityManager: liveActivityManager)
                         }) {
                             Text("START THE GRIND")
                                 .font(FontTokens.architectsDaughter(size: 24))

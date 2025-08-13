@@ -68,7 +68,7 @@ class FastAPIClient {
         
         // Add originalTransactionId to params if available
         var requestParams = params
-        if let originalTransactionId = await subscriptionManager.originalTransactionId {
+        if let originalTransactionId = await subscriptionManager.getTransactionId() {
             requestParams["originalTransactionId"] = Config.useDebugSubscription ? Config.debugSubscriptionString : "\(originalTransactionId)"
         }
         
@@ -116,7 +116,7 @@ class FastAPIClient {
     
     func verifySubscription() async -> Bool {
         do {
-            guard await subscriptionManager.originalTransactionId != nil else {
+            guard await subscriptionManager.getTransactionId() != nil else {
                 return false
             }
             
@@ -385,7 +385,7 @@ class FastAPIClient {
     func linkSubscription() async throws -> Bool{
         print("linking subscription...")
         do {
-            guard await subscriptionManager.originalTransactionId != nil else {
+            guard await subscriptionManager.getTransactionId() != nil else {
                 print("No subscriptions, cannot link subscriptions")
                 return false
             }

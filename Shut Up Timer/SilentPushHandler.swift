@@ -1,6 +1,35 @@
 import Foundation
+import ActivityKit
 import UserNotifications
 struct SilentPushHandler {
+    static func handleLiveActivityNotification() {
+        print("Handling live activity notification")
+        
+        // Generate roast features
+        let persistenceController = PersistenceController.shared
+        let viewContext = persistenceController.container.viewContext
+        
+        // Send request to backend
+        Task {
+            // Initialize CredManager and FastAPI
+            let subscriptionManager = await SubscriptionManager()
+            let credManager = CredManager(subscriptionManager: subscriptionManager)
+            let roastResult = await RoastGenerator.generateLiveActivityRoast(viewContext: viewContext, credManager: credManager)
+            
+            if let roastResult = roastResult {
+                Task {
+                    for activity in Activity<Procrastination_Countdown_ActivityAttributes>.activities {
+                        let content = Procrastination_Countdown_ActivityAttributes.ContentState(curRoast: roastResult, duration: activity.content.state.duration)
+                        await activity.update(ActivityContent(state: content, staleDate: nil))
+                    }
+                    _ = await credManager.fastAPI.scheduleLiveActivityNotification(timestamp: Date().addingTimeInterval(30 * 60))
+                }
+            } else {
+                print("Roast Result was nil for live activity")
+            }
+        }
+    }
+    
     static func handleIntervalNotificationBeckon() {
         print("Handling interval notification beckon")
         

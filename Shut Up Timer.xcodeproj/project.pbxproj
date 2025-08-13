@@ -18,6 +18,9 @@
 		734C17C62E26D31E00C6B5A7 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 734C17C52E26D31E00C6B5A7 /* FirebaseAppCheck */; };
 		736830832E0E4A96006BFDFD /* SwiftUIReorderableForEach in Frameworks */ = {isa = PBXBuildFile; productRef = 736830822E0E4A96006BFDFD /* SwiftUIReorderableForEach */; };
 		736831EB2E1178BB006BFDFD /* Notification Remote Receival.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		73A5DB022E4BD6BA0074EFC0 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A5DB012E4BD6BA0074EFC0 /* WidgetKit.framework */; };
+		73A5DB042E4BD6BA0074EFC0 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73A5DB032E4BD6BA0074EFC0 /* SwiftUI.framework */; };
+		73A5DB152E4BD6BC0074EFC0 /* Procrastination_Countdown_ActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 73A5DB002E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		73D04C542E3E9E190051B807 /* Device Activity Report.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = 73D04C482E3E9E190051B807 /* Device Activity Report.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		73D04EA02E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
 		73D04EA12E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */; };
@@ -54,6 +57,13 @@
 			remoteGlobalIDString = 736831E32E1178BB006BFDFD;
 			remoteInfo = "Notification Remote Receival";
 		};
+		73A5DB132E4BD6BC0074EFC0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C93EE9822DB5133700E5080A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73A5DAFF2E4BD6BA0074EFC0;
+			remoteInfo = Procrastination_Countdown_ActivityExtension;
+		};
 		73D04C522E3E9E190051B807 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C93EE9822DB5133700E5080A /* Project object */;
@@ -84,6 +94,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				73A5DB152E4BD6BC0074EFC0 /* Procrastination_Countdown_ActivityExtension.appex in Embed Foundation Extensions */,
 				736831EB2E1178BB006BFDFD /* Notification Remote Receival.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
@@ -105,6 +116,10 @@
 /* Begin PBXFileReference section */
 		734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Notification Remote Receival.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		73A5DB002E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Procrastination_Countdown_ActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		73A5DB012E4BD6BA0074EFC0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		73A5DB032E4BD6BA0074EFC0 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		73A5DDC22E4D18550074EFC0 /* Procrastination_Countdown_ActivityExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Procrastination_Countdown_ActivityExtension.entitlements; sourceTree = "<group>"; };
 		73D04C482E3E9E190051B807 /* Device Activity Report.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = "Device Activity Report.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Shut Up Timer DEV.storekit"; sourceTree = "<group>"; };
 		C93EE98A2DB5133700E5080A /* Shut Up Timer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Shut Up Timer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,6 +159,37 @@
 			);
 			target = 736831E32E1178BB006BFDFD /* Notification Remote Receival */;
 		};
+		73A5DB192E4BD6BC0074EFC0 /* Exceptions for "Procrastination_Countdown_Activity" folder in "Procrastination_Countdown_ActivityExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 73A5DAFF2E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension */;
+		};
+		73A5DB1B2E4BDAC40074EFC0 /* Exceptions for "Shut Up Timer" folder in "Procrastination_Countdown_ActivityExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"ArchitectsDaughter-Regular.ttf",
+				Tokens/ColorTokens.swift,
+				Tokens/FontTokens.swift,
+				Tokens/ImageAssets.swift,
+			);
+			target = 73A5DAFF2E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension */;
+		};
+		73A5DB202E4BDE560074EFC0 /* Exceptions for "Procrastination_Countdown_Activity" folder in "Shut Up Timer" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ProcrastinationCountdownActivityAttributes.swift,
+			);
+			target = C93EE9892DB5133700E5080A /* Shut Up Timer */;
+		};
+		73A5DB262E4BEDF80074EFC0 /* Exceptions for "Shut Up Timer" folder in "Device Activity Report" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"ArchitectsDaughter-Regular.ttf",
+			);
+			target = 73D04C472E3E9E190051B807 /* Device Activity Report */;
+		};
 		73D04C582E3E9E190051B807 /* Exceptions for "Device Activity Report" folder in "Device Activity Report" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -176,6 +222,15 @@
 			path = "Notification Remote Receival";
 			sourceTree = "<group>";
 		};
+		73A5DB052E4BD6BA0074EFC0 /* Procrastination_Countdown_Activity */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				73A5DB202E4BDE560074EFC0 /* Exceptions for "Procrastination_Countdown_Activity" folder in "Shut Up Timer" target */,
+				73A5DB192E4BD6BC0074EFC0 /* Exceptions for "Procrastination_Countdown_Activity" folder in "Procrastination_Countdown_ActivityExtension" target */,
+			);
+			path = Procrastination_Countdown_Activity;
+			sourceTree = "<group>";
+		};
 		73D04C492E3E9E190051B807 /* Device Activity Report */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -190,6 +245,8 @@
 				73F6AEC22E318754003A7BB5 /* Exceptions for "Shut Up Timer" folder in "Shut Up TimerTests" target */,
 				73F6AEC32E318754003A7BB5 /* Exceptions for "Shut Up Timer" folder in "Shut Up TimerUITests" target */,
 				736831F32E1180DD006BFDFD /* Exceptions for "Shut Up Timer" folder in "Notification Remote Receival" target */,
+				73A5DB262E4BEDF80074EFC0 /* Exceptions for "Shut Up Timer" folder in "Device Activity Report" target */,
+				73A5DB1B2E4BDAC40074EFC0 /* Exceptions for "Shut Up Timer" folder in "Procrastination_Countdown_ActivityExtension" target */,
 			);
 			path = "Shut Up Timer";
 			sourceTree = "<group>";
@@ -223,6 +280,15 @@
 				73DDFE602E46A79400765EB5 /* FirebaseAppCheck in Frameworks */,
 				73DDFE5C2E46A79400765EB5 /* FirebaseAnalyticsCore in Frameworks */,
 				73DDFE6D2E46A82200765EB5 /* Functions in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73A5DAFD2E4BD6BA0074EFC0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73A5DB042E4BD6BA0074EFC0 /* SwiftUI.framework in Frameworks */,
+				73A5DB022E4BD6BA0074EFC0 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,12 +340,14 @@
 		C93EE9812DB5133700E5080A = {
 			isa = PBXGroup;
 			children = (
+				73A5DDC22E4D18550074EFC0 /* Procrastination_Countdown_ActivityExtension.entitlements */,
 				73D04E9F2E43D6200051B807 /* Shut Up Timer DEV.storekit */,
 				C93EE98C2DB5133700E5080A /* Shut Up Timer */,
 				C93EE99D2DB5133A00E5080A /* Shut Up TimerTests */,
 				C93EE9A72DB5133A00E5080A /* Shut Up TimerUITests */,
 				736831E52E1178BB006BFDFD /* Notification Remote Receival */,
 				73D04C492E3E9E190051B807 /* Device Activity Report */,
+				73A5DB052E4BD6BA0074EFC0 /* Procrastination_Countdown_Activity */,
 				C9E74AA22DC3B3F40014B994 /* Frameworks */,
 				C93EE98B2DB5133700E5080A /* Products */,
 				734C17B72E26D29200C6B5A7 /* GoogleService-Info.plist */,
@@ -294,6 +362,7 @@
 				C93EE9A42DB5133A00E5080A /* Shut Up TimerUITests.xctest */,
 				736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */,
 				73D04C482E3E9E190051B807 /* Device Activity Report.appex */,
+				73A5DB002E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -301,6 +370,8 @@
 		C9E74AA22DC3B3F40014B994 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				73A5DB012E4BD6BA0074EFC0 /* WidgetKit.framework */,
+				73A5DB032E4BD6BA0074EFC0 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -342,6 +413,28 @@
 			productReference = 736831E42E1178BB006BFDFD /* Notification Remote Receival.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		73A5DAFF2E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73A5DB162E4BD6BC0074EFC0 /* Build configuration list for PBXNativeTarget "Procrastination_Countdown_ActivityExtension" */;
+			buildPhases = (
+				73A5DAFC2E4BD6BA0074EFC0 /* Sources */,
+				73A5DAFD2E4BD6BA0074EFC0 /* Frameworks */,
+				73A5DAFE2E4BD6BA0074EFC0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				73A5DB052E4BD6BA0074EFC0 /* Procrastination_Countdown_Activity */,
+			);
+			name = Procrastination_Countdown_ActivityExtension;
+			packageProductDependencies = (
+			);
+			productName = Procrastination_Countdown_ActivityExtension;
+			productReference = 73A5DB002E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		73D04C472E3E9E190051B807 /* Device Activity Report */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 73D04C552E3E9E190051B807 /* Build configuration list for PBXNativeTarget "Device Activity Report" */;
@@ -379,6 +472,7 @@
 			dependencies = (
 				736831EA2E1178BB006BFDFD /* PBXTargetDependency */,
 				73D04C532E3E9E190051B807 /* PBXTargetDependency */,
+				73A5DB142E4BD6BC0074EFC0 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C93EE98C2DB5133700E5080A /* Shut Up Timer */,
@@ -463,6 +557,9 @@
 					736831E32E1178BB006BFDFD = {
 						CreatedOnToolsVersion = 16.4;
 					};
+					73A5DAFF2E4BD6BA0074EFC0 = {
+						CreatedOnToolsVersion = 16.4;
+					};
 					73D04C472E3E9E190051B807 = {
 						CreatedOnToolsVersion = 16.4;
 					};
@@ -504,6 +601,7 @@
 				C93EE9A32DB5133A00E5080A /* Shut Up TimerUITests */,
 				736831E32E1178BB006BFDFD /* Notification Remote Receival */,
 				73D04C472E3E9E190051B807 /* Device Activity Report */,
+				73A5DAFF2E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -515,6 +613,13 @@
 			files = (
 				73D04EA02E43D6200051B807 /* Shut Up Timer DEV.storekit in Resources */,
 				734C17BB2E26D29200C6B5A7 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73A5DAFE2E4BD6BA0074EFC0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,6 +668,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		73A5DAFC2E4BD6BA0074EFC0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		73D04C442E3E9E190051B807 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -598,6 +710,11 @@
 			isa = PBXTargetDependency;
 			target = 736831E32E1178BB006BFDFD /* Notification Remote Receival */;
 			targetProxy = 736831E92E1178BB006BFDFD /* PBXContainerItemProxy */;
+		};
+		73A5DB142E4BD6BC0074EFC0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73A5DAFF2E4BD6BA0074EFC0 /* Procrastination_Countdown_ActivityExtension */;
+			targetProxy = 73A5DB132E4BD6BC0074EFC0 /* PBXContainerItemProxy */;
 		};
 		73D04C532E3E9E190051B807 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -665,6 +782,66 @@
 				);
 				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "kd.Shut-Up-Timer.Notification-Remote-Receival";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		73A5DB172E4BD6BC0074EFC0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Procrastination_Countdown_ActivityExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_TEAM = 77B86BDTVZ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Procrastination_Countdown_Activity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Procrastination_Countdown_Activity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "kd.Shut-Up-Timer.Procrastination-Countdown-Activity";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		73A5DB182E4BD6BC0074EFC0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Procrastination_Countdown_ActivityExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_TEAM = 77B86BDTVZ;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Procrastination_Countdown_Activity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Procrastination_Countdown_Activity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.3;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "kd.Shut-Up-Timer.Procrastination-Countdown-Activity";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -866,6 +1043,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Shut Up Timer";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take photos.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -906,6 +1084,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Shut Up Timer";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to take photos.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1006,6 +1185,15 @@
 			buildConfigurations = (
 				736831EE2E1178BB006BFDFD /* Debug */,
 				736831EF2E1178BB006BFDFD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73A5DB162E4BD6BC0074EFC0 /* Build configuration list for PBXNativeTarget "Procrastination_Countdown_ActivityExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73A5DB172E4BD6BC0074EFC0 /* Debug */,
+				73A5DB182E4BD6BC0074EFC0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -14,20 +14,25 @@
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
+		<key>Procrastination_Countdown_ActivityExtension.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
+		</dict>
 		<key>Promises (Playground).xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>5</integer>
 		</dict>
 		<key>Shut Up Timer No Storekit Config.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>4</integer>
+			<integer>3</integer>
 		</dict>
 		<key>Shut Up Timer Release Debug Build.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>5</integer>
+			<integer>4</integer>
 		</dict>
 		<key>Shut Up Timer.xcscheme_^#shared#^_</key>
 		<dict>
@@ -38,6 +43,11 @@
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>736831E32E1178BB006BFDFD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>73A5DAFF2E4BD6BA0074EFC0</key>
 		<dict>
 			<key>primary</key>
 			<true/>

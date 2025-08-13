@@ -31,6 +31,7 @@ class NoLeaveSessionManager : CurSessionManager {
     @Published var tasks: [TempTaskLog];
     
     var lastActiveUpdate: Date;
+    var lastUpdate: Date
     
     @Published var curTodo: UUID;
     @Published var status: SessionStatus;
@@ -49,6 +50,7 @@ class NoLeaveSessionManager : CurSessionManager {
         curParam: TimerParam,
         tasks: [TempTaskLog],
         lastActiveUpdate: Date,
+        lastUpdate: Date,
         curTodo: UUID,
         status: SessionStatus
     ) {
@@ -57,6 +59,7 @@ class NoLeaveSessionManager : CurSessionManager {
         self.curParam = curParam
         self.tasks = tasks
         self.lastActiveUpdate = lastActiveUpdate
+        self.lastUpdate = lastUpdate
         self.curTodo = curTodo
         self.status = status
         
@@ -111,6 +114,9 @@ class NoLeaveSessionManager : CurSessionManager {
         if status == .succeeded || status == .failed {
             return;
         }
+        
+        lastUpdate = Date()
+        
         if phase != .active {
             return;
         }
@@ -174,7 +180,7 @@ class NoLeaveSessionManager : CurSessionManager {
     // ------------------ CODING AND DECODING ------------------
     
     enum CodingKeys: String, CodingKey {
-        case initialParam, startTime, curParam, tasks, lastActiveUpdate, curTodo, status
+        case initialParam, startTime, curParam, tasks, lastActiveUpdate, lastUpdate, curTodo, status
     }
 
     required init(from decoder: Decoder) throws {
@@ -184,6 +190,7 @@ class NoLeaveSessionManager : CurSessionManager {
         curParam = try container.decode(TimerParam.self, forKey: .curParam)
         tasks = try container.decode([TempTaskLog].self, forKey: .tasks)
         lastActiveUpdate = try container.decode(Date.self, forKey: .lastActiveUpdate)
+        lastUpdate = try container.decode(Date.self, forKey: .lastUpdate)
         curTodo = try container.decode(UUID.self, forKey: .curTodo)
         status = try container.decode(SessionStatus.self, forKey: .status)
         

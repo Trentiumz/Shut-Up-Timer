@@ -204,7 +204,7 @@ fileprivate struct WeeksCalculatorScreen: View {
     
     var body: some View {
         DarkContentContainer {
-            VStack(spacing: 20) {
+            VStack(spacing: 0) {
                 Spacer()
                 
                 CalculatorComponent(value: _weeksNeeded, placeholder: "How many weeks do you need to accomplish this goal?", onEnter: onNext, onCancel: onCancel)
@@ -369,7 +369,8 @@ struct CalculatorComponent: View {
                  }
                 .frame(width: geometry.size.width, height: geometry.size.height)
             }
-            .layoutPriority(1)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .layoutPriority(2)
             
             Spacer()
                 .frame(height: 4)
@@ -393,6 +394,7 @@ struct CalculatorComponent: View {
                     )
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private let calculatorButtons = [
@@ -427,22 +429,22 @@ struct CalculatorComponent: View {
 
 // MARK: - Supporting Views
 struct DarkContentContainer<Content: View>: View {
-    let content: Content
+    let content: () -> Content
     
-    init(@ViewBuilder content: () -> Content) {
-        self.content = content()
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content
     }
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.black)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.white, lineWidth: 2)
-                )
-                .overlay(content)
-        }
+        RoundedRectangle(cornerRadius: 20)
+            .fill(Color.black)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white, lineWidth: 2)
+            )
+            .overlay(
+                content()
+            )
     }
 }
 

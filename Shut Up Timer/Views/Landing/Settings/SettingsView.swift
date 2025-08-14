@@ -114,6 +114,18 @@ struct SettingsView : View {
     
     struct TimerSettings: View {
         @EnvironmentObject var settings: Settings;
+        @State private var showDifficultyOverlay: Bool = false
+        
+        func getDifficultyDescription(_ difficulty: Difficulty) -> String {
+            switch difficulty {
+            case .easy:
+                return "A simple timer, easy for tracking!"
+            case .medium:
+                return "Blocks apps, but will fail you if you close the app >:("
+            case .asian:
+                return "Don't u dare leave this app."
+            }
+        }
         
         var body : some View {
             VStack {
@@ -133,6 +145,7 @@ struct SettingsView : View {
                                     StylizedOption(onClick: { 
                                         let oldValue = settings.difficulty.rawValue
                                         settings.difficulty = difficulty
+                                        showDifficultyOverlay = true
                                         AnalyticsManager.shared.trackDifficultyChanged(from: oldValue, to: difficulty.rawValue)
                                     }, text: difficulty.rawValue.capitalized)
                                         .tag(difficulty)
@@ -140,7 +153,16 @@ struct SettingsView : View {
                             } label: {
                                 StylizedLabel(settings.difficulty.rawValue.capitalized)
                             }
+                            
                         }
+                        .alert("Difficulty Changed", isPresented: $showDifficultyOverlay) {
+                            Button("Got it!", role: .cancel) { }
+                        } message: {
+                            Text(getDifficultyDescription(settings.difficulty))
+                        }
+                        
+                        // TODO: add back roast levels
+                        /*
                         // roast level selector
                         HStack {
                             SettingLabel("Roast Level")
@@ -158,6 +180,8 @@ struct SettingsView : View {
                                 StylizedLabel(settings.roastLevel.rawValue.capitalized)
                             }
                         }
+                         */
+                         
                         TimerSelector(param: $settings.timerParam)
                         Spacer()
                     }

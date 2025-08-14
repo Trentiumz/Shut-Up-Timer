@@ -17,12 +17,21 @@ struct SilentPushHandler {
             let roastResult = await RoastGenerator.generateLiveActivityRoast(viewContext: viewContext, credManager: credManager)
             
             if let roastResult = roastResult {
-                Task {
-                    for activity in Activity<Procrastination_Countdown_ActivityAttributes>.activities {
-                        let content = Procrastination_Countdown_ActivityAttributes.ContentState(curRoast: roastResult, duration: activity.content.state.duration)
-                        await activity.update(ActivityContent(state: content, staleDate: nil))
+                switch(LiveActivitySessionWrapper.shared.currentSession) {
+                case .countdown(let startTime, let duration, let sentAmber):
+                    Task {
+                        var foundActivity = false
+                        for activity in Activity<Procrastination_Countdown_ActivityAttributes>.activities {
+                            let content = Procrastination_Countdown_ActivityAttributes.ContentState(curRoast: roastResult, duration: activity.content.state.duration)
+                            await activity.update(ActivityContent(state: content, staleDate: nil))
+                            if !foundActivity {
+                                _ = await credManager.fastAPI.scheduleLiveActivityNotification(timestamp: Date().addingTimeInterval(30 * 60))
+                                foundActivity = true
+                            }
+                        }
                     }
-                    _ = await credManager.fastAPI.scheduleLiveActivityNotification(timestamp: Date().addingTimeInterval(30 * 60))
+                default:
+                    print("No live activity detected")
                 }
             } else {
                 print("Roast Result was nil for live activity")
@@ -33,14 +42,14 @@ struct SilentPushHandler {
     static func handleIntervalNotificationBeckon() {
         print("Handling interval notification beckon")
         
-        // Generate roast features
-        let persistenceController = PersistenceController.shared
-        let viewContext = persistenceController.container.viewContext
-        let featureGenerator = RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
-        let roastFeatures = featureGenerator.generateFeatures()
-        
         // Send request to backend
         Task {
+            // Generate roast features
+            let persistenceController = PersistenceController.shared
+            let viewContext = persistenceController.container.viewContext
+            let featureGenerator = await RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
+            let roastFeatures = await featureGenerator.generateFeatures()
+            
             do {
                 // Initialize CredManager and FastAPI
                 let subscriptionManager = await SubscriptionManager()

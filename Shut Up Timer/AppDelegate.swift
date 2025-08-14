@@ -38,9 +38,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                      fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         print("Received silent push with userInfo: \(userInfo)")
         
-        if let flag = userInfo["flag"] as? String,
-            flag == "send-interval-notification-beckon" {
-            SilentPushHandler.handleIntervalNotificationBeckon()
+        if let flag = userInfo["flag"] as? String {
+            if flag == "send-interval-notification-beckon" {
+                SilentPushHandler.handleIntervalNotificationBeckon()
+            } else if flag == "live_activity_notif" {
+                SilentPushHandler.handleLiveActivityNotification()
+            }
         }
         
         // Fetch data or schedule local notifications here

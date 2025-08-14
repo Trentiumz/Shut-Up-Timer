@@ -2,7 +2,7 @@ import CoreData
 
 extension RoastGenerator {
     static func generateCatchphrase(viewContext: NSManagedObjectContext, credManager: CredManager) async -> String? {
-        let featureGenerator = RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
+        let featureGenerator = await RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
         do {
             let newRoast = try await credManager.fastAPI.generateCatchphrase(roastFeatures: featureGenerator.generateFeatures())
             if let newRoast = newRoast {
@@ -18,7 +18,7 @@ extension RoastGenerator {
     }
     
     static func generateRoast(viewContext: NSManagedObjectContext, credManager: CredManager) async -> String? {
-        let featureGenerator = RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
+        let featureGenerator = await RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
         do {
             let newRoast = try await credManager.fastAPI.generateRoast(roastFeatures: featureGenerator.generateFeatures())
             if let newRoast = newRoast {
@@ -36,7 +36,7 @@ extension RoastGenerator {
     /// Generates a live activity-appropriate roast - for now, it is the same as the catchphrase.
     static func generateLiveActivityRoast(viewContext: NSManagedObjectContext, credManager: CredManager) async -> String? {
         // TODO: focus more on the time since we last studied
-        let featureGenerator = RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
+        let featureGenerator = await RoastGenerator.RoastFeatureGenerator(viewContext: viewContext)
         do {
             let newRoast = try await credManager.fastAPI.generateCatchphrase(roastFeatures: featureGenerator.generateFeatures())
             if let newRoast = newRoast {

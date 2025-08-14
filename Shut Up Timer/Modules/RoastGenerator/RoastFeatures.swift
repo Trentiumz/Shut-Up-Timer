@@ -6,6 +6,7 @@ extension RoastGenerator {
         let recentRoasts: [String]?
     }
     
+    @MainActor
     class RoastFeatureGenerator {
         var viewContext: NSManagedObjectContext
         init(viewContext: NSManagedObjectContext) {

@@ -19,16 +19,6 @@ struct Procrastination_Countdown_ActivityLiveActivity: Widget {
             let progress: (Date) -> Double = { now in
                 max(0, min(1, now.timeIntervalSince(start) / duration))
             }
-            let timeSinceStr: (Date) -> String = { now in
-                let formatter = DateComponentsFormatter()
-                formatter.allowedUnits = [.hour, .minute, .second]
-                formatter.unitsStyle = .positional
-                formatter.zeroFormattingBehavior = .dropLeading
-                
-                let timeInterval = max(0, now.timeIntervalSince(start))
-                let formattedTime = formatter.string(from: timeInterval) ?? "0:00"
-                return "\(formattedTime) since last studying"
-            }
             
             // UI constants (kept small to suit lock screen height, scale via Dynamic Type if needed)
             let barHeight: CGFloat = 8
@@ -44,17 +34,17 @@ struct Procrastination_Countdown_ActivityLiveActivity: Widget {
                     // Header row
                     HStack() {
                         
-                        Image(uiImage: UIImage(named: "friend-qr-bg-image-93")!)
-                            .renderingMode(.original)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .background(Color.red)
+                        // TODO: Add a picture back
+//                        Image(uiImage: UIImage(named: "friend-qr-bg-image-93")!)
+//                            .resizable()
+//                            .scaledToFit()
+//                            .frame(width: 110, height: 110)
+//                            .background(Color.red)
                         
                         Spacer()
                         
                         VStack {
-                            Text("Patience Level")
+                            Text("Mother's Patience Lvl")
                                 .font(FontTokens.architectsDaughter(size: titleSize))
                                 .foregroundColor(.white)
                                 .lineLimit(1)
@@ -74,45 +64,50 @@ struct Procrastination_Countdown_ActivityLiveActivity: Widget {
                     }
                     
                     // Progress bar
-                    TimelineView(.periodic(from: .now, by: 1.0)) { timeline in
+                    VStack(alignment: .center, spacing: 0) {
                         HStack {
                             Text(timeString(from: start))
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.white)
-                            VStack {
-                                ZStack(alignment: .leading) {
-                                    Capsule()
-                                        .fill(Color.white.opacity(0.25))
-                                        .frame(height: barHeight)
-                                    
-                                    // Fill scaled by progress without GeometryReader
-                                    Capsule()
-                                        .fill(Color(red: 0.48, green: 0.12, blue: 0.12))
-                                        .frame(height: barHeight)
-                                         .scaleEffect(x: progress(timeline.date), y: 1, anchor: .leading)
-                                         .animation(.easeInOut(duration: 0.2), value: progress(timeline.date))
-                                    
-                                    // Subtle indicator cap
-                                    Capsule()
-                                        .fill(Color.white.opacity(0.7))
-                                        .frame(width: 4, height: barHeight)
-                                        .overlay(Color.clear)
-                                        .scaleEffect(x: 1, y: 1, anchor: .leading)
-                                        .overlay(
-                                            Capsule().fill(Color.clear)
-                                        )
-                                        .mask(
-                                            HStack { Spacer(); Rectangle().frame(width: 4) }
-                                        )
-                                         .scaleEffect(x: progress(timeline.date), y: 1, anchor: .leading)
-                                }
-                                Text(timeSinceStr(Date()))
-                                     .font(FontTokens.architectsDaughter(size: 10))
-                                     .foregroundColor(.white)
+                            ZStack(alignment: .leading) {
+                                Capsule()
+                                    .fill(Color.white.opacity(0.25))
+                                    .frame(height: barHeight)
+                                
+                                // Fill scaled by progress without GeometryReader
+                                Capsule()
+                                    .fill(Color(red: 0.48, green: 0.12, blue: 0.12))
+                                    .frame(height: barHeight)
+                                    .scaleEffect(x: progress(Date()), y: 1, anchor: .leading)
+                                    .animation(.easeInOut(duration: 0.2), value: progress(Date()))
+                                
+                                // Subtle indicator cap
+                                Capsule()
+                                    .fill(Color.white.opacity(0.7))
+                                    .frame(width: 4, height: barHeight)
+                                    .overlay(Color.clear)
+                                    .scaleEffect(x: 1, y: 1, anchor: .leading)
+                                    .overlay(
+                                        Capsule().fill(Color.clear)
+                                    )
+                                    .mask(
+                                        HStack { Spacer(); Rectangle().frame(width: 4) }
+                                    )
+                                    .scaleEffect(x: progress(Date()), y: 1, anchor: .leading)
                             }
                             Text(timeString(from: end))
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.white)
+                        }
+                        HStack(spacing: 0) {
+                            Text("Time since last session: ")
+                                .font(FontTokens.architectsDaughter(size: 10))
+                                .foregroundColor(.white)
+                                .minimumScaleFactor(0.7)
+                            Text(timerInterval: start...end, pauseTime: end, countsDown: false)
+                                .font(FontTokens.architectsDaughter(size: 10))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: 50, alignment: .leading)
                         }
                     }
                 }

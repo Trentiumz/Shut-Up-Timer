@@ -71,6 +71,9 @@ struct FeedbackView: View {
             Background()
             if let curPP = curUser.userPublicProfile {
                 VStack(spacing: 0) {
+                    
+                    // TODO: stars removed
+                    /*
                     // AVG Star Rating
                     VStack(spacing: 4) {
                         Text("AVG Star Rating")
@@ -93,6 +96,7 @@ struct FeedbackView: View {
                             .offset(y: 4)
                             .clipped()
                     }
+                     */
                     
                     Spacer()
                         .frame(maxHeight: 36)

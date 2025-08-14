@@ -157,10 +157,14 @@ fileprivate struct SummaryScreen: View {
                         }
                         .padding(.leading, 30)
                         .layoutPriority(1)
-                        
+                                                
                         Spacer()
-                            .frame(maxHeight: 25)
                         
+                        // TODO: Add patience level
+                        /*
+                         Spacer()
+                             .frame(maxHeight: 25)
+                         
                         // Patience Level
                         VStack(alignment: .leading, spacing: 5) {
                             Text("Patience Level")
@@ -187,6 +191,7 @@ fileprivate struct SummaryScreen: View {
                             .frame(height: 20)
                         }
                         .layoutPriority(1)
+                         */
                     }
                     .padding(15)
                 )

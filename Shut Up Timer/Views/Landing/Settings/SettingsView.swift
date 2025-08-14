@@ -201,6 +201,7 @@ struct SettingsView : View {
         @State private var showMonitorPicker = false
         @State private var showCountdownPicker = false
         @State private var showLiveActivityInfo = false
+        @State private var showDailyReminderInfo = false
         
         var body: some View {
             VStack {
@@ -223,6 +224,34 @@ struct SettingsView : View {
                             }
                         }
                         .familyActivityPicker(isPresented: $showAppPicker, selection: $settings.defaultBlockedApps)
+                        
+                        Spacer()
+                            .frame(maxHeight: 8)
+                        
+                        HStack {
+                            SettingLabel("Daily Reminder")
+                                .layoutPriority(2)
+                            Spacer()
+                                .layoutPriority(-1)
+                            Toggle("", isOn: Binding<Bool>(
+                                get: {
+                                    self.settings.dailyBeckon
+                                },
+                                set: {
+                                    if $0 {
+                                        self.settings.dailyBeckon = true
+                                        self.showDailyReminderInfo = true
+                                    } else {
+                                        self.settings.dailyBeckon = false
+                                    }
+                                }
+                            ))
+                        }
+                        .alert("Daily Reminder Enabled", isPresented: $showDailyReminderInfo) {
+                            Button("OK", role: .cancel) { };
+                        } message: {
+                            Text("Every day, you might get a couple messages telling you to study :)")
+                        }
                         
                         Spacer()
                             .frame(maxHeight: 8)

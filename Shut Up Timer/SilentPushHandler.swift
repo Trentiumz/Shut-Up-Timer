@@ -18,15 +18,17 @@ struct SilentPushHandler {
             
             if let roastResult = roastResult {
                 switch(LiveActivitySessionWrapper.shared.currentSession) {
-                case .countdown(let startTime, let duration, let sentAmber):
-                    Task {
-                        var foundActivity = false
-                        for activity in Activity<Procrastination_Countdown_ActivityAttributes>.activities {
-                            let content = Procrastination_Countdown_ActivityAttributes.ContentState(curRoast: roastResult, duration: activity.content.state.duration)
-                            await activity.update(ActivityContent(state: content, staleDate: nil))
-                            if !foundActivity {
-                                _ = await credManager.fastAPI.scheduleLiveActivityNotification(timestamp: Date().addingTimeInterval(30 * 60))
-                                foundActivity = true
+                case .countdown(let startTime, let duration, _):
+                    if startTime <= Date() && Date() <= startTime.addingTimeInterval(duration) {
+                        Task {
+                            var foundActivity = false
+                            for activity in Activity<Procrastination_Countdown_ActivityAttributes>.activities {
+                                let content = Procrastination_Countdown_ActivityAttributes.ContentState(curRoast: roastResult, duration: activity.content.state.duration)
+                                await activity.update(ActivityContent(state: content, staleDate: nil))
+                                if !foundActivity {
+                                    _ = await credManager.fastAPI.scheduleLiveActivityNotification(timestamp: Date().addingTimeInterval(30 * 60))
+                                    foundActivity = true
+                                }
                             }
                         }
                     }
@@ -41,6 +43,11 @@ struct SilentPushHandler {
     
     static func handleIntervalNotificationBeckon() {
         print("Handling interval notification beckon")
+        let settings = SettingsLoader.loadSettings()
+        guard settings.dailyBeckon else {
+            print("User turned off daily beckon notification")
+            return
+        }
         
         // Send request to backend
         Task {

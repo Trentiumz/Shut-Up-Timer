@@ -25,7 +25,7 @@
     "_developerTeamID" : "77B86BDTVZ",
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 776197668.62726605,
+    "_lastSynchronizedDate" : 776902549.61436999,
     "_locale" : "en_US",
     "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "CAN",
@@ -46,7 +46,10 @@
         "name" : "Verification"
       },
       {
-        "current" : null,
+        "current" : {
+          "index" : 2,
+          "type" : "generic"
+        },
         "enabled" : false,
         "name" : "App Store Sync"
       },
@@ -93,7 +96,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "4.99",
+          "displayPrice" : "9.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "6749550466",
@@ -121,7 +124,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "44.99",
+          "displayPrice" : "79.99",
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "6749550663",

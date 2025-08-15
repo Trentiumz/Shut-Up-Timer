@@ -198,7 +198,7 @@ class LiveActivityManager: ObservableObject {
             do {
                 let activity = try Activity.request(
                     attributes: attributes,
-                    content: ActivityContent(state: content, staleDate: nil),
+                    content: ActivityContent(state: content, staleDate: startTime.addingTimeInterval(duration)),
                     pushType: .token
                 )
                 print("Live Activity created successfully: \(activity.id)")

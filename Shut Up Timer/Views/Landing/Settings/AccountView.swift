@@ -103,25 +103,25 @@ struct AccountView : View {
                         VStack(spacing: 20) {
                             LocalUserInfoView()
                             
-                            // Posts Section
-                            HStack {
-                                SectionStripe("Posts >")
-                                Spacer()
-                            }.padding(.horizontal, 20)
-                            
-                            ViewThatFits {
-                                HorizontalScroller(data: postAlbums, itemWidth: 140, numItems: 2) { album in
-                                    Button(action: { router.toPostView(month: album.1, year: album.2) }) {
-                                        FormattedImages.DisappointmentBook(album.0, width: 140)
-                                    }
-                                }
-                                HorizontalScroller(data: postAlbums, itemWidth: 120, numItems: 2) { album in
-                                    Button(action: { router.toPostView(month: album.1, year: album.2) }) {
-                                        FormattedImages.DisappointmentBook(album.0, width: 120)
-                                    }
-                                }
-                            }
-                            .edgesIgnoringSafeArea(.horizontal)
+                            // TODO: Add back Posts Section
+//                            HStack {
+//                                SectionStripe("Posts >")
+//                                Spacer()
+//                            }.padding(.horizontal, 20)
+//                            
+//                            ViewThatFits {
+//                                HorizontalScroller(data: postAlbums, itemWidth: 140, numItems: 2) { album in
+//                                    Button(action: { router.toPostView(month: album.1, year: album.2) }) {
+//                                        FormattedImages.DisappointmentBook(album.0, width: 140)
+//                                    }
+//                                }
+//                                HorizontalScroller(data: postAlbums, itemWidth: 120, numItems: 2) { album in
+//                                    Button(action: { router.toPostView(month: album.1, year: album.2) }) {
+//                                        FormattedImages.DisappointmentBook(album.0, width: 120)
+//                                    }
+//                                }
+//                            }
+//                            .edgesIgnoringSafeArea(.horizontal)
                             
                             HStack {
                                 SectionStripe("Friends >")
@@ -299,10 +299,10 @@ struct LocalUserInfoView : View {
 }
 
 #Preview {
-    let credManager = CredManager()
+    let credManager = CredManager(subscriptionManager: SubscriptionManager())
     AccountView()
         .environmentObject(AppRouter())
         .environmentObject(SettingsLoader.loadSettings())
-        .environmentObject(CredManager())
+        .environmentObject(credManager)
         .environmentObject(CurUser(credManager: credManager))
 }

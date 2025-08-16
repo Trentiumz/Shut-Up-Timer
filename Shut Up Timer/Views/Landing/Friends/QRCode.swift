@@ -79,5 +79,5 @@ fileprivate func generateQRCode(from string: String) -> UIImage? {
 
 #Preview("QR Code with Friend Code") {
     FriendQRInvite(data: "shutuptimer://friend-invite?code=123456789", userProfile: UserProfileResponse(friend_code: "123456", is_public_profile_visible: true, sessions: []))
-        .environmentObject(CurUser(credManager: CredManager()))
+        .environmentObject(CurUser(credManager: CredManager(subscriptionManager: SubscriptionManager())))
 }

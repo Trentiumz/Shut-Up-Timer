@@ -8,13 +8,18 @@ struct TaskListView: View {
     let onAddTask: (() -> Void)
     let onRedeem: (Goal) -> Void
     
-    @FocusState.Binding var todoTitleEditID: UUID?
+    enum FocusItem: Hashable {
+        case taskTitle(id: UUID)
+        case goalTitle(id: UUID)
+        case iqGoal(id: UUID)
+    }
+    @FocusState.Binding var fieldFocusItem: FocusItem?
     
-    init(onAddGoal: @escaping () -> Void, onAddTask: @escaping () -> Void, onRedeem: @escaping (Goal) -> Void, todoTitleEditID: FocusState<UUID?>.Binding) {
+    init(onAddGoal: @escaping () -> Void, onAddTask: @escaping () -> Void, onRedeem: @escaping (Goal) -> Void, fieldFocusItem: FocusState<FocusItem?>.Binding) {
         self.onAddGoal = onAddGoal
         self.onAddTask = onAddTask
         self.onRedeem = onRedeem
-        self._todoTitleEditID = todoTitleEditID
+        self._fieldFocusItem = fieldFocusItem
     }
     
     enum TaskTab: CaseIterable {
@@ -75,11 +80,11 @@ struct TaskListView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             if selectedTab == .myTasks {
                                 TasksContentView(
-                                    todoTitleEditID: _todoTitleEditID
+                                    fieldFocusItem: _fieldFocusItem
                                 )
                             } else {
                                 DreamGoalsContentView(
-                                    textEditID: _todoTitleEditID,
+                                    fieldFocusItem: _fieldFocusItem,
                                     onRedeem: onRedeem
                                 )
                             }
@@ -127,7 +132,7 @@ struct TasksContentView: View {
         entity: Todo.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Todo.order, ascending: true),
                           NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
-        predicate: NSPredicate(format: "active == YES AND goal.redeemed == NO")
+        predicate: NSPredicate(format: "active == YES AND goal.active == true AND goal.redeemedAt == nil")
     ) private var activeTodos: FetchedResults<Todo>
     
     // Fetch goals using @FetchRequest for automatic updates
@@ -135,10 +140,10 @@ struct TasksContentView: View {
         entity: Goal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true),
                           NSSortDescriptor(keyPath: \Goal.created, ascending: false)],
-        predicate: NSPredicate(format: "redeemed == false")
+        predicate: NSPredicate(format: "redeemedAt == nil")
     ) private var goals: FetchedResults<Goal>
     
-    @FocusState.Binding var todoTitleEditID: UUID?
+    @FocusState.Binding var fieldFocusItem: TaskListView.FocusItem?
     
     var body: some View {
         return List {
@@ -146,7 +151,7 @@ struct TasksContentView: View {
                 TaskRowView(
                     task: task,
                     availableGoals: goals,
-                    textEditID: _todoTitleEditID
+                    fieldFocusItem: _fieldFocusItem
                 )
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -191,7 +196,7 @@ struct TaskRowView: View {
     @State var rectState = ExpandingGestureState(maxOffset: 60)
     @State private var showingGoalPicker = false
     
-    @FocusState.Binding var textEditID: UUID?
+    @FocusState.Binding var fieldFocusItem: TaskListView.FocusItem?
     
     @Environment(\.taskSelectable) var taskSelectable
     
@@ -234,7 +239,7 @@ struct TaskRowView: View {
                     }
                 }
             ))
-            .focused(_textEditID, equals: task.id)
+            .focused(_fieldFocusItem, equals: .taskTitle(id: task.id ?? UUID()))
             .font(FontTokens.architectsDaughter(size: 12))
             .foregroundColor(.black)
             .strikethrough(task.completed)
@@ -341,16 +346,16 @@ struct DreamGoalsContentView: View {
         entity: Goal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true),
                           NSSortDescriptor(keyPath: \Goal.created, ascending: false)],
-        predicate: NSPredicate(format: "redeemed == false")
+        predicate: NSPredicate(format: "redeemedAt == nil")
     ) private var goals: FetchedResults<Goal>
     
-    @FocusState.Binding var textEditID: UUID?
+    @FocusState.Binding var fieldFocusItem: TaskListView.FocusItem?
     let onRedeem: (Goal) -> Void
     
     var body: some View {
         return List {
             ForEach(goals, id: \.id) { goal in
-                DreamGoalRowView(goal: goal, textEditID: _textEditID, onRedeem: onRedeem)
+                DreamGoalRowView(goal: goal, fieldFocusItem: _fieldFocusItem, onRedeem: onRedeem)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
             }
@@ -378,8 +383,10 @@ struct DreamGoalRowView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     @State var rectState = ExpandingGestureState(maxOffset: 60)
+    @State private var iqGoalText: String = ""
     
-    @FocusState.Binding var textEditID: UUID?
+    @FocusState.Binding var fieldFocusItem: TaskListView.FocusItem?
+    @State var isEditingGoal: Bool = false
     let onRedeem: (Goal) -> Void
     
     func getGoalColor(curColor: String?) -> Color {
@@ -388,6 +395,18 @@ struct DreamGoalRowView: View {
         } else {
             return ColorTokens.red300
         }
+    }
+    
+    func submitIQGoalChange() {
+        if let iqGoalValue = Double(iqGoalText), iqGoalValue > 0 {
+            goal.addProgress(iqCurrent: goal.lastGoalProgress?.iqCurrent ?? 0, iqGoal: iqGoalValue)
+            do {
+                try viewContext.save()
+            } catch {
+                print("Failed to save IQ goal: \(error)")
+            }
+        }
+        fieldFocusItem = nil
     }
     
     var body: some View {
@@ -416,7 +435,7 @@ struct DreamGoalRowView: View {
                         }
                     }
                 ))
-                .focused(_textEditID, equals: goal.id)
+                .focused(_fieldFocusItem, equals: .goalTitle(id: goal.id ?? UUID()))
                 .font(FontTokens.architectsDaughter(size: 12))
                 .foregroundColor(.black)
                 .lineLimit(1)
@@ -426,9 +445,45 @@ struct DreamGoalRowView: View {
                     .contentShape(Rectangle())
                     .layoutPriority(-1)
                 
-                Text("[\(Int(goal.lastGoalProgress?.iqGoal ?? 0)) IQ Points]")
-                    .font(FontTokens.architectsDaughter(size: 10))
-                    .foregroundColor(ColorTokens.shade600)
+                // IQ Goal editing section
+                if isEditingGoal {
+                    TextField("Enter new IQ Goal", text: $iqGoalText)
+                        .focused(_fieldFocusItem, equals: .iqGoal(id: goal.id ?? UUID()))
+                        .font(FontTokens.architectsDaughter(size: 10))
+                        .multilineTextAlignment(.trailing)
+                        .foregroundColor(ColorTokens.shade600)
+                        .keyboardType(.numberPad)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    submitIQGoalChange()
+                                    // Dismiss keyboard
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                }
+                            }
+                        }
+                        .onSubmit {
+                            submitIQGoalChange()
+                        }
+                        .onAppear {
+                            iqGoalText = String(Int(goal.lastGoalProgress?.iqGoal ?? 0))
+                            fieldFocusItem = .iqGoal(id: goal.id ?? UUID())
+                        }
+                        .onChange(of: fieldFocusItem) { val in
+                            if val != .iqGoal(id: goal.id ?? UUID()) {
+                                isEditingGoal = false
+                                iqGoalText = ""
+                            }
+                        }
+                } else {
+                    Text("[\(Int(goal.lastGoalProgress?.iqCurrent ?? 0)) / \(Int(goal.lastGoalProgress?.iqGoal ?? 0)) IQ Points]")
+                        .font(FontTokens.architectsDaughter(size: 10))
+                        .foregroundColor(ColorTokens.shade600)
+                        .onTapGesture {
+                            isEditingGoal = true
+                        }
+                }
                 
                 // Show "Redeem" button for incomplete tasks only when not editing
                 TaskSelectText(text: "Redeem")
@@ -523,13 +578,11 @@ func addSampleDataToDB(viewContext: NSManagedObjectContext) {
         goal.created = Date()
         goal.goal = "Ace Math!"
         goal.id = UUID()
-        goal.redeemed = false
         
         let goal2 = Goal(context: viewContext)
         goal2.created = Date()
         goal2.goal = "Ace Math #2!"
         goal2.id = UUID()
-        goal2.redeemed = false
         
         let todo1 = Todo(context: viewContext)
         todo1.id = UUID()
@@ -541,7 +594,6 @@ func addSampleDataToDB(viewContext: NSManagedObjectContext) {
         todo2.id = UUID()
         todo2.todo = "Todo 1"
         todo2.created = Date()
-        todo2.goal = nil
         
         try viewContext.save()
         viewContext.processPendingChanges()
@@ -554,10 +606,10 @@ func addSampleDataToDB(viewContext: NSManagedObjectContext) {
 struct TaskListViewPreview : PreviewProvider {
     struct Wrapper : View {
         @Environment(\.managedObjectContext) private var viewContext
-        @FocusState var todoTitleEditID: UUID?
+        @FocusState var fieldFocusItem: TaskListView.FocusItem?
         
         var body : some View {
-            TaskListView(onAddGoal: {}, onAddTask: {}, onRedeem: { _ in }, todoTitleEditID: $todoTitleEditID)
+            TaskListView(onAddGoal: {}, onAddTask: {}, onRedeem: { _ in }, fieldFocusItem: $fieldFocusItem)
                 .onAppear {
                     addSampleDataToDB(viewContext: viewContext)
                 }

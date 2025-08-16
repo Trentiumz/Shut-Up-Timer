@@ -12,7 +12,7 @@ class CredManager: ObservableObject {
     @Published var supabaseClient: SupabaseClient
     let fastAPI: FastAPIClient
     
-    init() {
+    init(subscriptionManager: SubscriptionManager) {
         // Initialize Supabase client with temporary keys
         let supabaseClient = SupabaseClient(
             supabaseURL: URL(string: Config.supabaseURL)!,
@@ -20,7 +20,7 @@ class CredManager: ObservableObject {
         )
         self.supabaseClient = supabaseClient;
         
-        fastAPI = FastAPIClient(supabase: supabaseClient)
+        fastAPI = FastAPIClient(supabase: supabaseClient, subscriptionManager: subscriptionManager)
             
         // Try to get the current session
         Task {
@@ -46,11 +46,34 @@ class CredManager: ObservableObject {
         print("Sending token??")
         if self.loggedIn {
             if let token = UserDefaults.standard.string(forKey: "device-token-push") {
-                print("Sending token \(token)")
+                print("Sending token \(token), sending subscription too")
                 Task {
                     try await self.supabaseClient.rpc("set_apn", params: ["new_apn": token]).execute()
+                    let _ = try await self.fastAPI.linkSubscription()
+                    
+                    // Also send roast information
+                    await sendRoastInformation()
                 }
             }
+        }
+    }
+    
+    private func sendRoastInformation() async {
+        let persistenceController = PersistenceController.shared
+        
+        let viewContext = persistenceController.container.viewContext
+        let infoGenerator = RoastGenerator.RoastInformationGenerator(viewContext: viewContext)
+        let roastInformation = infoGenerator.generateInformation()
+        
+        do {
+            let success = try await self.fastAPI.sendRoastInformation(roastInformation)
+            if success {
+                print("Successfully sent roast information to backend")
+            } else {
+                print("Failed to send roast information to backend")
+            }
+        } catch {
+            print("Error sending roast information: \(error)")
         }
     }
 

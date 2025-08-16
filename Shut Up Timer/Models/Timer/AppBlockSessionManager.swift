@@ -114,7 +114,7 @@ class AppBlockSessionManager : CurSessionManager {
     }
     
     func appReopen() {
-        // For AppBlock, fail the user instantly when app is reopened
+        // fail the user when they reopen the app because that means they weren't here!
         failTimer()
     }
     

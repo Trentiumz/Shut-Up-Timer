@@ -203,6 +203,6 @@ struct LocalPostListView: View {
     AccountPostView(month: Calendar.current.component(.month, from: Date()),
                    year: Calendar.current.component(.year, from: Date()))
         .environmentObject(PostLoader.loadPostLoader())
-        .environmentObject(CredManager())
-        .environmentObject(CurUser(credManager: CredManager()))
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
+        .environmentObject(CurUser(credManager: CredManager(subscriptionManager: SubscriptionManager())))
 }

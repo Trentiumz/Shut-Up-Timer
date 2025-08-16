@@ -16,6 +16,8 @@ struct AddFeedbackView: View {
                 HStack(alignment: .center, spacing: 8) {
                     PFPDisplay(url: curUser.profile_picture, width: 40, height: 40)
                     
+                    // TODO: Stars was removed
+                    /*
                     HStack(spacing: 2) {
                         ForEach(1...5, id: \.self) { i in
                             Image(systemName: (curStars ?? 0) >= i ? "star.fill" : "star")
@@ -29,6 +31,7 @@ struct AddFeedbackView: View {
                                 }
                         }
                     }
+                     */
                     
                     Spacer()
                     
@@ -59,7 +62,7 @@ struct AddFeedbackView: View {
                             if success {
                                 await MainActor.run {
                                     withAnimation {
-                                        curStars = 0;
+                                        curStars = nil
                                         curResponse = "";
                                     }
                                     onAdded();

@@ -114,6 +114,18 @@ struct SettingsView : View {
     
     struct TimerSettings: View {
         @EnvironmentObject var settings: Settings;
+        @State private var showDifficultyOverlay: Bool = false
+        
+        func getDifficultyDescription(_ difficulty: Difficulty) -> String {
+            switch difficulty {
+            case .easy:
+                return "A simple timer, easy for tracking!"
+            case .medium:
+                return "Blocks apps, but will fail you if you close the app >:("
+            case .asian:
+                return "Don't u dare leave this app."
+            }
+        }
         
         var body : some View {
             VStack {
@@ -133,6 +145,7 @@ struct SettingsView : View {
                                     StylizedOption(onClick: { 
                                         let oldValue = settings.difficulty.rawValue
                                         settings.difficulty = difficulty
+                                        showDifficultyOverlay = true
                                         AnalyticsManager.shared.trackDifficultyChanged(from: oldValue, to: difficulty.rawValue)
                                     }, text: difficulty.rawValue.capitalized)
                                         .tag(difficulty)
@@ -140,7 +153,16 @@ struct SettingsView : View {
                             } label: {
                                 StylizedLabel(settings.difficulty.rawValue.capitalized)
                             }
+                            
                         }
+                        .alert("Difficulty Changed", isPresented: $showDifficultyOverlay) {
+                            Button("Got it!", role: .cancel) { }
+                        } message: {
+                            Text(getDifficultyDescription(settings.difficulty))
+                        }
+                        
+                        // TODO: add back roast levels
+                        /*
                         // roast level selector
                         HStack {
                             SettingLabel("Roast Level")
@@ -158,6 +180,8 @@ struct SettingsView : View {
                                 StylizedLabel(settings.roastLevel.rawValue.capitalized)
                             }
                         }
+                         */
+                         
                         TimerSelector(param: $settings.timerParam)
                         Spacer()
                     }
@@ -172,7 +196,12 @@ struct SettingsView : View {
     
     struct AppBlockSettings: View {
         @EnvironmentObject var settings: Settings;
+        @EnvironmentObject var liveActivitManager: LiveActivityManager
         @State private var showAppPicker = false
+        @State private var showMonitorPicker = false
+        @State private var showCountdownPicker = false
+        @State private var showLiveActivityInfo = false
+        @State private var showDailyReminderInfo = false
         
         var body: some View {
             VStack {
@@ -194,6 +223,118 @@ struct SettingsView : View {
                                 StylizedLabel("Select")
                             }
                         }
+                        .familyActivityPicker(isPresented: $showAppPicker, selection: $settings.defaultBlockedApps)
+                        
+                        Spacer()
+                            .frame(maxHeight: 8)
+                        
+                        HStack {
+                            SettingLabel("Daily Reminder")
+                                .layoutPriority(2)
+                            Spacer()
+                                .layoutPriority(-1)
+                            Toggle("", isOn: Binding<Bool>(
+                                get: {
+                                    self.settings.dailyBeckon
+                                },
+                                set: {
+                                    if $0 {
+                                        self.settings.dailyBeckon = true
+                                        self.showDailyReminderInfo = true
+                                    } else {
+                                        self.settings.dailyBeckon = false
+                                    }
+                                }
+                            ))
+                        }
+                        .alert("Daily Reminder Enabled", isPresented: $showDailyReminderInfo) {
+                            Button("OK", role: .cancel) { };
+                        } message: {
+                            Text("Every day, you might get a couple messages telling you to study :)")
+                        }
+                        
+                        Spacer()
+                            .frame(maxHeight: 8)
+                        
+                        HStack {
+                            SettingLabel("Live Activity Countdown")
+                                .layoutPriority(2)
+                            Spacer()
+                                .layoutPriority(-1)
+                            Toggle("", isOn: Binding<Bool>(
+                                get: {
+                                    self.liveActivitManager.settings.isEnabled
+                                },
+                                set: {
+                                    if $0 {
+                                        self.liveActivitManager.enableLiveActivity()
+                                        self.showLiveActivityInfo = true
+                                    } else {
+                                        self.liveActivitManager.disableLiveActivity()
+                                    }
+                                }
+                            ))
+                        }
+                        .alert("Live Activity Enabled", isPresented: $showLiveActivityInfo) {
+                            Button("OK", role: .cancel) { };
+                        } message: {
+                            Text("This automatically creates a live activity countdown from when you last studied.");
+                        }
+
+                        if self.liveActivitManager.settings.isEnabled {
+                            HStack {
+                                SettingLabel("Countdown Time")
+                                    .layoutPriority(2)
+                                Spacer()
+                                    .layoutPriority(-1)
+                                let countdownHours = max(1, Int(self.liveActivitManager.settings.durationParameter / 3600))
+                                Button(action: { showCountdownPicker = true }) {
+                                    StylizedLabel("\(countdownHours) \(countdownHours == 1 ? "hour" : "hours")")
+                                }
+                                .sheet(isPresented: $showCountdownPicker) {
+                                    VStack(spacing: 16) {
+                                        Text("Select Countdown Hours")
+                                            .font(FontTokens.architectsDaughter(size: 22))
+                                            .foregroundColor(ColorTokens.shade700)
+                                        Picker(
+                                            "Hours",
+                                            selection: Binding<Int>(
+                                                get: {
+                                                    countdownHours
+                                                },
+                                                set: { newValue in
+                                                    self.liveActivitManager.userRequestedTimeChange(newDuration: TimeInterval(newValue * 3600))
+                                                }
+                                            )
+                                        ) {
+                                            ForEach(1...2400, id: \.self) { hour in
+                                                Text("\(hour) \(hour == 1 ? "hour" : "hours")").tag(hour)
+                                            }
+                                        }
+                                        .pickerStyle(WheelPickerStyle())
+                                        Button("Done") { showCountdownPicker = false }
+                                            .font(FontTokens.architectsDaughter(size: 20))
+                                            .foregroundColor(ColorTokens.shade700)
+                                    }
+                                    .padding()
+                                }
+                            }
+                        }
+                        
+                        // TODO: Add app monitoring
+                        /*
+                        // App blocking selector
+                        HStack {
+                            SettingLabel("Apps to Monitor")
+                            Spacer()
+                            Button(action: {
+                                showMonitorPicker = true
+                            }) {
+                                StylizedLabel("Select")
+                            }
+                        }
+                        .familyActivityPicker(isPresented: $showMonitorPicker, selection: $settings.appsToMonitor)
+                         */
                         
                         Spacer()
                     }
@@ -202,34 +343,6 @@ struct SettingsView : View {
                     .padding(.top, 5)
                     .padding(.bottom, 5)
                 }.frame(width: 350, height: 240)
-            }
-            .sheet(isPresented: $showAppPicker) {
-                AppBlockPickerModal(selection: $settings.defaultBlockedApps)
-            }
-        }
-    }
-    
-    struct AppBlockPickerModal: View {
-        @Binding var selection: FamilyActivitySelection
-        @Environment(\.dismiss) private var dismiss
-        
-        var body: some View {
-            NavigationView {
-                VStack {
-                    FamilyActivityPicker(selection: $selection)
-                        .padding()
-                }
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationBarBackButtonHidden(true)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") {
-                            dismiss()
-                        }
-                        .font(FontTokens.architectsDaughter(size: 18))
-                        .foregroundColor(ColorTokens.shade700)
-                    }
-                }
             }
         }
     }
@@ -323,7 +436,7 @@ struct SettingsPreview : PreviewProvider {
     struct Wrapper : View {
         @State var userPublicProfile: UserPublicProfileResponse? = nil;
         @State var userProfile: UserProfileResponse? = nil;
-        var credManager = CredManager()
+        var credManager = CredManager(subscriptionManager: SubscriptionManager())
         
         var body : some View {
             SettingsView()
@@ -331,6 +444,7 @@ struct SettingsPreview : PreviewProvider {
             .environmentObject(SettingsLoader.loadSettings())
             .environmentObject(credManager)
             .environmentObject(CurUser(credManager: credManager))
+            .environmentObject(LiveActivityManager(fastAPIClient: credManager.fastAPI))
         }
     }
     

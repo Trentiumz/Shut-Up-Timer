@@ -12,8 +12,9 @@ enum TopTaskScreen {
 struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
     @Binding private var taskScreen: TopTaskScreen
     @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject private var roastInformation: RoastInformation
     
-    @FocusState var todoTitleEditID: UUID?
+    @FocusState var fieldFocusItem: TaskListView.FocusItem?
     @State private var displayTop: Bool = true
     
     @ViewBuilder var startView: () -> DefaultViewType
@@ -77,7 +78,7 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                         onRedeem: { goal in
                             do {
                                 try withAnimation {
-                                    goal.redeemed = true
+                                    goal.redeemedAt = Date()
                                     try viewContext.save()
                                     taskScreen = .start
                                 }
@@ -118,7 +119,7 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                         taskScreen = .redeem(goal: goal)
                     }
                 },
-                todoTitleEditID: $todoTitleEditID
+                fieldFocusItem: $fieldFocusItem
             )
             .frame(maxHeight: 400)
             .padding(.horizontal, 8)
@@ -132,13 +133,13 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
         .onAppear {
             syncDisplayTop()
         }
-        .onChange(of: todoTitleEditID) { _ in
+        .onChange(of: fieldFocusItem) { _ in
             syncDisplayTop()
         }
     }
     
     func syncDisplayTop() {
-        if todoTitleEditID == nil {
+        if fieldFocusItem == nil {
             withAnimation {
                 displayTop = true
             }
@@ -170,9 +171,11 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
             goal.created = Date()
             goal.goal = temporaryGoal.name
             goal.addProgress(iqCurrent: 0.0, iqGoal: temporaryGoal.iqGoal)
-            goal.redeemed = false
+            goal.redeemedAt = nil
             goal.color = colorToHexString(temporaryGoal.color)
             goal.order = minVal - 1
+            
+            roastInformation.lastCacheableTime[.catchphrase] = Date()
             
             try viewContext.save()
             return true;
@@ -198,6 +201,8 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                 todo.order = Int16(index) // Set order based on position in array
                 todo.goal = tempTask.goal // Link to goal if specified
             }
+            
+            roastInformation.lastCacheableTime[.catchphrase] = Date()
             
             try viewContext.save()
             return true

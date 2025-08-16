@@ -7,6 +7,8 @@ struct ContentView: View {
     @EnvironmentObject var settings: Settings;
     @EnvironmentObject var sessions: SessionLoader;
     @EnvironmentObject var credManager: CredManager;
+    @EnvironmentObject var subscriptionManager: SubscriptionManager;
+    @EnvironmentObject var liveActivityManager: LiveActivityManager
     
     @State var showAlert: Bool = false;
     @State var alertMessage: String = "";
@@ -20,10 +22,28 @@ struct ContentView: View {
         NavigationStack(path:$router.path){
             if(settings.firstTime) {
                 // onboarding
-                OnboardingView(onDone: {
+                OnboardingV2View(onDone: {
                     AnalyticsManager.shared.trackOnboardingComplete()
                     settings.firstTime = false;
                 })
+            } else if(subscriptionManager.currentSubscription == nil) {
+                if subscriptionManager.isLoading {
+                    // Show loading screen while checking subscription status
+                    ZStack {
+                        Color.white.ignoresSafeArea()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .scaleEffect(1.5)
+                            Text("Loading...")
+                                .font(.body)
+                                .foregroundColor(Color("ColorlyShadeShade600"))
+                        }
+                    }
+                } else {
+                    SubscriptionPurchaseView()
+                        .ignoresSafeArea(.keyboard)
+                }
             } else {
                 LandingView()
                     .ignoresSafeArea(.keyboard)
@@ -80,11 +100,16 @@ struct ContentView: View {
             }
         }
         .environmentObject(router)
-        .onAppear{
+        .onAppear {
             if let sessionInProgress = TempSessionLoader.getSession() {
                 // if there is an active session, navigate to the timer
                 let sessionWrapper = CurSessionManagerType(from: sessionInProgress)
-                router.toTimerState(sessionInProgress: sessionWrapper, appReopened: true)
+                router.toTimerState(sessionInProgress: sessionWrapper, liveActivityManager: liveActivityManager, appReopened: true)
+            }
+        }
+        .onAppear {
+            Task {
+                await liveActivityManager.synchronizeLiveActivity()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -140,8 +165,8 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(Settings(firstTime: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20), defaultBlockedApps: FamilyActivitySelection()))
-        .environmentObject(CurUser(credManager: CredManager()))
-        .environmentObject(CredManager())
+        .environmentObject(Settings(firstTime: false, firstTimerCompleted: false, dailyBeckon: false, difficulty: .asian, roastLevel: .med, timerParam: .countdown(seconds: 20), defaultBlockedApps: FamilyActivitySelection(), appsToMonitor: FamilyActivitySelection()))
+        .environmentObject(CurUser(credManager: CredManager(subscriptionManager: SubscriptionManager())))
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
         .environmentObject(AppRouter());
 }

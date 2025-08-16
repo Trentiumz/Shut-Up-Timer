@@ -8,6 +8,7 @@ protocol CurSessionManager: ObservableObject, Codable {
     var curTodo: UUID { get set }
     var status: SessionStatus { get set }
     var managerType: TimerManagerType { get }
+    var lastUpdate: Date { get }
     
     func pause()
     func resume()

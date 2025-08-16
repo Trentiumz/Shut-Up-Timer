@@ -174,5 +174,5 @@ struct FriendCodeAdd : View {
 
 #Preview {
     FriendInvite()
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
 }

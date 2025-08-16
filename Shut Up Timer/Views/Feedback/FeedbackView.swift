@@ -71,6 +71,9 @@ struct FeedbackView: View {
             Background()
             if let curPP = curUser.userPublicProfile {
                 VStack(spacing: 0) {
+                    
+                    // TODO: stars removed
+                    /*
                     // AVG Star Rating
                     VStack(spacing: 4) {
                         Text("AVG Star Rating")
@@ -93,6 +96,7 @@ struct FeedbackView: View {
                             .offset(y: 4)
                             .clipped()
                     }
+                     */
                     
                     Spacer()
                         .frame(maxHeight: 36)
@@ -325,7 +329,7 @@ struct FeedbackPaperView: View {
 
 #Preview {
     FeedbackPaperView(feedback: FeedbackResponse(id: UUID(), user_id: UUID(), feedback: "Hello there!", developer_response: "Hello back!", created_at: Date(), upvotes: 23, user_upvoted: false), onUpvote: {}, onRemoveUpvote: {}, deleteFeedback: {})
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
 //    FeedbackView()
-//        .environmentObject(CredManager())
+//        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
 }

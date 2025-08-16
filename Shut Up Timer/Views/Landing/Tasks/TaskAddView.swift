@@ -18,7 +18,7 @@ struct TaskAddView: View {
         entity: Goal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true),
                           NSSortDescriptor(keyPath: \Goal.created, ascending: false)],
-        predicate: NSPredicate(format: "redeemed == false")
+        predicate: NSPredicate(format: "redeemedAt == nil")
     ) private var goals: FetchedResults<Goal>
     
     var body: some View {

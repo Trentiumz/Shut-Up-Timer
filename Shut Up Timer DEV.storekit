@@ -1,0 +1,155 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "CE6A4A69",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6745527811",
+    "_askToBuyEnabled" : false,
+    "_compatibilityTimeRate" : {
+      "3" : 6
+    },
+    "_developerTeamID" : "77B86BDTVZ",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 776902549.61436999,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "CAN",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : {
+          "index" : 2,
+          "type" : "generic"
+        },
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ],
+    "_timeRate" : 13
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21747969",
+      "localizations" : [
+
+      ],
+      "name" : "Application Access",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6749550466",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "A monthly subscription",
+              "displayName" : "Monthly Access",
+              "locale" : "en_CA"
+            }
+          ],
+          "productID" : "monthly_access_1",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Access",
+          "subscriptionGroupID" : "21747969",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "79.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "6749550663",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "An anually recurring subscription",
+              "displayName" : "Annual Access",
+              "locale" : "en_CA"
+            }
+          ],
+          "productID" : "yearly_access_1",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Yearly Access",
+          "subscriptionGroupID" : "21747969",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

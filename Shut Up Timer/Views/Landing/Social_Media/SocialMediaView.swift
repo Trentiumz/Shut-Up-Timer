@@ -51,7 +51,7 @@ struct SocialMediaView: View {
 
 #Preview {
     SocialMediaView()
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
         .environmentObject(PostLoader.loadPostLoader())
         .environmentObject(SessionLoader())
 }

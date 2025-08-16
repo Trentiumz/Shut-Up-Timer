@@ -17,17 +17,23 @@ struct Shut_Up_TimerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     let persistenceController = PersistenceController.shared
     
-    let notificationManager = NotificationManager()
     let router = AppRouter()
     let settings = SettingsLoader.loadSettings()
-    let credManager = CredManager()
+    let subscriptionManager = SubscriptionManager()
+    let credManager: CredManager
     let postLoader = PostLoader.loadPostLoader()
     let sessions = SessionLoader() // New Core Data wrapper
     let curUser: CurUser
+    let roastInformation = RoastInformation.loadRoastInformation()
+    
+    let liveActivityManager: LiveActivityManager
     
     init() {
+        // Create credManager with subscriptionManager
+        self.credManager = CredManager(subscriptionManager: subscriptionManager)
         // Create curUser with the same credManager instance
         self.curUser = CurUser(credManager: credManager)
+        self.liveActivityManager = LiveActivityManager(fastAPIClient: credManager.fastAPI)
         
         requestFamilyPermissions()
         // Set up subscriptions
@@ -39,6 +45,7 @@ struct Shut_Up_TimerApp: App {
         Task {
             do {
                 try await FamilyControls.AuthorizationCenter.shared.requestAuthorization(for: .individual)
+                
             } catch {
                 print("Authorization failed for family controls: \(error)")
             }
@@ -68,6 +75,31 @@ struct Shut_Up_TimerApp: App {
                 SettingsLoader.saveSettings(updatedSettings)
             }
             .store(in: &settings.cancellables)
+        
+        roastInformation.didChange
+            .sink { updatedRoastInformation in
+                updatedRoastInformation.saveRoastInformation()
+            }
+            .store(in: &roastInformation.cancellables)
+        
+        subscriptionManager.transactionIdUpdate
+            .sink { id in
+                Task {
+                    do {
+                        let success = try await credManager.fastAPI.linkSubscription()
+                        print("Linking subscription result: \(success)")
+                    } catch {
+                        print("Failed to link subscription: \(error)")
+                    }
+                }
+            }
+            .store(in: &subscriptionManager.cancellables)
+        
+        appDelegate.notificationManager.remoteNotificationGranted
+            .sink {
+                credManager.sendTokenToBackend()
+            }
+            .store(in: &appDelegate.notificationManager.cancellables)
     }
     
     var body: some Scene {
@@ -77,9 +109,12 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(settings)
                 .environmentObject(sessions)
                 .environmentObject(credManager)
-                .environmentObject(notificationManager)
+                .environmentObject(appDelegate.notificationManager)
                 .environmentObject(curUser)
                 .environmentObject(postLoader)
+                .environmentObject(subscriptionManager)
+                .environmentObject(roastInformation)
+                .environmentObject(liveActivityManager)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .preferredColorScheme(.light)
         }

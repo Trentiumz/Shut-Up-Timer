@@ -91,5 +91,5 @@ struct LeaderboardView : View {
 
 #Preview {
     LeaderboardView()
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
 }

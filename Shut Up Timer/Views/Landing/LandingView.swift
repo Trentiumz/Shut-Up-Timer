@@ -1,9 +1,9 @@
 import SwiftUI
 
-enum LandingScreen {
+enum LandingScreen: Equatable {
     case tasksAndTimer
 //    case posts
-    case stats
+    case stats(display: StatsView.StatDisplay)
     case settings
     
     func screenName() -> String {
@@ -15,7 +15,7 @@ enum LandingScreen {
         }
     }
     
-    static func from(_ from: LandingScreenOption) -> LandingScreen {
+    func updateOnClick(_ from: LandingScreenOption) -> LandingScreen {
         switch from{
         case .tasks:
                 .tasksAndTimer
@@ -24,7 +24,12 @@ enum LandingScreen {
 //        case .posts:
 //                .posts
         case .stats:
-                .stats
+            switch(self) {
+            case .stats(let display):
+                    .stats(display: display)
+            default:
+                    .stats(display: .stats)
+            }
         case .settings:
                 .settings
         }
@@ -40,6 +45,7 @@ struct LandingView: View {
     
     @EnvironmentObject var router: AppRouter
     @EnvironmentObject var settings: Settings
+    @EnvironmentObject var liveActivityManager: LiveActivityManager
     
     var isTimer: Bool {
         if selectedScreen == .tasksAndTimer, case .other = taskTopScreen {
@@ -47,25 +53,31 @@ struct LandingView: View {
         }
         return false
     }
-    
-        var taskSelectableBehavior: TaskSelectable? {
-            switch(taskTopScreen) {
-            case .other:
-                TaskSelectable(title: "select", onSelect: { todo in
-                    withAnimation {
-                        taskTopScreen = .other
-                        taskTimerSelectorTodo = todo
-                    }
-                })
-            default:
-                TaskSelectable(title: "lock in", onSelect: { todo in
-                    withAnimation {
-                        taskTopScreen = .other
-                        taskTimerSelectorTodo = todo
-                    }
-                })
-            }
+    var isStats: Bool {
+        if case .stats = selectedScreen {
+            return true;
         }
+        return false
+    }
+    
+    var taskSelectableBehavior: TaskSelectable? {
+        switch(taskTopScreen) {
+        case .other:
+            TaskSelectable(title: "select", onSelect: { todo in
+                withAnimation {
+                    taskTopScreen = .other
+                    taskTimerSelectorTodo = todo
+                }
+            })
+        default:
+            TaskSelectable(title: "lock in", onSelect: { todo in
+                withAnimation {
+                    taskTopScreen = .other
+                    taskTimerSelectorTodo = todo
+                }
+            })
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -98,7 +110,17 @@ struct LandingView: View {
                     }
                     .padding(.horizontal, 30)
                 } else {
-                    TopBarView()
+                    let titleType: TopBarView.TitleType = switch(selectedScreen) {
+                    case .stats(.album):
+                            .goBack(action: {
+                                withAnimation {
+                                    selectedScreen = .stats(display: .stats)
+                                }
+                            })
+                    default:
+                            .normal
+                    }
+                    TopBarView(titleType: titleType)
                         .zIndex(5)
                 }
                 
@@ -114,9 +136,19 @@ struct LandingView: View {
 //                        .opacity(selectedScreen == .posts ? 1 : 0)
 //                        .allowsHitTesting(selectedScreen == .posts)
 //                
-                    StatsView().tag(LandingScreenOption.stats)
-                        .opacity(selectedScreen == .stats ? 1 : 0)
-                        .allowsHitTesting(selectedScreen == .stats)
+                    StatsView(statDisplay: Binding<StatsView.StatDisplay>(
+                        get: { switch(selectedScreen) {
+                        case .stats(let display):
+                            display
+                        default:
+                                .stats
+                        }},
+                        set: {
+                            selectedScreen = .stats(display: $0)
+                        }
+                    )).tag(LandingScreenOption.stats)
+                        .opacity(isStats ? 1 : 0)
+                        .allowsHitTesting(isStats)
                 
                     ViewThatFits {
                         AccountView().tag(LandingScreenOption.settings)
@@ -133,7 +165,7 @@ struct LandingView: View {
                     Group {
                         Button(action: {
                             let managerType: TimerManagerType = settings.difficulty == .asian ? .noLeave : .appBlock
-                            router.toTimerState(params: settings.timerParam, todoID: taskTimerSelectorTodo?.id ?? UUID(), managerType: managerType)
+                            router.toTimerState(params: settings.timerParam, todoID: taskTimerSelectorTodo?.id ?? UUID(), managerType: managerType, liveActivityManager: liveActivityManager)
                         }) {
                             Text("START THE GRIND")
                                 .font(FontTokens.architectsDaughter(size: 24))
@@ -155,7 +187,7 @@ struct LandingView: View {
                     BottomBarView(onScreenSelected: { screen in
                         let previousScreen = selectedScreen
                         withAnimation {
-                            selectedScreen = LandingScreen.from(screen)
+                            selectedScreen = selectedScreen.updateOnClick(screen)
                             if screen == .timer {
                                 taskTopScreen = .other
                                 taskTimerSelectorTodo = nil

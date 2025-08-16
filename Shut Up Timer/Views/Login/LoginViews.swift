@@ -447,7 +447,7 @@ struct EmailRegister: View {
 #Preview {
     LoginView(onLoggedIn: {})
         .environmentObject(AppRouter())
-        .environmentObject(CredManager())
+        .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))
     // EmailLogin(onLoggedIn: {}, registerButtonPressed: {})
     // EmailRegister(onRegistered: {}, onBack: {} )
 }

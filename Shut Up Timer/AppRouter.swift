@@ -4,17 +4,19 @@ import SwiftUI;
 class AppRouter: ObservableObject {
     @Published var path = NavigationPath();
     
-    func toTimerState(params: TimerParam, todoID: UUID, managerType: TimerManagerType, startTime: Date = Date()) {
+    func toTimerState(params: TimerParam, todoID: UUID, managerType: TimerManagerType, liveActivityManager: LiveActivityManager, startTime: Date = Date()) {
+        liveActivityManager.userStartedStudying()
         switch managerType {
         case .noLeave:
-            let manager = NoLeaveSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], lastActiveUpdate: Date(), curTodo: todoID, status: .paused)
+            let manager = NoLeaveSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], lastActiveUpdate: Date(), lastUpdate: Date(), curTodo: todoID, status: .paused)
             path.append(PathElement(route: AppRoute.noLeaveTimer(timerModel: TimerViewModel<NoLeaveSessionManager>(from: manager, startPhase: .active, appReopened: false))));
         case .appBlock:
             let manager = AppBlockSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], lastUpdate: Date(), curTodo: todoID, status: .paused)
             path.append(PathElement(route: AppRoute.appBlockTimer(timerModel: TimerViewModel<AppBlockSessionManager>(from: manager, startPhase: .active, appReopened: false))));
         }
     }
-    func toTimerState(sessionInProgress: CurSessionManagerType, appReopened: Bool = true) {
+    func toTimerState(sessionInProgress: CurSessionManagerType, liveActivityManager: LiveActivityManager, appReopened: Bool = true) {
+        liveActivityManager.userStartedStudying()
         switch sessionInProgress {
         case .noLeaveSessionManager(let manager):
             path.append(PathElement(route: AppRoute.noLeaveTimer(timerModel: TimerViewModel<NoLeaveSessionManager>(from: manager, startPhase: .active, appReopened: appReopened))))

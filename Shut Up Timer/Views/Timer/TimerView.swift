@@ -59,6 +59,7 @@ struct TimerView<Manager: CurSessionManager>: View {
             reason: "user_quit"
         )
         
+        viewContext.reset()
         sessions.addSession(tempSession)
         liveActivityManager.userFinishedStudying();
         router.toTimerFailed(session: tempSession);

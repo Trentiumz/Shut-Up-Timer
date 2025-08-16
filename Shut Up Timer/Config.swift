@@ -40,7 +40,7 @@ struct Config {
     
     static let useDebugSubscription: Bool = {
 #if DEBUG
-        return true
+        return false
 #else
         return false
 #endif

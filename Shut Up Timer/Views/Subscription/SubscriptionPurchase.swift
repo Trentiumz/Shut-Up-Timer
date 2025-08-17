@@ -14,7 +14,7 @@ struct SubscriptionPurchaseView: View {
             
             VStack(spacing: 22) {
                 SubscriptionHeaderCard()
-
+                
                 // Subscription options (no container box)
                 VStack(spacing: 12) {
                     if subscriptionManager.isLoading {
@@ -30,13 +30,14 @@ struct SubscriptionPurchaseView: View {
                             SubscriptionChoiceButton(
                                 title: title,
                                 subtitle: subtitle,
+                                introOffer: product.subscription?.introductoryOffer,
                                 selected: selectedProduct?.id == product.id,
                                 onTap: { withAnimation { selectedProduct = product } }
                             )
                         }
                     }
                 }
-
+                
                 // Action button
                 if let selectedProduct = selectedProduct {
                     PopQuizPrimaryButton(title: "Start the Grind!", action: {
@@ -46,23 +47,25 @@ struct SubscriptionPurchaseView: View {
                     .padding(.bottom)
                 }
                 
-                HStack {
-                    Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
-                        .font(FontTokens.architectsDaughter(size: 20))
-                        .foregroundStyle(ColorTokens.shade100)
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
-                    
-                    Spacer()
-                    Spacer()
-                        .frame(maxWidth: 150)
-                    Spacer()
-                    
-                    Link("Privacy Policy", destination: URL(string: "https://www.termsfeed.com/live/697db344-9dd5-430c-9d0d-0df752b8464e")!)
-                        .font(FontTokens.architectsDaughter(size: 20))
-                        .foregroundStyle(ColorTokens.shade100)
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
+                VStack(alignment: .leading) {
+                    HStack {
+                        Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundStyle(ColorTokens.shade100)
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                        
+                        Spacer()
+                        Spacer()
+                            .frame(maxWidth: 150)
+                        Spacer()
+                        
+                        Link("Privacy Policy", destination: URL(string: "https://www.termsfeed.com/live/697db344-9dd5-430c-9d0d-0df752b8464e")!)
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundStyle(ColorTokens.shade100)
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                    }
                 }
                 .padding(.horizontal)
             }
@@ -94,11 +97,12 @@ struct SubscriptionPurchaseView: View {
 struct SubscriptionChoiceButton: View {
     let title: String
     let subtitle: String?
+    let introOffer: Product.SubscriptionOffer?
     let selected: Bool
     let onTap: () -> Void
-
+    
     private let height: CGFloat = 66
-
+    
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
@@ -112,8 +116,8 @@ struct SubscriptionChoiceButton: View {
                             .frame(width: 10, height: 10)
                     }
                 }
-
-                VStack(alignment: .leading, spacing: 2) {
+                
+                VStack(alignment: .leading, spacing: 0) {
                     Text(title)
                         .font(FontTokens.architectsDaughter(size: 18))
                         .foregroundStyle(.white)
@@ -126,7 +130,17 @@ struct SubscriptionChoiceButton: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                     }
+                    if let introOffer = introOffer {
+                        if introOffer.paymentMode == .freeTrial {
+                            Text("INTRO OFFER: Free for \(introOffer.period)")
+                                .font(FontTokens.architectsDaughter(size: 12))
+                                .foregroundStyle(Color.green)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                    }
                 }
+                .padding(.vertical, 3)
                 
                 Spacer()
             }
@@ -158,18 +172,21 @@ struct SubscriptionPurchaseView_Previews: PreviewProvider {
 
 // MARK: - Custom header that mimics Pop Quiz look (without using PopQuizCard)
 struct SubscriptionHeaderCard: View {
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Failure-style banner reused as a container top, but with "Barely Passing"
-
-            ZStack(alignment: .top) {
+            
+            Group {
                 // Lined paper background with slight rotation
                 let paper = FormattedImages.Image134
                 Image(uiImage: paper)
                     .resizable()
                     .scaledToFit()
                     .rotationEffect(.degrees(2))
-                
+            }
+            .overlay(
                 HStack {
                     Spacer()
                     ZStack(alignment: .top) {
@@ -180,7 +197,7 @@ struct SubscriptionHeaderCard: View {
                             .padding(.horizontal, 7)
                             .offset(y: -8)
                             .allowsHitTesting(false)
-
+                        
                         VStack(spacing: 0) {
                             Text("BARELY")
                                 .font(FontTokens.architectsDaughter(size: 15))
@@ -195,8 +212,10 @@ struct SubscriptionHeaderCard: View {
                     }
                     Spacer()
                 }
-                .padding(.top, -40)
-
+                    .padding(.top, -40),
+                alignment: .top
+            )
+            .overlay(
                 // Content: text on left, image with polaroid overlay on right
                 VStack {
                     HStack(alignment: .center, spacing: 12) {
@@ -216,6 +235,19 @@ struct SubscriptionHeaderCard: View {
                                 .foregroundColor(ColorTokens.shade700)
                                 .minimumScaleFactor(0.7)
                                 .lineLimit(1)
+                            
+                            Spacer()
+                                .frame(maxHeight: 20)
+                            
+                            Button(action: {
+                                Task {
+                                    await subscriptionManager.restorePurchases()
+                                }
+                            }) {
+                                Text("Restore Purchases")
+                                    .font(.system(size: 16))
+                                    .fontWeight(.semibold)
+                            }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 48)
@@ -238,10 +270,12 @@ struct SubscriptionHeaderCard: View {
                         )
                     }
                 }
-                .padding(.vertical, 18)
-                .padding(.top, 20)
-                .padding(.trailing, 24)
-            }
+                    .padding(.top, 30)
+                    .padding(.bottom, 15)
+            )
+            .padding(.vertical, 18)
+            .padding(.top, 20)
+            .padding(.trailing, 24)
         }
     }
 }

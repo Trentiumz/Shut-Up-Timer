@@ -208,6 +208,7 @@ class NoLeaveSessionManager : CurSessionManager {
         try container.encode(tasks, forKey: .tasks)
         try container.encode(lastActiveUpdate, forKey: .lastActiveUpdate)
         try container.encode(curTodo, forKey: .curTodo)
+        try container.encode(lastUpdate, forKey: .lastUpdate)
         try container.encode(status, forKey: .status)
     }
 }

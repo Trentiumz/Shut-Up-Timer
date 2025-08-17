@@ -20,6 +20,9 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
     @ViewBuilder var startView: () -> DefaultViewType
     @ViewBuilder var otherView: () -> OtherViewType
     
+    @State private var showCannotRedeem: Bool = false
+    @State private var cannotRedeemMessage: String? = nil
+    
     init(taskScreen: Binding<TopTaskScreen>, @ViewBuilder startView: @escaping () -> DefaultViewType, @ViewBuilder otherView: @escaping () -> OtherViewType) {
         self._taskScreen = taskScreen;
         self.startView = startView
@@ -78,9 +81,23 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                         onRedeem: { goal in
                             do {
                                 try withAnimation {
-                                    goal.redeemedAt = Date()
-                                    try viewContext.save()
-                                    taskScreen = .start
+                                    var canRedeem = false
+                                    if let lastGoalProgress = goal.lastGoalProgress,
+                                       lastGoalProgress.iqCurrent >= lastGoalProgress.iqGoal {
+                                        canRedeem = true
+                                    }
+                                    if goal.lastGoalProgress == nil {
+                                        canRedeem = true
+                                    }
+                                    
+                                    if canRedeem {
+                                        goal.redeemedAt = Date()
+                                        try viewContext.save()
+                                        taskScreen = .start
+                                    } else {
+                                        cannotRedeemMessage = "You haven't reached your goal yet... maybe you should study some more (or click on it to edit)"
+                                        showCannotRedeem = true
+                                    }
                                 }
                             } catch {
                                 print("Error redeeming goal: \(error)")
@@ -92,6 +109,13 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                             }
                         }
                     )
+                    .alert("Can't Redeem Goal!", isPresented: $showCannotRedeem) {
+                        Button("OK") {
+                            showCannotRedeem = false
+                        }
+                    } message: {
+                        Text(cannotRedeemMessage ?? "")
+                    }
                     .padding()
                     .transition(rightwardAnimation)
                 case .other:
@@ -99,9 +123,6 @@ struct TaskView<DefaultViewType: View, OtherViewType: View>: View {
                         .transition(rightwardAnimation)
                 }
             }
-            
-            Spacer()
-                .frame(maxHeight: 15)
             
             TaskListView(
                 onAddGoal: {

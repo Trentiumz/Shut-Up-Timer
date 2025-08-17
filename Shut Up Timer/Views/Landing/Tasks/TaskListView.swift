@@ -132,7 +132,7 @@ struct TasksContentView: View {
         entity: Todo.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Todo.order, ascending: true),
                           NSSortDescriptor(keyPath: \Todo.created, ascending: false)],
-        predicate: NSPredicate(format: "active == YES AND goal.active == true AND goal.redeemedAt == nil")
+        predicate: NSPredicate(format: "active == YES AND (goal == nil OR (goal.active == YES AND goal.redeemedAt == nil))")
     ) private var activeTodos: FetchedResults<Todo>
     
     // Fetch goals using @FetchRequest for automatic updates
@@ -140,7 +140,7 @@ struct TasksContentView: View {
         entity: Goal.entity(),
         sortDescriptors: [NSSortDescriptor(keyPath: \Goal.order, ascending: true),
                           NSSortDescriptor(keyPath: \Goal.created, ascending: false)],
-        predicate: NSPredicate(format: "redeemedAt == nil")
+        predicate: NSPredicate(format: "active == YES AND redeemedAt == nil")
     ) private var goals: FetchedResults<Goal>
     
     @FocusState.Binding var fieldFocusItem: TaskListView.FocusItem?
@@ -201,7 +201,7 @@ struct TaskRowView: View {
     @Environment(\.taskSelectable) var taskSelectable
     
     var goalColor: Color {
-        return task.goal?.realColor ?? ColorTokens.red300
+        return task.goal?.realColor ?? Color.black
     }
     
     var body: some View {
@@ -212,9 +212,9 @@ struct TaskRowView: View {
                 .frame(width: 4 + rectState.dragOffset, height: 20)
                 .overlay(
                     HStack {
-                        Text(task.goal?.goal ?? "Goal")
+                        Text(task.goal?.goal ?? "No Goal")
                             .font(FontTokens.architectsDaughter(size: 14))
-                            .foregroundColor(goodOverlayColor(for: goalColor))
+                            .foregroundColor(task.goal == nil ? Color.red : goodOverlayColor(for: goalColor))
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                             .frame(width: rectState.maxOffset - 12 + 4, alignment: .center) // Fixed size equal to maxOffset
@@ -313,7 +313,7 @@ struct TaskRowView: View {
             }
         }
         .confirmationDialog("Select Goal", isPresented: $showingGoalPicker, titleVisibility: .visible) {
-            Button("None") {
+            Button("No Goal") {
                 task.goal = nil
                 do {
                     try viewContext.save()

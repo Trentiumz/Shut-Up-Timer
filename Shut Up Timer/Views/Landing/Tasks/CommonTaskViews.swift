@@ -9,6 +9,7 @@ struct CommonTaskViews {
                 Text("Cancel >")
                     .font(FontTokens.architectsDaughter(size: 16))
                     .foregroundColor(ColorTokens.shade400)
+                    .minimumScaleFactor(0.6)
                     .padding(.vertical, 8)
             }
         }

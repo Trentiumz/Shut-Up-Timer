@@ -151,7 +151,7 @@ fileprivate struct TaskMakeView: View {
                             .fill(ColorTokens.red300)
                             .frame(width: 60, height: 40)
                         
-                        Text("None")
+                        Text("No Goal")
                             .font(FontTokens.architectsDaughter(size: 16))
                             .foregroundColor(goodOverlayColor(for: ColorTokens.red300))
                             .minimumScaleFactor(0.5)
@@ -184,7 +184,7 @@ fileprivate struct TaskMakeView: View {
             )
         }
         .confirmationDialog("Select Goal", isPresented: $showingGoalPicker, titleVisibility: .visible) {
-            Button("None") {
+            Button("No Goal") {
                 task.goal = nil
             }
             

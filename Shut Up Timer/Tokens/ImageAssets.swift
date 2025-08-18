@@ -72,6 +72,7 @@ enum ImageAssets {
     static let image189 = UIImage(named: "image 189")!
     
     static let popQuiz = UIImage(named: "POP QUIZ")!
+    static let breakOver1 = UIImage(named: "BREAKOVER1")!
 }
 
 fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {
@@ -745,6 +746,8 @@ struct FormattedImages {
     }
     
     static var PopQuiz: UIImage = ImageAssets.popQuiz
+    
+    static var BreakOver1: UIImage = ImageAssets.breakOver1
 }
 
 #Preview {

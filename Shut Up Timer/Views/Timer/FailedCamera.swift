@@ -9,6 +9,9 @@ struct FailedCameraView : View {
     @Environment(\.managedObjectContext) private var viewContext
     let sessionID: UUID;
     
+    @State private var ashamedAlert: Bool = false
+    @State private var ashamedMessage: String? = nil
+    
     var body : some View {
         ZStack {
             Background()
@@ -78,13 +81,23 @@ struct FailedCameraView : View {
                                 print("Failed to update session with image: \(error)")
                             }
                         }
+                        router.toHome()
+                    } else {
+                        ashamedAlert = true
+                        ashamedMessage = "Please select a photo to continue (or press the skip button)"
                     }
-                    router.toHome()
                 })
+                .opacity(image == nil ? 0.5 : 1)
+                
                 Spacer()
                     .frame(maxHeight: 40)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .alert(ashamedMessage ?? "", isPresented: $ashamedAlert) {
+                Button("Fine.") {
+                    ashamedAlert = false
+                }
+            }
         }
     }
 }

@@ -148,6 +148,16 @@ struct TimerView<Manager: CurSessionManager>: View {
                             currentScreen = .giveup
                         }
                     },
+                    onCompleteTap: {
+                        switch(curSession.curParam) {
+                        case .stopwatch(_):
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                curSession.succeedTimer()
+                            }
+                        default:
+                            break
+                        }
+                    },
                     namespace: sharedTimerNamespace,
                     isSource: currentScreen == .mainTimer
                 )
@@ -217,7 +227,7 @@ struct TimerView<Manager: CurSessionManager>: View {
             
             // Track timer start analytics
             let timerType = curSession.managerType == .noLeave ? "no_leave" : "app_block"
-            let duration = curSession.curParam.getTotTime()
+            let duration = curSession.curParam.getTimeRemaining()
             let sessionType = curSession.managerType.rawValue
             AnalyticsManager.shared.trackTimerStart(
                 type: timerType,
@@ -255,51 +265,10 @@ struct TimerView<Manager: CurSessionManager>: View {
     }
 }
 
-struct GiveUpSlider : View {
-    var onGiveUp: () -> Void;
-    var onCancel: () -> Void;
-    
-    var body : some View {
-        ZStack {
-            Background()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            TodoPaper(width: 400)
-            VStack {
-                Spacer()
-                Text("Are you sure you want to give up?")
-                  .font(Font.custom("Architects Daughter", size: 30))
-                  .foregroundColor(ColorTokens.shade700)
-                  .frame(width: 269, alignment: .topLeading)
-                Spacer()
-                    .frame(maxHeight: 70)
-                Slider(onActivate: onGiveUp, message: "Slide to give up")
-                Spacer()
-                    .frame(maxHeight: 40)
-                Button(action: onCancel){
-                    Rectangle()
-                      .foregroundColor(.clear)
-                      .frame(width: 54, height: 54)
-                      .background(ColorTokens.shade300)
-                      .cornerRadius(10)
-                      .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                          .inset(by: 1)
-                          .stroke(ColorTokens.shade700, lineWidth: 2)
-                      )
-                      .overlay(
-                        Text("x")
-                          .font(Font.custom("Architects Daughter", size: 50))
-                          .multilineTextAlignment(.center)
-                          .foregroundColor(ColorTokens.shade700)
-                      )
-                }
-                Spacer()
-                    .frame(maxHeight: 80)
-            }.frame(maxHeight: 600)
-        }
-    }
-}
-
 #Preview {
-    GiveUpSlider(onGiveUp: {}, onCancel: {})
+    TimerView(timerModel: TimerViewModel(from: AppBlockSessionManager(initialParam: .stopwatch(time: 0), startTime: Date(), curParam: .stopwatch(time: 0), tasks: [], lastUpdate: Date(), curTodo: UUID(), status: .paused), startPhase: .active, appReopened: false))
+        .environmentObject(AppRouter())
+        .environmentObject(SettingsLoader.loadSettings())
+        .environmentObject(SessionLoader())
+        .environment(\.managedObjectContext, PersistenceController.shared.container.viewContext)
 }

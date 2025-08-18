@@ -116,12 +116,11 @@ class NoLeaveSessionManager : CurSessionManager {
         }
         
         lastUpdate = Date()
+        let curTime = Date()
         
         if phase != .active {
             return;
         }
-        
-        let curTime = Date()
         
         if status == .inProgress {
             if curTime.timeIntervalSince(lastActiveUpdate) > 30 {
@@ -131,13 +130,7 @@ class NoLeaveSessionManager : CurSessionManager {
             
             // update our task logs using extension
             let timeSince = curTime.timeIntervalSince(lastActiveUpdate);
-            updateTaskLogs(timeSince: timeSince)
-            
-            // update our current state using extension
-            updateCurrentTimeParams(timeSince: timeSince)
-            
-            // check success condition using extension
-            checkSuccessCondition()
+            updateSessionInfo(timeSince: timeSince)
         }
         
         // update our last active update variable
@@ -169,8 +162,8 @@ class NoLeaveSessionManager : CurSessionManager {
             tasks: tasks.map { TempTaskLog(id: $0.id, todoID: $0.todoID, timeIn: $0.timeIn) },
             started: startTime,
             ended: endTime,
-            timeLocked: initialParam.getTotTime() - curParam.getTotTime(),
-            plannedTime: initialParam.getTotTime(),
+            timeLocked: initialParam.getTimeRemaining() - curParam.getTimeRemaining(),
+            plannedTime: initialParam.getTimeRemaining(),
             success: status == .succeeded,
             roast: nil,
             imageName: nil

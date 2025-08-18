@@ -26,22 +26,47 @@ enum RoastLevel : String, Codable, CaseIterable, Identifiable {
 
 enum TimerParam : Codable, Equatable {
     case countdown (seconds: TimeInterval);
+    case stopwatch (time: TimeInterval)
     
-    func getTotTime() -> TimeInterval {
+    func getDisplayTime() -> TimeInterval {
         return switch(self) {
         case .countdown(let seconds):
             seconds
+        case .stopwatch(let time):
+            time
+        }
+    }
+    
+    /// the total time REQUIRED in the session (smaller means more time locked in)
+    func getTimeRemaining() -> TimeInterval {
+        return switch(self) {
+        case .countdown(let seconds):
+            seconds
+        case .stopwatch(let time):
+            -time
+        }
+    }
+    
+    func update(timeSince: TimeInterval) -> TimerParam {
+        return switch(self) {
+        case .countdown(let seconds):
+                .countdown(seconds: seconds - timeSince);
+        case .stopwatch(let time):
+                .stopwatch(time: time + timeSince);
         }
     }
 }
 enum TimerType: String, Codable, CaseIterable, Identifiable {
     case countdown;
+    case stopwatch;
     var id: String {self.rawValue }
 }
 func timerParamToType(param: TimerParam) -> TimerType {
     switch param {
     case .countdown:
         return .countdown;
+    case .stopwatch(_):
+        return .stopwatch;
     }
 }
 

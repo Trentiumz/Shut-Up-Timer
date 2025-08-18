@@ -206,8 +206,8 @@
             filePath = "Shut Up Timer/Models/Timer/AppBlockSessionManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "156"
-            endingLineNumber = "156"
+            startingLineNumber = "154"
+            endingLineNumber = "154"
             landmarkName = "init(from:)"
             landmarkType = "7">
          </BreakpointContent>

@@ -6,13 +6,15 @@ struct SharedTimerDisplay: View {
     let isSource: Bool
     
     private var timeText: String {
-        Utils.formatTime(timerParam.getTotTime())
+        Utils.formatTime(timerParam.getDisplayTime())
     }
     
     private var subText: String {
         switch timerParam {
         case .countdown:
             return "LEFT"
+        case .stopwatch:
+            return "SPENT STUDYING"
         }
     }
     

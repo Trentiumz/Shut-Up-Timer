@@ -12,6 +12,7 @@ protocol CurSessionManager: ObservableObject, Codable {
     
     func pause()
     func resume()
+    /// updates the state of the current session manager; the phase should be the phase of the most recent window, as should the status
     func tick(phase: SceneMiniPhase)
     func updateCurTodo(curTodo: UUID)
     func failTimer()
@@ -24,7 +25,7 @@ protocol CurSessionManager: ObservableObject, Codable {
 // MARK: - CurSessionManager Extensions
 extension CurSessionManager {
     /// Updates task logs with the given time since last update
-    func updateTaskLogs(timeSince: TimeInterval) {
+    fileprivate func updateTaskLogs(timeSince: TimeInterval) {
         guard status == .inProgress else {
             print("ERROR: Cannot update task logs when status is not inProgress, current status: \(status)")
             return
@@ -38,20 +39,17 @@ extension CurSessionManager {
     }
     
     /// Updates the current parameter by subtracting the given time
-    func updateCurrentTimeParams(timeSince: TimeInterval) {
+    fileprivate func updateCurrentTimeParams(timeSince: TimeInterval) {
         guard status == .inProgress else {
             print("ERROR: Cannot update current state when status is not inProgress, current status: \(status)")
             return
         }
         
-        curParam = switch(curParam) {
-        case .countdown(let seconds):
-                .countdown(seconds: seconds - timeSince)
-        }
+        curParam = curParam.update(timeSince: timeSince)
     }
     
     /// Checks success condition and succeeds timer if conditions are met
-    func checkSuccessCondition() {
+    fileprivate func checkSuccessCondition() {
         guard status == .inProgress else {
             print("ERROR: Cannot check success condition when status is not inProgress, current status: \(status)")
             return
@@ -62,17 +60,42 @@ extension CurSessionManager {
             if seconds <= 0 {
                 succeedTimer()
             }
+        case .stopwatch(_):
+            break
         }
+    }
+    
+    /// updates the session information given the time interval since the last "active" update, 
+    func updateSessionInfo(timeSince: TimeInterval) {
+        let isWorking = switch(curParam) {
+        case .countdown(_):
+            true
+        case .stopwatch(_):
+            true
+        }
+        if isWorking {
+            updateTaskLogs(timeSince: timeSince)
+        }
+        
+        // update our current state using extension
+        updateCurrentTimeParams(timeSince: timeSince)
+        
+        // check success condition using extension
+        checkSuccessCondition()
     }
     
     var iqChange: Double {
         let plannedTime: TimeInterval = switch(initialParam) {
         case .countdown(let seconds):
             seconds
+        case .stopwatch(_):
+            0
         }
         let timeLeft: TimeInterval = switch(curParam) {
         case .countdown(let seconds):
             seconds
+        case .stopwatch(let time):
+            -time
         }
         let timeLocked = plannedTime - timeLeft
         return Session.getIQChange(lockedTime: timeLocked, success: true)

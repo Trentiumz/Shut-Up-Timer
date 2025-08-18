@@ -10,6 +10,52 @@ struct LandingTimerSelectorView: View {
                 get: {seconds},
                 set: {settings.timerParam = TimerParam.countdown(seconds: $0)}
             ))
+        case .stopwatch(_):
+            StopwatchSelectorView()
+        }
+    }
+}
+
+struct StopwatchSelectorView : View{
+    
+    var body : some View {
+        VStack(alignment: .trailing, spacing: 0) {
+            // Time display - clickable to open picker
+            VStack(spacing: 0) {
+                Text("Stopwatch")
+                    .font(FontTokens.architectsDaughter(size: 32))
+                    .foregroundStyle(.white)
+            }
+            
+            Spacer()
+                .frame(maxHeight: 30)
+            
+            // Pan image
+            ViewThatFits {
+                Group {
+                    Image(uiImage: FormattedImages.Image160)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 300, height: 230)
+                }
+                .frame(width: 300, height: 130, alignment: .bottom)
+                
+                Group {
+                    Image(uiImage: FormattedImages.Image160)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 240, height: 180)
+                }
+                .frame(width: 270, height: 110, alignment: .bottomLeading)
+                
+                Group {
+                    Image(uiImage: FormattedImages.Image160)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 180, height: 140)
+                }
+                .frame(width: 240, height: 80, alignment: .bottomLeading)
+            }
         }
     }
 }
@@ -111,7 +157,7 @@ struct PanFrame : View {
 
 struct CountdownSelectorPreview : PreviewProvider {
     struct Wrapper : View {
-        @State var timerParams: TimerParam = .countdown(seconds: 20);
+        @State var timerParams: TimerParam = .stopwatch(time: 20);
         
         var body : some View {
             switch(timerParams) {
@@ -122,6 +168,11 @@ struct CountdownSelectorPreview : PreviewProvider {
                         get: {seconds},
                         set: {timerParams = .countdown(seconds: $0)}
                     ))
+                }
+            case .stopwatch(_):
+                ZStack {
+                    Background()
+                    StopwatchSelectorView()
                 }
             }
         }

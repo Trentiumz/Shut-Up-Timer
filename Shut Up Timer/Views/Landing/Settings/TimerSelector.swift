@@ -26,6 +26,8 @@ struct TimerSelector : View {
         switch timerParam {
         case .countdown(let seconds):
             self.cdDuration = TimeInterval(seconds);
+        case .stopwatch(_):
+            break;
         }
     }
     
@@ -35,9 +37,13 @@ struct TimerSelector : View {
         case .countdown:
             if case .countdown = timerParam {
             } else {
-                cdDuration = 0;
+                cdDuration = 60;
             }
             timerParam = .countdown(seconds: cdDuration.rounded());
+        case .stopwatch:
+            showCDPicker = false;
+            cdDuration = 0
+            timerParam = .stopwatch(time: 0)
         }
     }
     
@@ -71,6 +77,8 @@ struct TimerSelector : View {
                         DurationPickerModal(duration: $cdDuration)
                     }
                 }
+            case .stopwatch(_):
+                EmptyView()
             }
         }.onChange(of: timerParam) { _ in
             syncParamToVars()

@@ -165,7 +165,7 @@ struct LandingView: View {
                     Group {
                         Button(action: {
                             let managerType: TimerManagerType = settings.difficulty == .asian ? .noLeave : .appBlock
-                            router.toTimerState(params: settings.timerParam, todoID: taskTimerSelectorTodo?.id ?? UUID(), managerType: managerType, liveActivityManager: liveActivityManager)
+                            router.toTimerState(type: settings.timerType, todoID: taskTimerSelectorTodo?.id ?? UUID(), managerType: managerType, liveActivityManager: liveActivityManager)
                         }) {
                             Text("START THE GRIND")
                                 .font(FontTokens.architectsDaughter(size: 24))

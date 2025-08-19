@@ -90,10 +90,22 @@ struct TimerMainScreen: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        switch(timerParam) {
-                        case .countdown(_):
-                            Button(action: onGiveUpTap) {
-                                Text("Give Up")
+                        let canLeave = switch(timerParam) {
+                        case .countdown:
+                            false
+                        case .stopwatch:
+                            true
+                        case .pomodoro(let pomo):
+                            switch(pomo.progress) {
+                            case .inSession:
+                                false
+                            case .onBreak:
+                                true
+                            }
+                        }
+                        if canLeave {
+                            Button(action: onCompleteTap) {
+                                Text("Finish Session")
                                     .font(FontTokens.architectsDaughter(size: 18))
                                     .foregroundColor(.black)
                                     .padding(.vertical, 14)
@@ -108,9 +120,9 @@ struct TimerMainScreen: View {
                                     )
                             }
                             .padding()
-                        case .stopwatch(_):
-                            Button(action: onCompleteTap) {
-                                Text("Finish Session")
+                        } else {
+                            Button(action: onGiveUpTap) {
+                                Text("Give Up")
                                     .font(FontTokens.architectsDaughter(size: 18))
                                     .foregroundColor(.black)
                                     .padding(.vertical, 14)

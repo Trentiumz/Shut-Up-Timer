@@ -4,8 +4,9 @@ import SwiftUI;
 class AppRouter: ObservableObject {
     @Published var path = NavigationPath();
     
-    func toTimerState(params: TimerParam, todoID: UUID, managerType: TimerManagerType, liveActivityManager: LiveActivityManager, startTime: Date = Date()) {
+    func toTimerState(type: TimerType, todoID: UUID, managerType: TimerManagerType, liveActivityManager: LiveActivityManager, startTime: Date = Date()) {
         liveActivityManager.userStartedStudying()
+        let params = TimerParam.from(type)
         switch managerType {
         case .noLeave:
             let manager = NoLeaveSessionManager(initialParam: params, startTime: Date(), curParam: params, tasks: [], lastActiveUpdate: Date(), lastUpdate: Date(), curTodo: todoID, status: .paused)

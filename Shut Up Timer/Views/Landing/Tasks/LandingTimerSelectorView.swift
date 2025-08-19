@@ -4,14 +4,81 @@ struct LandingTimerSelectorView: View {
     @EnvironmentObject var settings: Settings
     
     var body: some View {
-        switch settings.timerParam {
+        switch settings.timerType {
         case .countdown(let seconds):
             CountdownSelectorView(duration: Binding<TimeInterval>(
                 get: {seconds},
-                set: {settings.timerParam = TimerParam.countdown(seconds: $0)}
+                set: {settings.timerType = TimerType.countdown(seconds: $0)}
             ))
-        case .stopwatch(_):
+        case .stopwatch:
             StopwatchSelectorView()
+        case .pomodoro(let sessionTime, let breakTime):
+            PomodoroSelectorView(
+                sessionTime: Binding<TimeInterval> (
+                    get: {sessionTime},
+                    set: {settings.timerType = .pomodoro(sessionTime: $0, breakTime: breakTime)}
+                ), breakTime: Binding<TimeInterval> (
+                    get: {breakTime},
+                    set: {settings.timerType = .pomodoro(sessionTime: sessionTime, breakTime: $0)}
+                ))
+        }
+    }
+}
+
+struct PomodoroSelectorView : View {
+    @Binding var sessionTime: TimeInterval
+    @Binding var breakTime: TimeInterval
+    
+    var body : some View {
+        VStack(alignment: .trailing, spacing: 0) {
+            // Time display - clickable to open picker
+            VStack(alignment: .trailing, spacing: 0) {
+                DurationPickerButton(val: $sessionTime) { time in
+                    Text("Session: \(Utils.formatTime(time))")
+                        .font(FontTokens.architectsDaughter(size: 32))
+                        .foregroundStyle(.white)
+                        .minimumScaleFactor(0.7)
+                }
+                DurationPickerButton(val: $breakTime) { time in
+                    Text("Break: \(Utils.formatTime(time))")
+                        .font(FontTokens.architectsDaughter(size: 24))
+                        .foregroundStyle(.white)
+                        .minimumScaleFactor(0.7)
+                }
+                Text("Pomodoro")
+                    .font(FontTokens.architectsDaughter(size: 18))
+                    .foregroundStyle(.white)
+            }
+            
+            Spacer()
+                .frame(maxHeight: 30)
+            
+            // Pan image
+            ViewThatFits {
+                Group {
+                    Image(uiImage: FormattedImages.Image160)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 300, height: 230)
+                }
+                .frame(width: 300, height: 130, alignment: .bottom)
+                
+                Group {
+                    Image(uiImage: FormattedImages.Image160)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 240, height: 180)
+                }
+                .frame(width: 270, height: 110, alignment: .bottomLeading)
+                
+                Group {
+                    Image(uiImage: FormattedImages.Image160)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 180, height: 140)
+                }
+                .frame(width: 240, height: 80, alignment: .bottomLeading)
+            }
         }
     }
 }
@@ -157,23 +224,32 @@ struct PanFrame : View {
 
 struct CountdownSelectorPreview : PreviewProvider {
     struct Wrapper : View {
-        @State var timerParams: TimerParam = .stopwatch(time: 20);
+        @State var timerType: TimerType = .stopwatch;
         
         var body : some View {
-            switch(timerParams) {
+            switch(timerType) {
                 case .countdown(let seconds):
                 ZStack {
                     Background()
                     CountdownSelectorView(duration: Binding<TimeInterval>(
                         get: {seconds},
-                        set: {timerParams = .countdown(seconds: $0)}
+                        set: {timerType = .countdown(seconds: $0)}
                     ))
                 }
-            case .stopwatch(_):
+            case .stopwatch:
                 ZStack {
                     Background()
                     StopwatchSelectorView()
                 }
+            case .pomodoro(let sessionTime, let breakTime):
+                PomodoroSelectorView(
+                    sessionTime: Binding<TimeInterval> (
+                        get: {sessionTime},
+                        set: {timerType = .pomodoro(sessionTime: $0, breakTime: breakTime)}
+                    ), breakTime: Binding<TimeInterval> (
+                        get: {breakTime},
+                        set: {timerType = .pomodoro(sessionTime: sessionTime, breakTime: $0)}
+                    ))
             }
         }
     }

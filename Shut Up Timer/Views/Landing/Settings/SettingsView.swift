@@ -182,7 +182,7 @@ struct SettingsView : View {
                         }
                          */
                          
-                        TimerSelector(param: $settings.timerParam)
+                        TimerSelector(param: $settings.timerType)
                         Spacer()
                     }
                     .padding(.leading, 45)

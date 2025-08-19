@@ -6,6 +6,7 @@ enum TimerScreenState {
     case mainTimer
     case taskSelection
     case giveup
+    case pomoDone
 }
 
 struct TimerView<Manager: CurSessionManager>: View {
@@ -149,17 +150,51 @@ struct TimerView<Manager: CurSessionManager>: View {
                         }
                     },
                     onCompleteTap: {
-                        switch(curSession.curParam) {
-                        case .stopwatch(_):
-                            withAnimation(.easeInOut(duration: 0.4)) {
-                                curSession.succeedTimer()
-                            }
-                        default:
-                            break
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            curSession.succeedTimer()
                         }
                     },
                     namespace: sharedTimerNamespace,
                     isSource: currentScreen == .mainTimer
+                )
+                .overlay(
+                    Group {
+                        switch curSession.curParam {
+                        case .pomodoro(let pomo):
+                            switch(pomo.progress) {
+                            case .onBreak(let left):
+                                if left <= 0 {
+                                    ZStack {
+                                        Color.black
+                                            .opacity(0.4)
+                                            .ignoresSafeArea(.all)
+                                            .allowsHitTesting(true)
+                                        PomodoroBreakOver(onContinue: {
+                                            withAnimation(.easeInOut(duration: 0.4)) {
+                                                curSession.tick(phase: .active)
+                                                curSession.curParam = .pomodoro(pomo: TimerParam.Pomodoro(
+                                                    progress: .inSession(left: pomo.sessionTime),
+                                                    timeLocked: pomo.timeLocked,
+                                                    sessionTime: pomo.sessionTime,
+                                                    breakTime: pomo.breakTime
+                                                ))
+                                            }
+                                        }, onComplete: {
+                                            withAnimation(.easeInOut(duration: 0.4)) {
+                                                curSession.succeedTimer()
+                                            }
+                                        })
+                                    }
+                                } else {
+                                    EmptyView()
+                                }
+                            default:
+                                EmptyView()
+                            }
+                        default:
+                            EmptyView()
+                        }
+                    }
                 )
                 .opacity(currentScreen == .mainTimer ? 1 : 0)
                 .allowsHitTesting(currentScreen == .mainTimer)

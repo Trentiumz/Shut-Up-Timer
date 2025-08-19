@@ -15,6 +15,13 @@ struct SharedTimerDisplay: View {
             return "LEFT"
         case .stopwatch:
             return "SPENT STUDYING"
+        case .pomodoro(let pomo):
+            switch(pomo.progress) {
+            case .inSession:
+                return "LEFT IN SESSION"
+            case .onBreak:
+                return "LEFT IN BREAK"
+            }
         }
     }
     

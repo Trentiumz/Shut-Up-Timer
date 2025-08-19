@@ -62,6 +62,8 @@ extension CurSessionManager {
             }
         case .stopwatch(_):
             break
+        case .pomodoro(_):
+            break
         }
     }
     
@@ -72,6 +74,13 @@ extension CurSessionManager {
             true
         case .stopwatch(_):
             true
+        case .pomodoro(let pomo):
+            switch(pomo.progress) {
+            case .inSession(_):
+                true
+            case .onBreak(_):
+                false
+            }
         }
         if isWorking {
             updateTaskLogs(timeSince: timeSince)
@@ -80,23 +89,27 @@ extension CurSessionManager {
         // update our current state using extension
         updateCurrentTimeParams(timeSince: timeSince)
         
+        switch(curParam) {
+        case .pomodoro(let pomo):
+            switch pomo.progress{
+            case .inSession(let left):
+                if left <= 0 {
+                    curParam = .pomodoro(pomo: TimerParam.Pomodoro(progress: .onBreak(left: pomo.breakTime), timeLocked: pomo.timeLocked, sessionTime: pomo.sessionTime, breakTime: pomo.breakTime))
+                }
+            default:
+                break
+            }
+        default:
+            break
+        }
+        
         // check success condition using extension
         checkSuccessCondition()
     }
     
     var iqChange: Double {
-        let plannedTime: TimeInterval = switch(initialParam) {
-        case .countdown(let seconds):
-            seconds
-        case .stopwatch(_):
-            0
-        }
-        let timeLeft: TimeInterval = switch(curParam) {
-        case .countdown(let seconds):
-            seconds
-        case .stopwatch(let time):
-            -time
-        }
+        let plannedTime: TimeInterval = initialParam.getTimeRemaining()
+        let timeLeft: TimeInterval = curParam.getTimeRemaining()
         let timeLocked = plannedTime - timeLeft
         return Session.getIQChange(lockedTime: timeLocked, success: true)
     }

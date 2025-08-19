@@ -226,6 +226,7 @@ struct TimerView<Manager: CurSessionManager>: View {
                 )
                 .opacity(currentScreen == .taskSelection ? 1 : 0)
                 .allowsHitTesting(currentScreen == .taskSelection)
+                .ignoresSafeArea(.keyboard)
             }
             .transition(.asymmetric(
                 insertion: .move(edge: .trailing).combined(with: .opacity),

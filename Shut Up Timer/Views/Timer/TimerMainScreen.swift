@@ -7,6 +7,7 @@ struct TimerMainScreen: View {
     let selectedTodo: Todo?
     let onTaskTitleTap: () -> Void
     let onGiveUpTap: () -> Void
+    let onCompleteTap: () -> Void
     let namespace: Namespace.ID
     let isSource: Bool
     
@@ -89,22 +90,54 @@ struct TimerMainScreen: View {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button(action: onGiveUpTap) {
-                            Text("Give Up")
-                                .font(FontTokens.architectsDaughter(size: 18))
-                                .foregroundColor(.black)
-                                .padding(.vertical, 14)
-                                .padding(.horizontal, 36)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .fill(ColorTokens.shade200)
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(.black, lineWidth: 2)
-                                )
+                        let canLeave = switch(timerParam) {
+                        case .countdown:
+                            false
+                        case .stopwatch:
+                            true
+                        case .pomodoro(let pomo):
+                            switch(pomo.progress) {
+                            case .inSession:
+                                false
+                            case .onBreak:
+                                true
+                            }
                         }
-                        .padding()
+                        if canLeave {
+                            Button(action: onCompleteTap) {
+                                Text("Finish Session")
+                                    .font(FontTokens.architectsDaughter(size: 18))
+                                    .foregroundColor(.black)
+                                    .padding(.vertical, 14)
+                                    .padding(.horizontal, 36)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(ColorTokens.shade200)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(.black, lineWidth: 2)
+                                    )
+                            }
+                            .padding()
+                        } else {
+                            Button(action: onGiveUpTap) {
+                                Text("Give Up")
+                                    .font(FontTokens.architectsDaughter(size: 18))
+                                    .foregroundColor(.black)
+                                    .padding(.vertical, 14)
+                                    .padding(.horizontal, 36)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .fill(ColorTokens.shade200)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(.black, lineWidth: 2)
+                                    )
+                            }
+                            .padding()
+                        }
                     }
                 }
                 .transition(.move(edge: .bottom))
@@ -164,6 +197,7 @@ struct TimerMainScreenPreview: PreviewProvider{
                         selectedTodo: nil,
                         onTaskTitleTap: { },
                         onGiveUpTap: { },
+                        onCompleteTap: {},
                         namespace: namespace,
                         isSource: false
                     )

@@ -85,7 +85,7 @@ class AppBlockSessionManager : CurSessionManager {
         appBlocker?.stopBlocking()
     }
     
-    /// updates the timer state - uses lastActiveUpdate to track time like NoLeaveSessionManager
+    /// updates the timer state given the current scene
     func tick(phase: SceneMiniPhase) {
         // don't update if we succeeded or failed, and for now, only 'update' on active
         if status == .succeeded || status == .failed {
@@ -97,13 +97,7 @@ class AppBlockSessionManager : CurSessionManager {
         if status == .inProgress {
             // update our task logs using extension
             let timeSince = curTime.timeIntervalSince(lastUpdate)
-            updateTaskLogs(timeSince: timeSince)
-            
-            // update our current state using extension
-            updateCurrentTimeParams(timeSince: timeSince)
-            
-            // check success condition using extension
-            checkSuccessCondition()
+            updateSessionInfo(timeSince: timeSince)
             
             self.lastUpdate = curTime
         }
@@ -114,8 +108,12 @@ class AppBlockSessionManager : CurSessionManager {
     }
     
     func appReopen() {
-        // fail the user when they reopen the app because that means they weren't here!
-        failTimer()
+//        LEGACY: fail the user when they reopen the app because that means they weren't here!
+//        failTimer()
+        
+        // if the app was closed, then continue where they left off - pause and run to simulate this
+        pause()
+        tick(phase: .inactive)
     }
     
     func destroy() {
@@ -132,8 +130,8 @@ class AppBlockSessionManager : CurSessionManager {
             tasks: tasks.map { TempTaskLog(id: $0.id, todoID: $0.todoID, timeIn: $0.timeIn) },
             started: startTime,
             ended: endTime,
-            timeLocked: initialParam.getTotTime() - curParam.getTotTime(),
-            plannedTime: initialParam.getTotTime(),
+            timeLocked: initialParam.getTimeRemaining() - curParam.getTimeRemaining(),
+            plannedTime: initialParam.getTimeRemaining(),
             success: status == .succeeded,
             roast: nil,
             imageName: nil

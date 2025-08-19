@@ -17,7 +17,7 @@ struct TopBarView : View {
             // App title on the left
             switch(titleType) {
             case .normal:
-                Text("Shut Up Timer >")
+                Text("Zero Excuses >")
                     .font(FontTokens.architectsDaughter(size: 25))
                     .foregroundColor(.white)
             case .goBack(let action):

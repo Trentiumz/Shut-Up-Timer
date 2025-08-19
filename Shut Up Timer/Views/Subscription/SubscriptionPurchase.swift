@@ -12,121 +12,62 @@ struct SubscriptionPurchaseView: View {
         ZStack {
             Background()
             
-            VStack(spacing: 24) {
-                // Header with image and message
-                HStack(spacing: 16) {
-                    Image(uiImage: FormattedImages.Image166)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 160, height: 200)
-                    
-                    VStack {
-                        Text("Want to get started? Buy me a bubble tea.")
-                            .font(FontTokens.architectsDaughter(size: 24))
-                            .fontWeight(.bold)
-                            .foregroundColor(ColorTokens.shade100)
-                            .multilineTextAlignment(.leading)
-                        
-                        Text("you're not gonna sacrifice your gpa for tapioca... right?")
-                            .font(FontTokens.architectsDaughter(size: 16))
-                            .foregroundColor(ColorTokens.shade200)
-                            .multilineTextAlignment(.leading)
-                    }
-                }
-                .layoutPriority(-1)
+            VStack(spacing: 22) {
+                SubscriptionHeaderCard()
                 
-                // Subscription options in rounded rectangle
-                VStack(spacing: 0) {
-                    VStack(spacing: 16) {
-                        // Header with reload button
-                            HStack {
-                                Spacer()
-                                if subscriptionManager.productsLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle())
-                                        .scaleEffect(0.8)
-                                        .foregroundColor(ColorTokens.shade600)
-                                        .padding(.trailing, 16)
-                                        .padding(.top, 16)
-                                } else {
-                                    Button(action: {
-                                        Task {
-                                            await subscriptionManager.restorePurchases()
-                                        }
-                                    }) {
-                                        Image(systemName: "arrow.clockwise")
-                                            .font(.title2)
-                                            .foregroundColor(ColorTokens.shade600)
-                                    }
-                                    .padding(.trailing, 16)
-                                    .padding(.top, 16)
-                                }
-                            }
-                        
-                        // Subscription options
-                        VStack(spacing: 12) {
-                            if subscriptionManager.isLoading {
-                                ProgressView("Loading subscription options...")
-                                    .progressViewStyle(CircularProgressViewStyle())
-                                    .foregroundColor(ColorTokens.shade600)
-                                    .padding(.vertical, 20)
-                            } else {
-                                ForEach(subscriptionManager.availableProducts, id: \.id) { product in
-                                    SubscriptionOptionCard(
-                                        product: product,
-                                        isSelected: selectedProduct?.id == product.id,
-                                        isCurrentSubscription: subscriptionManager.currentSubscription?.id == product.id
-                                    ) {
-                                        withAnimation {
-                                            selectedProduct = product
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    
-                    Spacer()
-                        .frame(maxHeight: 20)
-                    
-                    // Action Buttons
-                    VStack(spacing: 12) {
-                        if let selectedProduct = selectedProduct {
-                            Button(action: {
-                                Task {
-                                    await subscriptionManager.purchase(selectedProduct)
-                                }
-                            }) {
-                                HStack {
-                                    if subscriptionManager.isLoading {
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                            .scaleEffect(0.8)
-                                    } else {
-                                        Text("Subscribe Now")
-                                            .font(FontTokens.architectsDaughter(size: 24))
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .background(ColorTokens.red300)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-                            }
-                            .padding()
-                            .disabled(subscriptionManager.isLoading)
+                // Subscription options (no container box)
+                VStack(spacing: 12) {
+                    if subscriptionManager.isLoading {
+                        ProgressView("Loading subscription options...")
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .foregroundColor(ColorTokens.shade600)
+                            .padding(.vertical, 20)
+                    } else {
+                        ForEach(subscriptionManager.availableProducts, id: \.id) { product in
+                            let isAnnual = product.displayName.lowercased().contains("year") || product.displayName.lowercased().contains("annual")
+                            let title = isAnnual ? "Academic Weapon (\(product.displayPrice)/yr)" : "Study Session (\(product.displayPrice)/month)"
+                            let subtitle = isAnnual ? "Includes all features, billed annually" : "Includes all features, billed monthly"
+                            SubscriptionChoiceButton(
+                                title: title,
+                                subtitle: subtitle,
+                                introOffer: product.subscription?.introductoryOffer,
+                                selected: selectedProduct?.id == product.id,
+                                onTap: { withAnimation { selectedProduct = product } }
+                            )
                         }
                     }
                 }
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(ColorTokens.brown500)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.white, lineWidth: 4)
-                        )
-                )
+                
+                // Action button
+                if let selectedProduct = selectedProduct {
+                    PopQuizPrimaryButton(title: "Start the Grind!", action: {
+                        Task { await subscriptionManager.purchase(selectedProduct) }
+                    })
+                    .disabled(subscriptionManager.isLoading)
+                    .padding(.bottom)
+                }
+                
+                VStack(alignment: .leading) {
+                    HStack {
+                        Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundStyle(ColorTokens.shade100)
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                        
+                        Spacer()
+                        Spacer()
+                            .frame(maxWidth: 150)
+                        Spacer()
+                        
+                        Link("Privacy Policy", destination: URL(string: "https://www.termsfeed.com/live/697db344-9dd5-430c-9d0d-0df752b8464e")!)
+                            .font(FontTokens.architectsDaughter(size: 20))
+                            .foregroundStyle(ColorTokens.shade100)
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.horizontal)
             }
             .padding(.horizontal, 20)
             .padding(.vertical)
@@ -152,72 +93,71 @@ struct SubscriptionPurchaseView: View {
     }
 }
 
-struct SubscriptionOptionCard: View {
-    let product: Product
-    let isSelected: Bool
-    let isCurrentSubscription: Bool
+// MARK: - Choice button styled like Pop Quiz buttons with a radio dot
+struct SubscriptionChoiceButton: View {
+    let title: String
+    let subtitle: String?
+    let introOffer: Product.SubscriptionOffer?
+    let selected: Bool
     let onTap: () -> Void
+    
+    private let height: CGFloat = 66
     
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 16) {
-                // Selection indicator
+            HStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .stroke(isSelected ? ColorTokens.red300 : ColorTokens.shade300, lineWidth: 2)
-                        .frame(width: 24, height: 24)
-                    
-                    if isSelected {
+                        .stroke(Color.white, lineWidth: 2)
+                        .frame(width: 22, height: 22)
+                    if selected {
                         Circle()
-                            .fill(ColorTokens.red300)
-                            .frame(width: 12, height: 12)
+                            .fill(.white)
+                            .frame(width: 10, height: 10)
                     }
                 }
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(product.displayName)
-                            .font(FontTokens.architectsDaughter(size: 18))
-                            .foregroundColor(ColorTokens.shade700)
-                        
-                        if isCurrentSubscription {
-                            Text("CURRENT")
-                                .font(FontTokens.architectsDaughter(size: 18))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(ColorTokens.red300)
-                                .cornerRadius(4)
-                        }
-                        
-                        Spacer()
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(title)
+                        .font(FontTokens.architectsDaughter(size: 18))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(FontTokens.architectsDaughter(size: 12))
+                            .foregroundStyle(.white.opacity(0.9))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
-                    
-                    Text(product.description)
-                        .font(FontTokens.architectsDaughter(size: 16))
-                        .foregroundColor(ColorTokens.shade600)
-                        .multilineTextAlignment(.leading)
-                    
-                    Text(product.displayPrice)
-                        .font(FontTokens.architectsDaughter(size: 24))
-                        .fontWeight(.bold)
-                        .foregroundColor(ColorTokens.red300)
+                    if let introOffer = introOffer {
+                        if introOffer.paymentMode == .freeTrial {
+                            Text("INTRO OFFER: Free for \(introOffer.period)")
+                                .font(FontTokens.architectsDaughter(size: 12))
+                                .foregroundStyle(Color.green)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                    }
                 }
+                .padding(.vertical, 3)
                 
                 Spacer()
             }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.white)
-            )
+            .padding(.horizontal, 18)
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .background(selected ? ColorTokens.red300 : ColorTokens.gray800)
+            .cornerRadius(10)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? ColorTokens.red300 : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 10)
+                    .inset(by: 1)
+                    .stroke(.white, lineWidth: 2)
             )
+            .shadow(color: .white.opacity(0.8), radius: 3, x: 0, y: 4)
+            .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 1)
         }
-        .buttonStyle(PlainButtonStyle())
-        .disabled(isCurrentSubscription)
+        .buttonStyle(.plain)
     }
 }
 
@@ -226,6 +166,117 @@ struct SubscriptionPurchaseView_Previews: PreviewProvider {
         SubscriptionPurchaseView()
             .environmentObject(SubscriptionManager())
             .environmentObject(AppRouter())
+    }
+}
+
+
+// MARK: - Custom header that mimics Pop Quiz look (without using PopQuizCard)
+struct SubscriptionHeaderCard: View {
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Failure-style banner reused as a container top, but with "Barely Passing"
+            
+            Group {
+                // Lined paper background with slight rotation
+                let paper = FormattedImages.Image134
+                Image(uiImage: paper)
+                    .resizable()
+                    .scaledToFit()
+                    .rotationEffect(.degrees(2))
+            }
+            .overlay(
+                HStack {
+                    Spacer()
+                    ZStack(alignment: .top) {
+                        Image(uiImage: FormattedImages.Image180)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 7)
+                            .offset(y: -8)
+                            .allowsHitTesting(false)
+                        
+                        VStack(spacing: 0) {
+                            Text("BARELY")
+                                .font(FontTokens.architectsDaughter(size: 15))
+                                .foregroundStyle(.white)
+                            Text("PASSING")
+                                .font(FontTokens.architectsDaughter(size: 34))
+                                .foregroundStyle(.white)
+                                .padding(.top, -10)
+                        }
+                        .frame(height: 60, alignment: .top)
+                        .padding(.top, 1)
+                    }
+                    Spacer()
+                }
+                    .padding(.top, -40),
+                alignment: .top
+            )
+            .overlay(
+                // Content: text on left, image with polaroid overlay on right
+                VStack {
+                    HStack(alignment: .center, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Swap one boba for")
+                                .font(FontTokens.architectsDaughter(size: 18))
+                                .foregroundColor(ColorTokens.shade700)
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                            Text("UNSTOPPABLE")
+                                .font(FontTokens.architectsDaughter(size: 44))
+                                .foregroundColor(ColorTokens.shade700)
+                                .minimumScaleFactor(0.4)
+                                .lineLimit(1)
+                            Text("productivity.")
+                                .font(FontTokens.architectsDaughter(size: 18))
+                                .foregroundColor(ColorTokens.shade700)
+                                .minimumScaleFactor(0.7)
+                                .lineLimit(1)
+                            
+                            Spacer()
+                                .frame(maxHeight: 20)
+                            
+                            Button(action: {
+                                Task {
+                                    await subscriptionManager.restorePurchases()
+                                }
+                            }) {
+                                Text("Restore Purchases")
+                                    .font(.system(size: 16))
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 48)
+                        
+                        Group {
+                            Image(uiImage: FormattedImages.Image188)
+                                .resizable()
+                                .frame(width: 140, height: 230)
+                        }
+                        .frame(width: 100, height: 160, alignment: .leading)
+                        .overlay(
+                            // Polaroid overlay with black inner content
+                            FormattedImages.PolaroidBG(innerContent: {
+                                Color.black
+                            }, width: 50)
+                            .rotationEffect(Angle(degrees: 12))
+                            .offset(x: 20, y: 110)
+                            .allowsHitTesting(false),
+                            alignment: .topLeading
+                        )
+                    }
+                }
+                    .padding(.top, 30)
+                    .padding(.bottom, 15)
+            )
+            .padding(.vertical, 18)
+            .padding(.top, 20)
+            .padding(.trailing, 24)
+        }
     }
 }
 

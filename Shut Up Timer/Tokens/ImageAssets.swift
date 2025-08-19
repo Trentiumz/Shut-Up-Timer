@@ -72,6 +72,7 @@ enum ImageAssets {
     static let image189 = UIImage(named: "image 189")!
     
     static let popQuiz = UIImage(named: "POP QUIZ")!
+    static let breakOver1 = UIImage(named: "BREAKOVER1")!
 }
 
 fileprivate func cropImage(_ image: UIImage, to rect: CGRect) -> UIImage? {
@@ -677,7 +678,7 @@ struct FormattedImages {
     static var Image146: UIImage = ImageAssets.image146;
     
     static var Image161: UIImage {
-        cropImage(ImageAssets.image161, to: CGRect(x: 20, y: 28, width: 195, height: 245))!
+        cropImage(ImageAssets.image161, to: CGRect(x: 10, y: 20, width: 210, height: 260))!
     }
     
     static var Image164: UIImage {
@@ -745,16 +746,17 @@ struct FormattedImages {
     }
     
     static var PopQuiz: UIImage = ImageAssets.popQuiz
+    
+    static var BreakOver1: UIImage = ImageAssets.breakOver1
 }
 
 #Preview {
     ZStack {
         Color.black
-        Image(uiImage: FormattedImages.Image158)
+        Image(uiImage: FormattedImages.Image161)
             .overlay(
                 Rectangle()
                     .stroke(Color.red, lineWidth: 3)
             )
-            .scaleEffect(0.4)
     }
 }

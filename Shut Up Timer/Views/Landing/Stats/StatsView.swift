@@ -14,31 +14,30 @@ struct StatsView : View {
                 StatsCalendarView()
                     .padding()
                 
-                // Middle section with image and achievements
-                HStack(spacing: 20) {
-                    // Left side - Peculiar Image Button
-                    Button(action: {
-                        withAnimation {
-                            statDisplay = .album
-                        }
-                    }) {
-                        AlbumViewButtonIcon()
-                            .padding(12)
-                    }
-                    
-                    Spacer()
-                    
-                    // Right side - Achievements (placeholder for now)
-                    Button(action: {
-                        router.toAchievementsView()
-                    }) {
-                        FormattedImages.DisappointmentBook("Achievements", width: 150)
-                    }
-                }
-                .padding(.horizontal, 25)
-                
                 switch(statDisplay) {
                 case .stats:
+                    // Middle section with image and achievements
+                    HStack(spacing: 20) {
+                        // Left side - Peculiar Image Button
+                        Button(action: {
+                            withAnimation {
+                                statDisplay = .album
+                            }
+                        }) {
+                            AlbumViewButtonIcon()
+                                .padding(12)
+                        }
+                        
+                        Spacer()
+                        
+                        // Right side - Achievements (placeholder for now)
+                        Button(action: {
+                            router.toAchievementsView()
+                        }) {
+                            FormattedImages.DisappointmentBook("Achievements", width: 150)
+                        }
+                    }
+                    .padding(.horizontal, 25)
                     StatsSummaryView()
                         .frame(maxHeight: 300, alignment: .top)
                         .padding()

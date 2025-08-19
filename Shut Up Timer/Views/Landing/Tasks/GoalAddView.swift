@@ -310,91 +310,137 @@ struct CalculatorComponent: View {
     var onCancel: (() -> Void)? = nil
     
     var body: some View {
-        VStack(spacing: 0) {
-            if let onCancel = onCancel {
-                HStack {
-                    Spacer()
-                    CommonTaskViews.CancelButton(onCancel: onCancel)
+        GeometryReader {fullDim in
+            VStack(spacing: 0) {
+                if let onCancel = onCancel {
+                    HStack {
+                        Spacer()
+                        CommonTaskViews.CancelButton(onCancel: onCancel)
+                    }
                 }
-            }
-            // Display
-            ZStack(alignment: .trailing) {
-                HStack {
-                    Spacer()
-                    Text(placeholder)
-                        .font(FontTokens.architectsDaughter(size: 18))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.trailing)
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(2)
+                // Display
+                ViewThatFits {
+                    ZStack(alignment: .trailing) {
+                        HStack {
+                            Spacer()
+                            Text(placeholder)
+                                .font(FontTokens.architectsDaughter(size: 18))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.trailing)
+                                .minimumScaleFactor(0.7)
+                                .lineLimit(2)
+                        }
+                        .opacity(displayText.isEmpty ? 1 : 0)
+                        .allowsHitTesting(displayText.isEmpty)
+                        
+                        HStack {
+                            Spacer()
+                            Text(displayText)
+                                .font(FontTokens.architectsDaughter(size: 24))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .lineLimit(1)
+                        }
+                        .opacity(!displayText.isEmpty ? 1 : 0)
+                        .allowsHitTesting(!displayText.isEmpty)
+                    }
+                    .frame(height: 42)
+                    
+                    ZStack(alignment: .trailing) {
+                        HStack {
+                            Spacer()
+                            Text(placeholder)
+                                .font(FontTokens.architectsDaughter(size: 18))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.trailing)
+                                .minimumScaleFactor(0.7)
+                                .lineLimit(2)
+                        }
+                        .opacity(displayText.isEmpty ? 1 : 0)
+                        .allowsHitTesting(displayText.isEmpty)
+                        
+                        HStack {
+                            Spacer()
+                            Text(displayText)
+                                .font(FontTokens.architectsDaughter(size: 24))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .lineLimit(1)
+                        }
+                        .opacity(!displayText.isEmpty ? 1 : 0)
+                        .allowsHitTesting(!displayText.isEmpty)
+                    }
                 }
-                .opacity(displayText.isEmpty ? 1 : 0)
-                .allowsHitTesting(displayText.isEmpty)
                 
-                HStack {
-                    Spacer()
-                    Text(displayText)
-                        .font(FontTokens.architectsDaughter(size: 24))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .lineLimit(1)
-                }
-                .opacity(!displayText.isEmpty ? 1 : 0)
-                .allowsHitTesting(!displayText.isEmpty)
-            }
-            .frame(height: 42)
-            
-            Spacer()
-                .frame(maxHeight: 20)
-            
-            // Calculator buttons
-            GeometryReader { geometry in
-                let availableWidth = geometry.size.width
-                let buttonSize = (availableWidth - 18) / 4 // 18 = 3 * 6 spacing
-                let buttonHeight = (geometry.size.height - 12) / 3
+                Spacer()
+                    .frame(maxHeight: 15)
                 
-                LazyVGrid(columns: Array(repeating: GridItem(.fixed(buttonSize), spacing: 6), count: 4), spacing: 6) {
-                     ForEach(calculatorButtons, id: \.self) { button in
-                         Button(action: {
-                             handleButtonPress(button)
-                         }) {
-                             Text(button)
-                                 .font(FontTokens.architectsDaughter(size: 24))
-                                 .minimumScaleFactor(0.7)
-                                 .foregroundColor(.white)
-                         }
-                         .buttonStyle(CalculatorButtonStyle(buttonSize: CGSize(width: buttonSize, height: buttonHeight)))
-                         .frame(width: buttonSize, height: buttonHeight)
-                     }
-                 }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .layoutPriority(2)
-            
-            Spacer()
-                .frame(height: 4)
-            
-            // Enter button
-            Button(action: {
-                if let newValue = Double(displayText) {
-                    value = newValue
-                }
-                onEnter()
-            }) {
-                Text("Enter")
-                    .font(FontTokens.architectsDaughter(size: 18))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(ColorTokens.red300)
+                // Calculator buttons
+                Rectangle()
+                    .fill(.clear)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(minHeight: 100)
+                    .overlay (
+                        GeometryReader { geometry in
+                            let availableWidth = geometry.size.width
+                            let buttonSize = (availableWidth - 18) / 4 // 18 = 3 * 6 spacing
+                            let buttonHeight = (geometry.size.height - 12) / 3
+                            
+                            LazyVGrid(columns: Array(repeating: GridItem(.fixed(buttonSize), spacing: 6), count: 4), spacing: 6) {
+                                ForEach(calculatorButtons, id: \.self) { button in
+                                    Button(action: {
+                                        handleButtonPress(button)
+                                    }) {
+                                        Text(button)
+                                            .font(FontTokens.architectsDaughter(size: 24))
+                                            .minimumScaleFactor(0.7)
+                                            .foregroundColor(.white)
+                                    }
+                                    .buttonStyle(CalculatorButtonStyle(buttonSize: CGSize(width: buttonSize, height: buttonHeight)))
+                                    .frame(width: buttonSize, height: buttonHeight)
+                                }
+                            }
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                        }
                     )
+                
+                Spacer()
+                    .frame(height: 4)
+                
+                // Enter button
+                Button(action: {
+                    if let newValue = Double(displayText) {
+                        value = newValue
+                    }
+                    onEnter()
+                }) {
+                    ViewThatFits {
+                        Text("Enter")
+                            .font(FontTokens.architectsDaughter(size: 18))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(ColorTokens.red300)
+                            )
+                        
+                        Text("Enter")
+                            .font(FontTokens.architectsDaughter(size: 16))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(ColorTokens.red300)
+                            )
+                    }
+                }
             }
+            .frame(width: fullDim.size.width, height: fullDim.size.height)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private let calculatorButtons = [
@@ -443,7 +489,8 @@ struct DarkContentContainer<Content: View>: View {
                     .stroke(Color.white, lineWidth: 2)
             )
             .overlay(
-                content()
+                content(),
+                alignment: .center
             )
     }
 }
@@ -479,17 +526,22 @@ fileprivate struct CalculatorButtonStyle: ButtonStyle {
     ZStack {
         Color.black
         DarkContentContainer {
-            CalculatorComponent(
-                value: .constant(0),
-                placeholder: "How many weeks do you need to accomplish this goal?",
-                onEnter: {
-                },
-                onCancel: {}
-            )
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-            .padding(.top, 10)
+            // this makes sure that the dimension is "fixed in the padding", so the geometryreader won't do anything weird :P
+            Rectangle()
+                .fill(.clear)
+                .overlay (
+                    CalculatorComponent(
+                        value: .constant(0),
+                        placeholder: "How many weeks do you need to accomplish this goal?",
+                        onEnter: {
+                        },
+                        onCancel: {}
+                    )
+                )
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+                .padding(.top, 10)
         }
     }
-    .frame(height: 500)
+    .frame(height: 450)
 }

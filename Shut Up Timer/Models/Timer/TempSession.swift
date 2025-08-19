@@ -30,11 +30,13 @@ class TempSessionLoader {
     static func getSession() -> (any CurSessionManager)? {
         let data = UserDefaults.standard.data(forKey: "cur-session-manager");
         if let liveData = data {
-            if let decoded = try? JSONDecoder().decode(CurSessionManagerType.self, from: liveData) {
+            do {
+                let decoded = try JSONDecoder().decode(CurSessionManagerType.self, from: liveData)
                 return decoded.manager;
+            } catch {
+                print("Decoding last session failed: \(error)")
+                return nil;
             }
-            print("Incorrect Data Type");
-            return nil;
         } else {
             return nil;
         }

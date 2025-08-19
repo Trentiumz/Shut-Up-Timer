@@ -2,43 +2,10 @@ import SwiftUI;
 
 struct TimerSelector : View {
     // the timerParam that we're going to keep up to date
-    @Binding var timerParam: TimerParam;
+    @Binding var timerType: TimerType;
     
-    // the currently selected timer type
-    @State private var timerType: TimerType;
-    
-    // if the timer type is CountDown...
-    @State var showCDPicker: Bool = false;
-    @State var cdDuration: TimeInterval = 0;
-    
-    init(param: Binding<TimerParam>) {
-        // bindings for params & initial state!
-        self._timerParam = param;
-        self.timerType = timerParamToType(param: param.wrappedValue)
-        
-        syncParamToVars()
-    }
-    
-    func syncParamToVars() {
-        self.timerType = timerParamToType(param: timerParam)
-        
-        // specific initial values for each type of parameter
-        switch timerParam {
-        case .countdown(let seconds):
-            self.cdDuration = TimeInterval(seconds);
-        }
-    }
-    
-    func syncVarsToParam() {
-        // update params based on the timerParam
-        switch timerType {
-        case .countdown:
-            if case .countdown = timerParam {
-            } else {
-                cdDuration = 0;
-            }
-            timerParam = .countdown(seconds: cdDuration.rounded());
-        }
+    init(param: Binding<TimerType>) {
+        self._timerType = param
     }
     
     var body : some View {
@@ -48,38 +15,71 @@ struct TimerSelector : View {
                 SettingsView.SettingLabel("Timer Type")
                 Spacer()
                 Menu {
-                    ForEach(TimerType.allCases) { type in
-                        SettingsView.StylizedOption(onClick: { timerType = type}, text: type.rawValue.capitalized)
-                            .tag(type)
+                    ForEach(TimerType.cases, id: \.0) { rep, onSelect in
+                        SettingsView.StylizedOption(onClick: { timerType = onSelect}, text: rep)
+                            .tag(rep)
                     }
                 } label: {
-                    SettingsView.StylizedLabel(timerType.rawValue.capitalized)
+                    SettingsView.StylizedLabel(timerType.description.capitalized)
                 }
             }
             
-            switch timerParam {
+            switch timerType {
             case .countdown(let seconds):
                 // selector for duration
                 HStack {
                     SettingsView.SettingLabel("Duration")
                     Spacer()
-                    Button (action: {
-                        showCDPicker = true;
-                    }) {
-                        SettingsView.StylizedLabel( "\(Utils.formatTime(Double(seconds)))")
-                    }.sheet(isPresented: $showCDPicker) {
-                        DurationPickerModal(duration: $cdDuration)
-                    }
+                    DurationPickerButton(val: Binding<TimeInterval>(
+                        get: { seconds },
+                        set: { timerType = .countdown(seconds: $0); }
+                    ), label: { time in
+                        SettingsView.StylizedLabel( "\(Utils.formatTime(time))")
+                    })
+                }
+            case .stopwatch:
+                EmptyView()
+            case .pomodoro(let sessionTime, let breakTime):
+                // TODO: fill in
+                HStack {
+                    SettingsView.SettingLabel("Session Time")
+                    Spacer()
+                    DurationPickerButton(val: Binding<TimeInterval>(
+                        get: { sessionTime },
+                        set: {
+                            timerType = .pomodoro(sessionTime: $0, breakTime: breakTime)
+                        }
+                    ), label: { time in
+                        SettingsView.StylizedLabel( "\(Utils.formatTime(time))")
+                    })
+                }
+                HStack {
+                    SettingsView.SettingLabel("Break Time")
+                    Spacer()
+                    DurationPickerButton(val: Binding<TimeInterval>(
+                        get: { breakTime },
+                        set: { timerType = .pomodoro(sessionTime: sessionTime, breakTime: $0) }
+                    ), label: { time in
+                        SettingsView.StylizedLabel( "\(Utils.formatTime(time))")
+                    })
                 }
             }
-        }.onChange(of: timerParam) { _ in
-            syncParamToVars()
-        }.onChange(of: timerType) { _ in
-            syncVarsToParam()
-        }.onChange(of: cdDuration) { _ in
-            syncVarsToParam()
-        }.onAppear() {
-            syncParamToVars()
+        }
+    }
+}
+
+struct DurationPickerButton<Label: View>: View {
+    @Binding var val: TimeInterval
+    var label: (TimeInterval) -> Label
+    @State private var showPicker: Bool = false
+    
+    var body: some View {
+        Button (action: {
+            showPicker = true;
+        }) {
+            label(val)
+        }.sheet(isPresented: $showPicker) {
+            DurationPickerModal(duration: $val)
         }
     }
 }
@@ -87,10 +87,10 @@ struct TimerSelector : View {
 struct TimerSelectorPreview : PreviewProvider {
     
     struct Wrapper : View {
-        @State private var timerParam: TimerParam = .countdown(seconds: 1200)
+        @State private var timerType: TimerType = .countdown(seconds: 1200)
         
         var body : some View {
-            TimerSelector(param: $timerParam)
+            TimerSelector(param: $timerType)
             .environmentObject(AppRouter())
             .environmentObject(SettingsLoader.loadSettings())
             .environmentObject(CredManager(subscriptionManager: SubscriptionManager()))

@@ -200,35 +200,7 @@ extension SettingsView {
         }
     }
     
-    struct TimerTypeButton: View {
-        let title: String
-        let isSelected: Bool
-        let onSelect: () -> Void
-        
-        var body: some View {
-            Button(action: onSelect) {
-                HStack {
-                    Text(title)
-                        .font(FontTokens.architectsDaughter(size: 16))
-                        .foregroundColor(ColorTokens.shade700)
-                    Spacer()
-                    Circle()
-                        .fill(isSelected ? ColorTokens.green500 : Color.clear)
-                        .frame(width: 20, height: 20)
-                        .overlay(
-                            Circle()
-                                .stroke(ColorTokens.shade700, lineWidth: 1)
-                        )
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(ColorTokens.shade400, lineWidth: 1)
-                )
-            }
-        }
-    }
+
     
     struct BlockedCategoriesContent: View {
         @EnvironmentObject var settings: Settings
@@ -622,65 +594,7 @@ extension SettingsView {
         }
     }
     
-    // MARK: - Container Components
-    
-    struct TabHeaderView: View {
-        @Binding var selectedTab: SettingsTab
-        let userIQ: Int
-        
-        var body: some View {
-            VStack(spacing: 12) {
-                // Tab buttons
-                HStack(spacing: 8) {
-                    ForEach(SettingsTab.allCases, id: \.self) { tab in
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                selectedTab = tab
-                            }
-                        }) {
-                            Text(tab.title)
-                                .font(FontTokens.architectsDaughter(size: 16))
-                                .foregroundColor(selectedTab == tab ? ColorTokens.shade100 : ColorTokens.shade700)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(selectedTab == tab ? ColorTokens.red300 : Color.clear)
-                                )
-                        }
-                    }
-                }
-                
-                // IQ Block that moves
-                HStack {
-                    // Calculate position based on selected tab
-                    let tabWidth: CGFloat = 100 // Approximate width per tab
-                    let offset: CGFloat = CGFloat(SettingsTab.allCases.firstIndex(of: selectedTab) ?? 0) * tabWidth
-                    
-                    Spacer()
-                        .frame(width: max(0, offset - 40))
-                    
-                    VStack(spacing: 4) {
-                        Text("\(userIQ)")
-                            .font(FontTokens.architectsDaughter(size: 20))
-                            .foregroundColor(ColorTokens.shade100)
-                        Text("IQ")
-                            .font(FontTokens.architectsDaughter(size: 14))
-                            .foregroundColor(ColorTokens.shade100)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(ColorTokens.brown500)
-                    )
-                    .animation(.easeInOut(duration: 0.3), value: selectedTab)
-                    
-                    Spacer()
-                }
-            }
-        }
-    }
+
     
     // MARK: - Timer Types Content
     

@@ -90,23 +90,11 @@ extension Session {
     /// Efficiently calculate total time locked using Core Data aggregation
     static func getTotalTimeLocked(context: NSManagedObjectContext) -> TimeInterval {
         return context.performAndWait {
-            let request: NSFetchRequest<NSDictionary> = NSFetchRequest(entityName: "Session")
-            request.resultType = .dictionaryResultType
-            
-            let sumExpression = NSExpression(format: "sum:(timeLocked)")
-            let sumDescription = NSExpressionDescription()
-            sumDescription.name = "totalTime"
-            sumDescription.expression = sumExpression
-            sumDescription.expressionResultType = .doubleAttributeType
-            
-            request.propertiesToFetch = [sumDescription]
+            let fetchRequest = Session.fetchRequest()
             
             do {
-                let results = try context.fetch(request)
-                if let result = results.first,
-                   let totalTime = result["totalTime"] as? Double {
-                    return totalTime
-                }
+                let results = try context.fetch(fetchRequest)
+                return results.compactMap{ $0.timeLocked }.reduce(0, +)
             } catch {
                 print("Failed to calculate total time locked: \(error)")
             }

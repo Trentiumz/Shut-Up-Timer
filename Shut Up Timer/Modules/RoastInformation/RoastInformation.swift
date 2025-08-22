@@ -292,15 +292,17 @@ extension RoastGenerator {
         // MARK: - Helper Methods
         
         private func fetchAllSessions() -> [Session] {
-            let request: NSFetchRequest<Session> = Session.fetchRequest()
-            request.sortDescriptors = [NSSortDescriptor(keyPath: \Session.started, ascending: false)]
-            request.fetchLimit = 500 // Limit to 500 as requested
-            
-            do {
-                return try viewContext.fetch(request)
-            } catch {
-                print("Failed to fetch sessions: \(error)")
-                return []
+            viewContext.performAndWait {
+                let request: NSFetchRequest<Session> = Session.fetchRequest()
+                request.sortDescriptors = [NSSortDescriptor(keyPath: \Session.started, ascending: false)]
+                request.fetchLimit = 500 // Limit to 500 as requested
+                
+                do {
+                    return try viewContext.fetch(request)
+                } catch {
+                    print("Failed to fetch sessions: \(error)")
+                    return []
+                }
             }
         }
     }

@@ -151,10 +151,10 @@ struct LandingView: View {
                         .allowsHitTesting(isStats)
                 
                     ViewThatFits {
-                        AccountView().tag(LandingScreenOption.settings)
+                        SettingsView().tag(LandingScreenOption.settings)
                             .opacity(selectedScreen == .settings ? 1 : 0)
                             .allowsHitTesting(selectedScreen == .settings)
-                        AccountView().tag(LandingScreenOption.settings)
+                        SettingsView().tag(LandingScreenOption.settings)
                             .opacity(selectedScreen == .settings ? 1 : 0)
                             .allowsHitTesting(selectedScreen == .settings)
                             .frame(width: 350)

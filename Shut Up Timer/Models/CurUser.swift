@@ -53,6 +53,23 @@ class CurUser: ObservableObject {
         Task {
             do {
                 let userId = credManager.supabaseClient.auth.currentUser?.id
+                
+                // userId = nil is logged out
+                guard userId != nil else {
+                    await MainActor.run {
+                        if animated {
+                            withAnimation {
+                                userPublicProfile = nil
+                                userProfile = nil
+                            }
+                        } else {
+                            userPublicProfile = nil
+                            userProfile = nil
+                        }
+                    }
+                    return
+                }
+                
                 // Get public profile
                 let publicProfile: [UserPublicProfileResponse] = try await credManager.supabaseClient.rpc("get_user_public_profile", params: ["user_id": userId]).execute().value
                 // Get private profile

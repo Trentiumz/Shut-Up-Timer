@@ -170,20 +170,6 @@ class AnalyticsManager {
     }
     
     // MARK: - Social Events
-    func trackPostCreated(type: String) {
-        Analytics.logEvent("post_created", parameters: [
-            "post_type": type
-        ])
-        print("🔍 Analytics: Post created - type: \(type)")
-    }
-    
-    func trackPostViewed(type: String) {
-        Analytics.logEvent("post_viewed", parameters: [
-            "post_type": type
-        ])
-        print("🔍 Analytics: Post viewed - type: \(type)")
-    }
-    
     func trackFriendRequestSent() {
         Analytics.logEvent("friend_request_sent", parameters: nil)
         print("🔍 Analytics: Friend request sent")

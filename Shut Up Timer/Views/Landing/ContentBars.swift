@@ -90,8 +90,6 @@ struct TopBarView : View {
 enum LandingScreenOption {
     case tasks;
     case timer;
-// TODO: Add posts
-//    case posts;
     case stats;
     case settings;
     
@@ -99,7 +97,6 @@ enum LandingScreenOption {
         switch self {
         case .tasks: return "tasks"
         case .timer: return "timer"
-//        case .posts: return "posts"
         case .stats: return "stats"
         case .settings: return "settings"
         }
@@ -181,7 +178,6 @@ struct BottomBarView : View {
         switch tab {
         case .tasks: return FormattedImages.Image145
         case .timer: return FormattedImages.Image147
-//        case .posts: return FormattedImages.Image144
         case .stats: return FormattedImages.Image124
         case .settings: return FormattedImages.Image146
         }
@@ -202,7 +198,6 @@ extension LandingScreenOption: CaseIterable {
         switch self {
         case .tasks: return "Tasks"
         case .timer: return "Timer"
-//        case .posts: return "Posts"
         case .stats: return "Stats"
         case .settings: return "Settings"
         }

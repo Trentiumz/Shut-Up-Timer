@@ -25,8 +25,8 @@ struct RoastDisplay : View {
     }
 }
 
-// --- FailImageDisplay: Carbon copy but for UIImage ---
-struct PostImageDisplay: View {
+// --- ImageDisplay: For displaying images in polaroid style ---
+struct ImageDisplay: View {
     let image: UIImage
 
     var body: some View {
@@ -42,7 +42,7 @@ struct PostImageDisplay: View {
     VStack(spacing: 20) {
         RoastDisplay(message: "You're one more '5-minute break' away from collapse.")
         if let testImage = UIImage(systemName: "person.crop.square") {
-            PostImageDisplay(image: testImage)
+            ImageDisplay(image: testImage)
         }
     }
     .padding()

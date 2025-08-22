@@ -14,8 +14,6 @@ enum AppRoute {
     case achievementsView
     case feedbackView
     case notifications
-    case addPost
-    case postView(month: Int, year: Int)
 }
 
 struct PathElement : Hashable {

@@ -68,14 +68,6 @@ class AppRouter: ObservableObject {
         path.append(PathElement(route: AppRoute.notifications))
     }
     
-    func toAddPost() {
-        path.append(PathElement(route: AppRoute.addPost))
-    }
-    
-    func toPostView(month: Int, year: Int) {
-        path.append(PathElement(route: AppRoute.postView(month: month, year: year)))
-    }
-    
     func pop() {
         if !path.isEmpty {
             path.removeLast();

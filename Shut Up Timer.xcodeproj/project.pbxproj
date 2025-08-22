@@ -132,7 +132,6 @@
 				API/FastAPIRoasts.swift,
 				Config.swift,
 				CredManager.swift,
-				"External Models/FunctionObjectModels.swift",
 				"External Models/FunctionResponseModels.swift",
 				"External Models/Utils.swift",
 				Models/ClientNotification.swift,

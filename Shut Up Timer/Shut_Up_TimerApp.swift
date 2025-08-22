@@ -21,7 +21,6 @@ struct Shut_Up_TimerApp: App {
     let settings = SettingsLoader.loadSettings()
     let subscriptionManager = SubscriptionManager()
     let credManager: CredManager
-    let postLoader = PostLoader.loadPostLoader()
     let sessions = SessionLoader() // New Core Data wrapper
     let curUser: CurUser
     let roastInformation = RoastInformation.loadRoastInformation()
@@ -111,7 +110,6 @@ struct Shut_Up_TimerApp: App {
                 .environmentObject(credManager)
                 .environmentObject(appDelegate.notificationManager)
                 .environmentObject(curUser)
-                .environmentObject(postLoader)
                 .environmentObject(subscriptionManager)
                 .environmentObject(roastInformation)
                 .environmentObject(liveActivityManager)

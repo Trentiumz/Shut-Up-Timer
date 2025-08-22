@@ -162,7 +162,7 @@ struct AlbumView: View {
                 ForEach(Array(imagesWithSessions.enumerated()), id: \.offset) { _, item in
                     let (image, session) = item
                     ZStack(alignment: .bottomTrailing) {
-                        PostImageDisplay(image: image)
+                        ImageDisplay(image: image)
                             .aspectRatio(contentMode: .fill)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .clipped()

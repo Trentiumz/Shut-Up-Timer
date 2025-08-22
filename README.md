@@ -1,56 +1,126 @@
-# Shut-Up-Timer
-Shut up timer is an iOS app made for people who want a more humorous (and aggressive) approach to studying
+# Shut Up Timer - iOS App
 
-### Project Structure
+A productivity-focused iOS app that helps users stay focused by implementing strict timer mechanisms with app blocking and motivational features.
+
+## 🎯 Overview
+
+Shut Up Timer is a SwiftUI-based iOS application that combines timer functionality with app blocking capabilities to help users maintain focus during work sessions. The app features:
+
+- **Strict Timer System**: No-leave and app-blocking timer modes
+- **Live Activities**: Real-time timer display on lock screen and Dynamic Island
+- **Social Features**: Friend system with QR codes and leaderboards
+- **Motivational Elements**: Roast system and catchphrases
+- **Analytics**: Comprehensive tracking of user behavior and session data
+- **Subscription Management**: In-app purchases and premium features
+
+## 🏗️ Architecture
+
+The app follows MVVM (Model-View-ViewModel) architecture with the following key components:
+
+### Core Architecture
+- **SwiftUI Views**: Modern declarative UI framework
+- **Combine**: Reactive programming for data flow
+- **Core Data**: Local data persistence
+- **Supabase**: Backend database and authentication
+- **FastAPI**: Custom backend services
+
+### Key Technologies
+- **FamilyControls**: App blocking and screen time management
+- **UserNotifications**: Local and remote notifications
+- **Live Activities**: Dynamic Island and lock screen widgets
+- **StoreKit**: In-app purchase handling
+
+## 📁 Project Structure
+
 ```
 Shut Up Timer/
-├── Models/                  # Core data models and business logic
-├── ViewModels/             # View-specific state management and business logic
-├── Views/                  # UI components and screens
-│   ├── Landing/           # Main app screens and navigation
-│   │   ├── Friends/       # Friend management and social features
-│   │   ├── Settings/      # App settings and configuration
-│   │   ├── Leaderboard/   # User rankings and achievements
-│   │   ├── Onboarding/    # First-time user experience
-│   │   ├── Disappointment/# User progress and motivation
-│   │   ├── Home/         # Main dashboard and timer interface
-│   │   └── TopBarView.swift # Common navigation header
-│   ├── Common/            # Reusable UI components
-│   └── Timer/             # Timer-specific views and controls
-├── External Models/        # Third-party model integrations
-├── Assets.xcassets/        # App images, colors, and assets
-├── Preview Content/        # SwiftUI preview resources
-├── AppRoute.swift         # App routing and navigation logic
-├── AppRouter.swift        # Navigation state management
-├── ContentView.swift      # Main app container view
-├── CredManager.swift      # Authentication and credentials management
-├── Shut_Up_TimerApp.swift # App entry point and configuration
-└── Utilities.swift        # Helper functions and utilities
+├── 📱 Main App (Shut Up Timer/)
+│   ├── Views/           # SwiftUI view components
+│   ├── Models/          # Data models and Core Data
+│   ├── ViewModels/      # MVVM view models
+│   ├── API/            # Backend API clients
+│   ├── Modules/        # Feature-specific modules
+│   ├── Tokens/         # Design system tokens
+│   └── Delegate/       # App delegates and managers
+├── 🔔 Live Activity Extension (Procrastination_Countdown_Activity/)
+├── 📊 Device Activity Report Extension
+├── 🔔 Notification Service Extension
+└── 🧪 Test Targets
 ```
 
-* **Models/**: Core data models and business logic for the application
-* **ViewModels/**: View-specific state management and business logic
-* **Views/**: UI components and screens that make up the app interface
-  * **Landing/**: Contains all main app screens and navigation components
-    * **Friends/**: Friend management, social features, and user connections
-    * **Settings/**: App configuration, preferences, and user settings
-    * **Leaderboard/**: User rankings, achievements, and competitive features
-    * **Onboarding/**: First-time user experience and initial setup
-    * **Disappointment/**: User progress tracking and motivation features
-    * **Home/**: Main dashboard and primary timer interface
-    * **TopBarView.swift**: Common navigation header used across screens
-  * **Common/**: Reusable UI components shared across the app
-  * **Timer/**: Timer-specific views and control interfaces
-* **External Models/**: Third-party model integrations and external data structures
-* **Assets.xcassets/**: Contains all app images, colors, and other visual assets
-* **Preview Content/**: Resources used for SwiftUI previews during development
-* **AppRoute.swift**: Defines the app's routing structure and navigation paths
-* **AppRouter.swift**: Manages navigation state and view transitions
-* **ContentView.swift**: Main container view that hosts the app's primary interface
-* **CredManager.swift**: Handles authentication, user credentials, and secure storage
-* **Shut_Up_TimerApp.swift**: App entry point, configuration, and initialization
-* **Utilities.swift**: Helper functions and utility methods used throughout the app
+## 🚀 Key Features
 
-### General Notes
-* All data that need to be synced up between views (e.g. sessions and settings) should be in Models. These models are then shared to all the views from Shut_Up_TimerApp.swift so that any time something updates, the Views will refresh with the new data. 
-* We follow an MVVM architection, but since the app isn't all that complex, we only really need to use it for the Timer. The AppRouter manages the ViewModel, and we call its functions to initialize and set up the ViewModel. 
+### Timer System
+- **No-Leave Mode**: Prevents leaving the app during timer
+- **App-Block Mode**: Blocks other apps during timer
+- **Pomodoro Integration**: Built-in Pomodoro technique support
+- **Task Selection**: Todo integration for focused work
+
+### Social Features
+- **Friend System**: Add friends via QR codes
+- **Leaderboards**: Compare productivity with friends
+- **Roast System**: Motivational messages when users fail
+
+### Analytics & Insights
+- **Session Tracking**: Detailed session analytics
+- **Productivity Metrics**: IQ scoring and time tracking
+- **Category Analysis**: Track focus areas and productivity patterns
+
+### Premium Features
+- **Subscription Tiers**: Multiple premium levels
+- **Advanced Analytics**: Detailed insights and reports
+- **Customization**: Enhanced personalization options
+
+## 🔧 Development Setup
+
+### Requirements
+- Xcode 15.0+
+- iOS 17.0+
+- Swift 5.9+
+
+### Configuration
+- Update `Config.swift` with your API endpoints
+- Configure Supabase credentials
+- Set up StoreKit configuration for testing
+
+### Key Dependencies
+- Supabase Swift SDK
+- Combine framework
+- Core Data
+- FamilyControls
+- UserNotifications
+
+## 📱 Extensions
+
+### Live Activity Extension
+- Real-time timer display on Dynamic Island
+- Lock screen widget integration
+- Background updates and notifications
+
+### Device Activity Report
+- Screen time and app usage analytics
+- Privacy-focused activity tracking
+- Family sharing integration
+
+### Notification Service
+- Remote notification processing
+- Silent push handling
+- Background task management
+
+## 🔄 Migration to Flutter
+
+This documentation is designed to facilitate migration to Flutter by providing:
+
+1. **Clear Architecture Mapping**: Each folder's README explains the iOS implementation
+2. **Feature Breakdown**: Detailed explanations of each feature's functionality
+3. **Data Flow Documentation**: How data moves through the app
+4. **API Integration Details**: Backend service implementations
+5. **State Management Patterns**: iOS-specific patterns that need Flutter equivalents
+
+## 📄 License
+
+See [LICENSE](LICENSE) file for details.
+
+---
+
+**Note**: This app uses strict timer mechanisms and app blocking features. Ensure compliance with App Store guidelines and user privacy requirements when implementing similar functionality in Flutter. 
